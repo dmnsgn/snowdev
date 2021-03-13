@@ -1,0 +1,33 @@
+{
+  "name": "packageName",
+  "version": "1.0.0",
+  "description": "Package description.",
+  "keywords": [
+    "keyword-1",
+    "keyword-2",
+    "keyword-3",
+    "keyword-4"
+  ],
+  "homepage": "https://github.com/gitHubUsername/packageName",
+  "bugs": "https://github.com/gitHubUsername/packageName/issues",
+  "repository": "gitHubUsername/packageName",
+  "funding": [
+    {
+      "type": "individual",
+      "url": "https://paypal.me/dmnsgn"
+    },
+    {
+      "type": "individual",
+      "url": "https://commerce.coinbase.com/checkout/56cbdf28-e323-48d8-9c98-7019e72c97f3"
+    }
+  ],
+  "license": "MIT",
+  "author": "authorName (https://github.com/gitHubUsername)",
+  "type": "module",
+  "main": "index.js",
+  "types": "types/index.d.ts",
+  "engines": {
+    "node": ">=15.0.0",
+    "npm": ">=7.0.0"
+  }
+}

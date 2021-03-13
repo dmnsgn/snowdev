@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>packageName by authorName (https://github.com/gitHubUsername)</title>
+    <style>
+      body {
+        margin: 0;
+        overscroll-behavior: none;
+      }
+    </style>
+  </head>
+  <body>
+		<script
+      async
+      src="https://unpkg.com/es-module-shims@0.10.1/dist/es-module-shims.js"
+    ></script>
+		<script src="web_modules/import-map.json" type="importmap"></script>
+
+    <script type="module">
+      import packageNameCC from "packageName";
+      console.log(packageNameCC);
+    </script>
+  </body>
+</html>
