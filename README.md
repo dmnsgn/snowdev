@@ -1,18 +1,19 @@
-# snowdev [![stable](http://badges.github.io/stability-badges/dist/stable.svg)](http://github.com/badges/stability-badges)
+# snowdev
 
 [![npm version](https://img.shields.io/npm/v/snowdev)](https://www.npmjs.com/package/snowdev)
+[![stability-stable](https://img.shields.io/badge/stability-stable-green.svg)](https://www.npmjs.com/package/snowdev)
 [![npm minzipped size](https://img.shields.io/bundlephobia/minzip/snowdev)](https://www.npmjs.com/package/snowdev)
 [![dependencies](https://img.shields.io/david/dmnsgn/snowdev)](https://github.com/dmnsgn/snowdev/blob/master/package.json)
 [![types](https://img.shields.io/npm/types/snowdev)](https://github.com/microsoft/TypeScript)
-[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
-[![linting: eslint](https://img.shields.io/badge/linting-ES_Lint-4B32C3.svg)](https://github.com/eslint/eslint)
+[![styled with prettier](https://img.shields.io/badge/styled_with-Prettier-f8bc45.svg?logo=prettier)](https://github.com/prettier/prettier)
+[![linted with eslint](https://img.shields.io/badge/linted_with-ES_Lint-4B32C3.svg?logo=eslint)](https://github.com/eslint/eslint)
 [![license](https://img.shields.io/github/license/dmnsgn/snowdev)](https://github.com/snowdev/snowdev/blob/master/LICENSE)
+
+> Zero configuration, unbundled, opinionated, development and prototyping server for simple ES modules development: types generation, format and linting, dev server and TypeScript support.
 
 [![paypal](https://img.shields.io/badge/donate-paypal-informational?logo=paypal)](https://paypal.me/dmnsgn)
 [![coinbase](https://img.shields.io/badge/donate-coinbase-informational?logo=coinbase)](https://commerce.coinbase.com/checkout/56cbdf28-e323-48d8-9c98-7019e72c97f3)
 [![twitter](https://img.shields.io/twitter/follow/dmnsgn?style=social)](https://twitter.com/dmnsgn)
-
-> Zero configuration, unbundled, opinionated, development and prototyping server for simple ES modules development: types generation, format and linting, dev server and TypeScript support.
 
 ## Installation
 
@@ -38,12 +39,11 @@ npm install -g snowdev
 
 - Simple BrowserSync dev server to watch and reload on changes
 - Write examples using [ES Modules](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules) directly with [import-map](https://github.com/WICG/import-maps). See [template/index.html](template/index.html).
-- Build examples dependencies with [browserlist](https://github.com/browserslist/browserslist) with targets `defaults and supports es6-module` to publish as GitHub pages with decent browser support.
+- Build examples dependencies using [browserlist](https://github.com/browserslist/browserslist) with targets `defaults and supports es6-module` to publish as GitHub pages with decent browser support.
 - Choose which dependencies to convert to ESM (devDependencies, dependencies or hardcoded list)
+- Push to a `gh-pages` branch
 
 ## Usage
-
-Development workflow:
 
 ```bash
 # Create folder

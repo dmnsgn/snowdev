@@ -1,18 +1,19 @@
-# packageName [![stable](http://badges.github.io/stability-badges/dist/stable.svg)](http://github.com/badges/stability-badges)
+# packageName
 
 [![npm version](https://img.shields.io/npm/v/packageName)](https://www.npmjs.com/package/packageName)
+[![stability-stable](https://img.shields.io/badge/stability-stable-green.svg)](https://www.npmjs.com/package/packageName)
 [![npm minzipped size](https://img.shields.io/bundlephobia/minzip/packageName)](https://www.npmjs.com/package/packageName)
 [![dependencies](https://img.shields.io/david/gitHubUsername/packageName)](https://github.com/gitHubUsername/packageName/blob/master/package.json)
 [![types](https://img.shields.io/npm/types/packageName)](https://github.com/microsoft/TypeScript)
-[![styled with prettier](https://img.shields.io/badge/styled_with-Prettier-f8bc45.svg)](https://github.com/prettier/prettier)
-[![linted with eslint](https://img.shields.io/badge/linted_with-ES_Lint-4B32C3.svg)](https://github.com/eslint/eslint)
+[![styled with prettier](https://img.shields.io/badge/styled_with-Prettier-f8bc45.svg?logo=prettier)](https://github.com/prettier/prettier)
+[![linted with eslint](https://img.shields.io/badge/linted_with-ES_Lint-4B32C3.svg?logo=eslint)](https://github.com/eslint/eslint)
 [![license](https://img.shields.io/github/license/gitHubUsername/packageName)](https://github.com/gitHubUsername/packageName/blob/master/LICENSE)
+
+Package description.
 
 [![paypal](https://img.shields.io/badge/donate-paypal-informational?logo=paypal)](https://paypal.me/dmnsgn)
 [![coinbase](https://img.shields.io/badge/donate-coinbase-informational?logo=coinbase)](https://commerce.coinbase.com/checkout/56cbdf28-e323-48d8-9c98-7019e72c97f3)
 [![twitter](https://img.shields.io/twitter/follow/dmnsgn?style=social)](https://twitter.com/dmnsgn)
-
-Package description.
 
 ![](https://raw.githubusercontent.com/username/packageName/master/screenshot.gif)
 
