@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { promises as fs, constants } from "fs";
 import { resolve } from "path";
 import { createRequire } from "module";
