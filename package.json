@@ -63,6 +63,7 @@
     "jsdoc-to-markdown": "^7.0.0",
     "ncp": "^2.0.0",
     "npm-user": "^4.1.1",
+    "prettier": "^2.2.1",
     "replace-in-file": "^6.2.0",
     "sort-package-json": "^1.49.0",
     "tslib": "^2.1.0",
