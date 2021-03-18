@@ -11,6 +11,7 @@ import cosmiconfig from "cosmiconfig";
 import init from "./init.js";
 import dev from "./dev.js";
 import build from "./build.js";
+import release from "./release.js";
 import install from "./install.js";
 import { console } from "./utils.js";
 
@@ -40,6 +41,7 @@ const DEFAULTS_OPTIONS = {
   docs: true,
   docsStart: "<!-- api-start -->",
   docsEnd: "<!-- api-end -->",
+  standardVersion: true,
 
   // External tools
   browserSync: {
@@ -149,12 +151,11 @@ const parser = yargs(hideBin(process.argv))
       defaultDescription: `false`,
     },
   })
+  .wrap(null)
   .version(version)
   .help();
 
-parser.wrap(parser.terminalWidth());
-
-const commands = [init, dev, build, install];
+const commands = [init, dev, build, release, install];
 commands.forEach((fn) => {
   parser.command(
     fn.name,

@@ -36,6 +36,11 @@ npm install -g snowdev
 - Prettier formatter and ESLint linter on build
 - Keep package.json keys sorted for consistency
 
+### Release
+
+- Write commits using the [Conventional Commits Specification](https://www.conventionalcommits.org/en/v1.0.0/)
+- Bump the version based on the commits (patch/minor/major), generate changelog release, create a new commit with git tag
+
 ### Write examples
 
 - Simple BrowserSync dev server to watch and reload on changes
@@ -52,51 +57,56 @@ mkdir ~/Projects/package-name
 cd ~/Projects/package-name
 
 # Generate folder structure (entry: index.js)
-npx init
+npx snowdev init
 # ...optionally use a TypeScript structure (entry: src/index.ts)
-npx init --ts
+npx snowdev init --ts
 
 # Start a dev server and compile dependencies to ESM in web_modules
-npx dev
+npx snowdev dev
 # ...optionally watching ts files
-npx dev --ts
+npx snowdev dev --ts
 # ...optionally passing options to browser-sync
-npx dev --port 8080
+npx snowdev dev --port 8080
 
-# Build package for release:
+# Build package:
 # - lint and format sources
 # - generate documentation in docs folder (when using --ts) or insert it directly in README
 # - generate TypeScript types from either JSDoc or using tsconfig.json (and optionally compiling ts files)
-npx build
+npx snowdev build
 
-# Publish to npm
-npm publish
+# or directly prepare a release
+npx snowdev release
+# ...optionally passing options to standard-version
+npx snowdev release --first-release --dry-run
+
+# and push/publish it
+git push --follow-tags origin main && npm publish
 ```
 
 ## API
 
 ```bash
 $ npx snowdev --help
-
-npx snowdev <command>
+snowdev <command>
 
 Commands:
   snowdev init     Create simple package structure.
   snowdev dev      Start dev server and install ESM dependencies.
   snowdev build    Lint and Format sources, run TypeScript, update README API.
+  snowdev release  Bump the version, generate changelog release, create a new commit with git tag.
   snowdev install  Install ESM dependencies.
 
 Options:
-  --cwd             Specify the current working directory for all commands.                                                                     [string] [default: process.cwd()]
-  --username        Specify a user name for the init command.                                                                                    [string] [default: $ npm whoami]
-  --gitHubUsername  Specify a GitHub user name for the init command.                                                                         [string] [default: options.username]
-  --files           A glob pattern for files to be processed by build command.                                                                       [array] [default: "**/*.js"]
-  --ignore          Files to be ignored by build command.    [array] [default: ["**/node_modules/**", "**/web_modules/**", join(options.cwd, "docs"), join(options.cwd, "lib"),]]
-  --devDeps         Only install devDependencies as web_modules.                              [boolean] [default: false. Uses options.dependencies or package.json dependencies.]
-  --dependencies    Specify list of dependencies to install as web_modules.                                              [array] [default: null. Uses package.json dependencies.]
-  --ts              Use TypeScript for init, dev and build commands (create index.ts, watch files or build files).                                     [boolean] [default: false]
-  --version         Show version number                                                                                                                                 [boolean]
-  --help            Show help
+  --cwd             Specify the current working directory for all commands.  [string] [default: process.cwd()]
+  --username        Specify a user name for the init command.  [string] [default: $ npm whoami]
+  --gitHubUsername  Specify a GitHub user name for the init command.  [string] [default: options.username]
+  --files           A glob pattern for files to be processed by build command. All JS and TS files in root or "src/" folder.  [string] [default: "{*.+(t|j||mj)s,src/**/*.+(t|j||mj)s}"]
+  --ignore          Files to be ignored by build command.  [array] [default: ["**/node_modules/**", "**/web_modules/**"]]
+  --devDeps         Only install devDependencies as web_modules.  [boolean] [default: false. Uses options.dependencies or package.json dependencies.]
+  --dependencies    Specify list of dependencies to install as web_modules.  [array] [default: null. Uses package.json dependencies.]
+  --ts              Use TypeScript for init, dev and build commands (create index.ts, watch files or build files).  [boolean] [default: false]
+  --version         Show version number  [boolean]
+  --help            Show help  [boolean]
 ```
 
 ## License
