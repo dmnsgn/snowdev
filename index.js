@@ -65,6 +65,9 @@ const DEFAULTS_OPTIONS = {
       requireConfigFile: false,
       babelOptions: {},
     },
+    env: {
+      browser: true,
+    },
   },
   tsconfig: {
     compilerOptions: {
