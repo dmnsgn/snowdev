@@ -208,7 +208,7 @@ const types = async (cwd, files, options, watch) => {
   }
   console.timeEnd(types.description);
 };
-types.description = `build: run TypeScript (generate types, watch or build)`;
+types.description = `build: run TypeScript (generate types, watch or compile)`;
 
 const build = async (options) => {
   const cwd = options.cwd;

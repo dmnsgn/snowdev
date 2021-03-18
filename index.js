@@ -24,16 +24,16 @@ const require = createRequire(import.meta.url);
 
 // Options
 const DEFAULTS_OPTIONS = {
-  // Inputs
+  // Inputs/meta
   cwd: process.cwd(),
   username: null,
+  gitHubUsername: null,
   files: "{*.+(t|j||mj)s,src/**/*.+(t|j||mj)s}",
   ignore: ["**/node_modules/**", "**/web_modules/**"],
   devDeps: false,
   dependencies: null,
 
   // Process
-  // TODO: add to yargs options
   ts: false,
   lint: true,
   format: true,
@@ -111,44 +111,83 @@ const parser = yargs(hideBin(process.argv))
   .demandCommand(1)
   .options({
     cwd: {
+      group: "Input/meta options:",
       type: "string",
       describe: `Specify the current working directory for all commands.`,
       defaultDescription: `process.cwd()`,
     },
     username: {
+      group: "Input/meta options:",
       type: "string",
       describe: `Specify a user name for the init command.`,
       defaultDescription: `$ npm whoami`,
     },
     gitHubUsername: {
+      group: "Input/meta options:",
       type: "string",
       describe: `Specify a GitHub user name for the init command.`,
       defaultDescription: `options.username`,
     },
     files: {
+      group: "Input/meta options:",
       type: "string",
       describe: `A glob pattern for files to be processed by build command. All JS and TS files in root or "src/" folder.`,
       defaultDescription: `"{*.+(t|j||mj)s,src/**/*.+(t|j||mj)s}"`,
     },
     ignore: {
+      group: "Input/meta options:",
       type: "array",
       describe: `Files to be ignored by build command.`,
       defaultDescription: `["**/node_modules/**", "**/web_modules/**"]`,
     },
     devDeps: {
+      group: "Input/meta options:",
       type: "boolean",
       describe: `Only install devDependencies as web_modules.`,
       defaultDescription: `false. Uses options.dependencies or package.json dependencies.`,
     },
     dependencies: {
+      group: "Input/meta options:",
       type: "array",
       describe: `Specify list of dependencies to install as web_modules.`,
       defaultDescription: `null. Uses package.json dependencies.`,
     },
+
     ts: {
+      group: "Process options:",
       type: "boolean",
       describe: `Use TypeScript for init, dev and build commands (create index.ts, watch files or build files).`,
       defaultDescription: `false`,
+    },
+    lint: {
+      group: "Process options:",
+      type: "boolean",
+      describe: `Lint on build command.`,
+      defaultDescription: `true`,
+    },
+    format: {
+      group: "Process options:",
+      type: "boolean",
+      describe: `Format on build command.`,
+      defaultDescription: `true`,
+    },
+    types: {
+      group: "Process options:",
+      type: "boolean",
+      describe: `Run TypeScript (generate types or compile) on build command or watch on dev command.`,
+      defaultDescription: `true`,
+    },
+    docs: {
+      group: "Process options:",
+      type: "boolean",
+      describe: `Generate documentation via "JSDoc" for JS only packages and inserted in README or via "typedoc" in a "docs" folder with --ts on build command.`,
+      defaultDescription: `true`,
+    },
+    standardVersion: {
+      group: "Process options:",
+      type: "boolean|Object",
+      describe: `Bump the version, generate changelog release, create a new commit with git tag on release command.`,
+      defaultDescription: `true`,
     },
   })
   .wrap(null)

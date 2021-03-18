@@ -96,7 +96,7 @@ Commands:
   snowdev release  Bump the version, generate changelog release, create a new commit with git tag.
   snowdev install  Install ESM dependencies.
 
-Options:
+Input/meta options:
   --cwd             Specify the current working directory for all commands.  [string] [default: process.cwd()]
   --username        Specify a user name for the init command.  [string] [default: $ npm whoami]
   --gitHubUsername  Specify a GitHub user name for the init command.  [string] [default: options.username]
@@ -104,9 +104,18 @@ Options:
   --ignore          Files to be ignored by build command.  [array] [default: ["**/node_modules/**", "**/web_modules/**"]]
   --devDeps         Only install devDependencies as web_modules.  [boolean] [default: false. Uses options.dependencies or package.json dependencies.]
   --dependencies    Specify list of dependencies to install as web_modules.  [array] [default: null. Uses package.json dependencies.]
-  --ts              Use TypeScript for init, dev and build commands (create index.ts, watch files or build files).  [boolean] [default: false]
-  --version         Show version number  [boolean]
-  --help            Show help  [boolean]
+
+Process options:
+  --ts               Use TypeScript for init, dev and build commands (create index.ts, watch files or build files).  [boolean] [default: false]
+  --lint             Lint on build command.  [boolean] [default: true]
+  --format           Format on build command.  [boolean] [default: true]
+  --types            Run TypeScript (generate types or compile) on build command or watch on dev command.  [boolean] [default: true]
+  --docs             Generate documentation via "JSDoc" for JS only packages and inserted in README or via "typedoc" in a "docs" folder with --ts on build command.  [boolean] [default: true]
+  --standardVersion  Bump the version, generate changelog release, create a new commit with git tag on release command.  [default: true]
+
+Options:
+  --version  Show version number  [boolean]
+  --help     Show help  [boolean]
 ```
 
 ## License
