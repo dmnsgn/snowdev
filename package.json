@@ -65,6 +65,7 @@
     "npm-user": "^4.1.1",
     "prettier": "^2.2.1",
     "replace-in-file": "^6.2.0",
+    "rimraf": "^3.0.2",
     "sort-package-json": "^1.49.0",
     "tslib": "^2.1.0",
     "typedoc": "^0.20.30",

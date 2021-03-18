@@ -12,7 +12,7 @@ import { ESLint } from "eslint";
 import jsdoc2md from "jsdoc-to-markdown";
 import TypeDoc from "typedoc";
 
-import { console, glob } from "./utils.js";
+import { console, glob, rimraf } from "./utils.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
@@ -80,17 +80,21 @@ const docs = async (cwd, files, options) => {
   console.time(docs.description);
 
   if (options.ts) {
-    const app = new TypeDoc.Application();
-    app.options.addReader(new TypeDoc.TSConfigReader());
-    app.options.addReader(new TypeDoc.TypeDocReader());
-    app.bootstrap({
-      entryPoints: [cwd],
-    });
+    const docsFolder = "docs";
+    try {
+      await rimraf(join(cwd, docsFolder));
 
-    const project = app.convert();
+      const app = new TypeDoc.Application();
+      app.options.addReader(new TypeDoc.TSConfigReader());
+      app.options.addReader(new TypeDoc.TypeDocReader());
+      app.bootstrap({
+        entryPoints: [cwd],
+      });
 
-    if (project) {
-      await app.generateDocs(project, "docs");
+      const project = app.convert();
+      if (project) await app.generateDocs(project, docsFolder);
+    } catch (error) {
+      console.error(error);
     }
   } else {
     const readmePath = join(cwd, "README.md");
@@ -166,6 +170,15 @@ const types = async (cwd, files, options, watch) => {
       const config = configPath
         ? ts.readConfigFile(configPath, ts.sys.readFile).config
         : options.tsconfig;
+
+      if (!configPath) config.include = files;
+
+      if (config.compilerOptions.declarationDir) {
+        await rimraf(join(cwd, config.compilerOptions.declarationDir));
+      }
+      if (config.compilerOptions.outDir) {
+        await rimraf(join(cwd, config.compilerOptions.outDir));
+      }
 
       const parsedCommandLine = ts.parseJsonConfigFileContent(
         config,
