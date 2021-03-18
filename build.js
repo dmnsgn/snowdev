@@ -199,14 +199,9 @@ types.description = `build: run TypeScript (generate types, watch or build)`;
 
 const build = async (options) => {
   const cwd = options.cwd;
-  const files = await glob(options.files || "**/*.{js,ts}", {
+  const files = await glob(options.files, {
     cwd,
-    ignore: options.ignore || [
-      "**/node_modules/**",
-      "**/web_modules/**",
-      join(options.cwd, "docs"),
-      join(options.cwd, "lib"),
-    ],
+    ignore: options.ignore,
     absolute: true,
   });
 

@@ -26,12 +26,13 @@ const DEFAULTS_OPTIONS = {
   // Inputs
   cwd: process.cwd(),
   username: null,
-  files: null,
-  ignore: null,
+  files: "{*.+(t|j||mj)s,src/**/*.+(t|j||mj)s}",
+  ignore: ["**/node_modules/**", "**/web_modules/**"],
   devDeps: false,
   dependencies: null,
 
   // Process
+  // TODO: add to yargs options
   ts: false,
   lint: true,
   format: true,
