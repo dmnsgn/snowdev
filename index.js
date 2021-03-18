@@ -124,14 +124,14 @@ const parser = yargs(hideBin(process.argv))
       defaultDescription: `options.username`,
     },
     files: {
-      type: "array",
-      describe: `A glob pattern for files to be processed by build command.`,
-      defaultDescription: `"**/*.js"`,
+      type: "string",
+      describe: `A glob pattern for files to be processed by build command. All JS and TS files in root or "src/" folder.`,
+      defaultDescription: `"{*.+(t|j||mj)s,src/**/*.+(t|j||mj)s}"`,
     },
     ignore: {
       type: "array",
       describe: `Files to be ignored by build command.`,
-      defaultDescription: `["**/node_modules/**", "**/web_modules/**", join(options.cwd, "docs"), join(options.cwd, "lib"),]`,
+      defaultDescription: `["**/node_modules/**", "**/web_modules/**"]`,
     },
     devDeps: {
       type: "boolean",
