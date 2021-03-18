@@ -6,21 +6,37 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>packageName by authorName (https://github.com/gitHubUsername)</title>
     <style>
+      :root {
+        --color-dark: #404040;
+        --color-light: #f2f2f2;
+        --color-accent: #fd5e62;
+      }
+
       body {
         margin: 0;
         overscroll-behavior: none;
+        font-family: sans-serif;
+        color: var(--color-dark);
+        background-color: var(--color-light);
+      }
+
+      main {
+        padding: 0 20px;
       }
     </style>
   </head>
   <body>
-		<script
+    <main>
+      <h1>packageName</h1>
+    </main>
+    <script
       async
       src="https://unpkg.com/es-module-shims@0.10.1/dist/es-module-shims.js"
     ></script>
-		<script src="web_modules/import-map.json" type="importmap"></script>
+    <script src="web_modules/import-map.json" type="importmap"></script>
 
     <script type="module">
-      import packageNameCC from "packageName";
+      import packageNameCC from "./index.js";
       console.log(packageNameCC);
     </script>
   </body>

@@ -5,6 +5,7 @@
 [![npm minzipped size](https://img.shields.io/bundlephobia/minzip/packageName)](https://www.npmjs.com/package/packageName)
 [![dependencies](https://img.shields.io/david/gitHubUsername/packageName)](https://github.com/gitHubUsername/packageName/blob/master/package.json)
 [![types](https://img.shields.io/npm/types/packageName)](https://github.com/microsoft/TypeScript)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-fa6673.svg)](https://conventionalcommits.org)
 [![styled with prettier](https://img.shields.io/badge/styled_with-Prettier-f8bc45.svg?logo=prettier)](https://github.com/prettier/prettier)
 [![linted with eslint](https://img.shields.io/badge/linted_with-ES_Lint-4B32C3.svg?logo=eslint)](https://github.com/eslint/eslint)
 [![license](https://img.shields.io/github/license/gitHubUsername/packageName)](https://github.com/gitHubUsername/packageName/blob/master/LICENSE)
