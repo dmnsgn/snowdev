@@ -53,7 +53,7 @@ const DEFAULTS_OPTIONS = {
   // TODO: lint and format config in code editor? Do I need config in package.json instead?
   eslint: {
     parser: require.resolve("@babel/eslint-parser"),
-    extends: ["eslint:recommended", require.resolve("eslint-config-prettier")],
+    extends: ["eslint:recommended", "plugin:prettier/recommended"],
     plugins: ["eslint-plugin-prettier"],
     rules: {
       "prettier/prettier": "error",
@@ -70,6 +70,29 @@ const DEFAULTS_OPTIONS = {
     env: {
       browser: true,
     },
+    overrides: [
+      {
+        files: ["**/*.ts"],
+        parser: require.resolve("@typescript-eslint/parser"),
+        extends: [
+          "eslint:recommended",
+          "plugin:@typescript-eslint/recommended",
+          "plugin:prettier/recommended",
+        ],
+        plugins: ["@typescript-eslint"],
+      },
+      {
+        files: ["test/**/*.js"],
+        parser: "esprima",
+        env: {
+          es6: true,
+          browser: true,
+          jest: true,
+          jasmine: true,
+          node: true,
+        },
+      },
+    ],
   },
   tsconfig: {
     compilerOptions: {
@@ -85,7 +108,7 @@ const DEFAULTS_OPTIONS = {
         require.resolve("@babel/preset-env"),
         {
           modules: false,
-          corejs: { version: "3.8", proposals: true },
+          corejs: { version: 3, proposals: true },
           useBuiltIns: "usage",
           debug: false,
           targets: [`defaults and supports es6-module`],

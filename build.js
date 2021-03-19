@@ -50,7 +50,7 @@ const format = async (cwd, files, options) => {
       await fs.writeFile(
         file,
         prettier.format(await fs.readFile(file, "utf-8"), {
-          parser: "babel",
+          parser: options.ts ? "typescript" : "babel",
           ...((await prettier.resolveConfig(file)) || {}),
           ...(options.prettier || {}),
         }),
@@ -196,12 +196,26 @@ const types = async (cwd, files, options, watch) => {
         .getPreEmitDiagnostics(program)
         .concat(diagnostics, parsedCommandLine.errors);
 
-      if (allDiagnostics.length) {
-        const message = ts.formatDiagnostics(allDiagnostics, formatHost);
-        console.warn(message);
-      }
+      const diagnosticToConsoleMethod = {
+        [ts.DiagnosticCategory["Message"]]: "log",
+        [ts.DiagnosticCategory["Suggestion"]]: "info",
+        [ts.DiagnosticCategory["Warning"]]: "warn",
+        [ts.DiagnosticCategory["Error"]]: "error",
+      };
 
-      if (emitSkipped) console.info("Emit skipped.");
+      allDiagnostics.forEach((diagnostic) => {
+        const { line, character } = diagnostic.file
+          ? ts.getLineAndCharacterOfPosition(diagnostic.file, diagnostic.start)
+          : { line: 0, character: 0 };
+
+        console[diagnosticToConsoleMethod[diagnostic.category] || "log"](
+          `TypeScript\n${diagnostic.file.fileName} (${line + 1}, ${
+            character + 1
+          }): ${ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")}`
+        );
+      });
+
+      if (emitSkipped) console.error("Emit skipped.");
     }
   } catch (error) {
     console.error(error);
