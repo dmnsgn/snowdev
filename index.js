@@ -35,6 +35,7 @@ const DEFAULTS_OPTIONS = {
 
   // Process
   ts: false,
+  serve: true,
   lint: true,
   format: true,
   types: true,
@@ -181,6 +182,12 @@ const parser = yargs(hideBin(process.argv))
       type: "boolean",
       describe: `Use TypeScript for init, dev and build commands (create index.ts, watch files or build files).`,
       defaultDescription: `false`,
+    },
+    serve: {
+      group: "Process options:",
+      type: "boolean",
+      describe: `Start BrowserSync on dev command.`,
+      defaultDescription: `true`,
     },
     lint: {
       group: "Process options:",
