@@ -1,3 +1,6 @@
+examples
+docs
 screenshot.*
 index.html
-examples
+tsconfig.json
+.editorconfig
