@@ -13,14 +13,14 @@
     "outDir": "lib",
     "sourceMap": true,
     "strictFunctionTypes": true,
-    "target": "ES2020",
-    "traceResolution": true
+    "target": "ES2020"
   },
   "include": [
     "src/**/*"
   ],
   "exclude": [
     "node_modules",
+    "web_modules",
     "**/*.spec.ts"
   ]
 }
