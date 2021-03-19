@@ -31,11 +31,13 @@ const lint = async (cwd, files, options) => {
       baseConfig: options.eslint,
       resolvePluginsRelativeTo: __dirname,
     });
+    const lintResults = await eslint.lintFiles(files);
+    const results = (await eslint.loadFormatter("stylish")).format(lintResults);
 
-    const results = (await eslint.loadFormatter("stylish")).format(
-      await eslint.lintFiles(files)
-    );
     if (results) console.error(results);
+    console.timeEnd(lint.description);
+
+    return results;
   } catch (error) {
     console.error(error);
   }
@@ -151,15 +153,16 @@ const types = async (cwd, files, options, watch) => {
           ts.createSemanticDiagnosticsBuilderProgram,
           function (diagnostic) {
             console.info(diagnostic.file.path);
-            console.error(
-              "Error",
-              diagnostic.code,
-              ":",
-              ts.flattenDiagnosticMessageText(
-                diagnostic.messageText,
-                formatHost.getNewLine()
-              )
-            );
+            const results = `Error ${
+              diagnostic.code
+            } : ${ts.flattenDiagnosticMessageText(
+              diagnostic.messageText,
+              formatHost.getNewLine()
+            )}`;
+            console.error(results);
+            if (typeof watch === "function") {
+              watch(`${diagnostic.file.path}\n${results}`);
+            }
           },
           function (diagnostic) {
             console.info(ts.formatDiagnostic(diagnostic, formatHost));
@@ -245,6 +248,6 @@ const build = async (options) => {
 };
 build.description = `Lint and Format sources, run TypeScript, update README API.`;
 
-export { types };
+export { types, lint };
 
 export default build;

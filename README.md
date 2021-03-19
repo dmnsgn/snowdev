@@ -68,6 +68,9 @@ npx snowdev dev --ts
 # ...optionally passing options to browser-sync
 npx snowdev dev --port 8080
 
+# Commit all changes
+git add -A && git commit -m "feat: add feature"
+
 # Build package:
 # - lint and format sources
 # - generate documentation in docs folder (when using --ts) or insert it directly in README
