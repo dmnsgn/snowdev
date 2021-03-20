@@ -36,18 +36,17 @@ npm install -g snowdev
 - Prettier formatter and ESLint linter on build
 - Keep package.json keys sorted for consistency
 
-### Release
-
-- Write commits using the [Conventional Commits Specification](https://www.conventionalcommits.org/en/v1.0.0/)
-- Bump the version based on the commits (patch/minor/major), generate changelog release, create a new commit with git tag
-
 ### Write examples
 
 - Simple BrowserSync dev server to watch and reload on changes
-- Write examples using [ES Modules](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules) directly with [import-map](https://github.com/WICG/import-maps). See [template/index.html](template/index.html).
+- Write examples using standard [ES Modules](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules) directly with [import-map](https://github.com/WICG/import-maps). See [template/index.html](template/index.html).
 - Build examples dependencies using [browserlist](https://github.com/browserslist/browserslist) with targets `defaults and supports es6-module` to publish as GitHub pages with decent browser support.
 - Choose which dependencies to convert to ESM (devDependencies, dependencies or hardcoded list)
-- Push to a `gh-pages` branch
+
+### Release
+
+- Write commits using the [Conventional Commits Specification](https://www.conventionalcommits.org/en/v1.0.0/)
+- Release with StandardVersion to bump the version based on the commits (patch/minor/major = fix/feat/BREAKING CHANGE), generate CHANGELOG release, create a new commit with git tag
 
 ## Usage
 
@@ -60,24 +59,30 @@ cd ~/Projects/package-name
 npx snowdev init
 # ...optionally use a TypeScript structure (entry: src/index.ts)
 npx snowdev init --ts
+# ...optionally passing your GitHub username if different from `npm whoami`
+npx snowdev init --ts --gitHubUsername YourUsername
 
 # Start a dev server and compile dependencies to ESM in web_modules
 npx snowdev dev
-# ...optionally watching ts files
-npx snowdev dev --ts
 # ...optionally passing options to browser-sync
 npx snowdev dev --port 8080
+# ...optionally watching ts files
+npx snowdev dev --ts
+# ...optionally watching ts files without dev server
+npx snowdev dev --ts --no-serve
 
-# Commit all changes
+# Write code and commit all changes
 git add -A && git commit -m "feat: add feature"
 
 # Build package:
 # - lint and format sources
-# - generate documentation in docs folder (when using --ts) or insert it directly in README
-# - generate TypeScript types from either JSDoc or using tsconfig.json (and optionally compiling ts files)
+# - generate documentation and insert it directly in README
+# - generate TypeScript types from either JSDoc
 npx snowdev build
+# ...optionally generate documentation in docs folder and optionally compiling ts files and types using tsconfig.json
+npx snowdev build --ts
 
-# or directly prepare a release
+# or directly prepare a release (build then run standard-version committing all artefacts eg. docs)
 npx snowdev release
 # ...optionally passing options to standard-version
 npx snowdev release --first-release --dry-run

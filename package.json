@@ -55,6 +55,7 @@
     "@typescript-eslint/parser": "^4.18.0",
     "browser-sync": "^2.26.14",
     "camelcase": "^6.2.0",
+    "conventional-changelog-angular": "^5.0.12",
     "core-js": "^3.9.1",
     "cosmiconfig": "^7.0.0",
     "esinstall": "^1.0.5",

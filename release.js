@@ -1,19 +1,30 @@
 import { join } from "path";
+import { createRequire } from "module";
 
 import standardVersion from "standard-version";
 
 import build from "./build.js";
 
-import { console } from "./utils.js";
+import { console, exec } from "./utils.js";
+
+const require = createRequire(import.meta.url);
 
 const release = async (options) => {
   try {
     await build(options);
 
     if (options.standardVersion) {
+      const { stdout, stderr } = await exec(`git add -A`, {
+        cwd: options.cwd,
+      });
+      if (stderr) throw new Error(stderr);
+      console.log(stdout);
+
       await standardVersion({
         path: options.cwd,
+        preset: require.resolve("conventional-changelog-angular"),
         infile: join(options.cwd, "CHANGELOG.md"),
+        commitAll: true,
         ...(options.standardVersion || {}),
         ...(options.argv || {}),
       });
