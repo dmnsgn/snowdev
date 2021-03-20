@@ -59,6 +59,7 @@ const init = async (options = {}) => {
     // Rewrite package name to folder name
     await replaceInFile({
       files: `${options.cwd}/**/*`,
+      ignore: options.ignore,
       from: [
         /packageNameCC/g,
         /packageName/g,
