@@ -42,6 +42,7 @@ const DEFAULTS_OPTIONS = {
   docs: true,
   docsStart: "<!-- api-start -->",
   docsEnd: "<!-- api-end -->",
+  docsFolder: "docs",
   standardVersion: true,
 
   // External tools
@@ -119,6 +120,7 @@ const DEFAULTS_OPTIONS = {
   },
   prettier: null,
   rollup: null,
+  typedoc: null,
 };
 
 let cosmiconfigOptions = {};

@@ -82,19 +82,27 @@ const docs = async (cwd, files, options) => {
   console.time(docs.description);
 
   if (options.ts) {
-    const docsFolder = "docs";
     try {
-      await rimraf(join(cwd, docsFolder));
+      await rimraf(join(cwd, options.docsFolder));
 
       const app = new TypeDoc.Application();
       app.options.addReader(new TypeDoc.TSConfigReader());
       app.options.addReader(new TypeDoc.TypeDocReader());
+
       app.bootstrap({
-        entryPoints: [cwd],
+        entryPoints: files,
+        exclude: options.ignore,
+        logger: console,
+        ...(options.typedoc || {}),
       });
 
       const project = app.convert();
-      if (project) await app.generateDocs(project, docsFolder);
+      if (project) await app.generateDocs(project, options.docsFolder);
+      await fs.writeFile(
+        join(cwd, options.docsFolder, ".nojekyll"),
+        "",
+        "utf-8"
+      );
     } catch (error) {
       console.error(error);
     }
@@ -235,7 +243,7 @@ const build = async (options) => {
     absolute: true,
   });
 
-  console.log(`build files:\n  - ${files.join("\n -")}`);
+  console.log(`build files:\n- ${files.join("\n- ")}`);
 
   await Promise.all(
     [
