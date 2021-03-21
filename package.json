@@ -62,6 +62,7 @@
     "eslint": "^7.22.0",
     "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-prettier": "^3.3.1",
+    "execa": "^5.0.0",
     "glob": "^7.1.6",
     "jsdoc-to-markdown": "^7.0.0",
     "ncp": "^2.0.0",
