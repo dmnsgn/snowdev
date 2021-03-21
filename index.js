@@ -46,7 +46,7 @@ const DEFAULTS_OPTIONS = {
   standardVersion: true,
 
   // External tools
-  browserSync: {
+  browsersync: {
     open: true,
     https: true,
     single: true,
@@ -188,7 +188,7 @@ const parser = yargs(hideBin(process.argv))
     serve: {
       group: "Process options:",
       type: "boolean",
-      describe: `Start BrowserSync on dev command.`,
+      describe: `Start Browsersync on dev command.`,
       defaultDescription: `true`,
     },
     lint: {

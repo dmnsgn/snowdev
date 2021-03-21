@@ -33,7 +33,7 @@ const dev = async (options = {}) => {
     bs.init(
       {
         server: { baseDir: options.cwd },
-        ...(options.browserSync || {}),
+        ...(options.browsersync || {}),
         ...(options.argv || {}),
       },
       async () => {

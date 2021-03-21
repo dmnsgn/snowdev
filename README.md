@@ -38,7 +38,7 @@ npm install -g snowdev
 
 ### Write examples
 
-- Simple BrowserSync dev server to watch and reload on changes
+- Simple Browsersync dev server to watch and reload on changes
 - Write examples using standard [ES Modules](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules) directly with [import-map](https://github.com/WICG/import-maps). See [template/index.html](template/index.html).
 - Build examples dependencies using [browserlist](https://github.com/browserslist/browserslist) with targets `defaults and supports es6-module` to publish as GitHub pages with decent browser support.
 - Choose which dependencies to convert to ESM (devDependencies, dependencies or hardcoded list)
@@ -77,9 +77,9 @@ git add -A && git commit -m "feat: add feature"
 # Build package:
 # - lint and format sources
 # - generate documentation and insert it directly in README
-# - generate TypeScript types from either JSDoc
+# - generate TypeScript types from JSDoc
 npx snowdev build
-# ...optionally generate documentation in docs folder and optionally compiling ts files and types using tsconfig.json
+# ...optionally generate documentation in docs folder and compiling ts files and types using tsconfig.json
 npx snowdev build --ts
 
 # or directly prepare a release (build then run standard-version committing all artefacts eg. docs)
