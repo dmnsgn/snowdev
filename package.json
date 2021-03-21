@@ -58,7 +58,7 @@
     "conventional-changelog-angular": "^5.0.12",
     "core-js": "^3.9.1",
     "cosmiconfig": "^7.0.0",
-    "esinstall": "^1.0.5",
+    "esinstall": "^1.1.1",
     "eslint": "^7.22.0",
     "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-prettier": "^3.3.1",

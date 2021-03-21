@@ -30,6 +30,13 @@ const dev = async (options = {}) => {
       });
     }
 
+    // Install on package.json change
+    bs.watch("package.json", async (event, file) => {
+      if (event === "change") {
+        await install(options);
+      }
+    });
+
     bs.init(
       {
         server: { baseDir: options.cwd },
