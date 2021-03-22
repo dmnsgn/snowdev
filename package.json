@@ -46,6 +46,11 @@
   "bin": {
     "snowdev": "index.js"
   },
+  "files": [
+    "*.js",
+    "template/**/*",
+    "!.DS_Store"
+  ],
   "dependencies": {
     "@babel/core": "^7.13.10",
     "@babel/eslint-parser": "^7.13.10",
