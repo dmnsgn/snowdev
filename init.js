@@ -56,6 +56,12 @@ const init = async (options = {}) => {
       },
     });
 
+    // Rename gitignore otherwise ignored on npm publish
+    await fs.rename(
+      join(options.cwd, "gitignore"),
+      join(options.cwd, ".gitignore")
+    );
+
     // Rewrite package name to folder name
     await replaceInFile({
       files: `${options.cwd}/**/*`,
