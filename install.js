@@ -1,10 +1,10 @@
 import { promises as fs } from "fs";
 import { join } from "path";
 
+import console from "console-ansi";
+
 import { babel } from "@rollup/plugin-babel";
 import { install as installDependencies, printStats } from "esinstall";
-
-import { console } from "./utils.js";
 
 const install = async (options) => {
   const packageJson = JSON.parse(

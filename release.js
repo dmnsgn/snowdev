@@ -1,11 +1,13 @@
 import { join } from "path";
 import { createRequire } from "module";
 
+import console from "console-ansi";
+
 import standardVersion from "standard-version";
 
 import build from "./build.js";
 
-import { console, exec } from "./utils.js";
+import { exec } from "./utils.js";
 
 const require = createRequire(import.meta.url);
 

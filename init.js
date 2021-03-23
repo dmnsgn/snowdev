@@ -2,11 +2,12 @@ import { promises as fs } from "fs";
 import { basename, join } from "path";
 import { fileURLToPath } from "url";
 
+import console from "console-ansi";
 import replaceInFile from "replace-in-file";
 import npmUser from "npm-user";
 import camelcase from "camelcase";
 
-import { console, exec, ncp } from "./utils.js";
+import { exec, ncp } from "./utils.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 

@@ -4,6 +4,7 @@ import { promises as fs, constants } from "fs";
 import { resolve } from "path";
 import { createRequire } from "module";
 
+import console from "console-ansi";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import cosmiconfig from "cosmiconfig";
@@ -13,7 +14,6 @@ import dev from "./dev.js";
 import build from "./build.js";
 import release from "./release.js";
 import install from "./install.js";
-import { console } from "./utils.js";
 
 const { version, name: NAME } = JSON.parse(
   await fs.readFile(new URL("./package.json", import.meta.url))

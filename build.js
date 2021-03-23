@@ -2,6 +2,8 @@ import { promises as fs } from "fs";
 import { join } from "path";
 import { fileURLToPath } from "url";
 
+import console from "console-ansi";
+
 import ts from "typescript";
 
 import prettier from "prettier";
@@ -12,7 +14,7 @@ import { ESLint } from "eslint";
 import jsdoc2md from "jsdoc-to-markdown";
 import TypeDoc from "typedoc";
 
-import { console, glob, rimraf } from "./utils.js";
+import { glob, rimraf } from "./utils.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
