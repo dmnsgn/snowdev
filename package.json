@@ -1,6 +1,6 @@
 {
   "name": "snowdev",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": "Zero configuration, unbundled, opinionated, development and prototyping server for simple ES modules development: types generation, format and linting, dev server and TypeScript support.",
   "keywords": [
     "esm",
