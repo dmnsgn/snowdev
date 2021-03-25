@@ -6,23 +6,25 @@ import console from "console-ansi";
 import { babel } from "@rollup/plugin-babel";
 import { install as installDependencies, printStats } from "esinstall";
 
+const DEPENDENCY_OPTION_MAP = {
+  all: ["dependencies", "devDependencies"],
+  dev: ["devDependencies"],
+  dep: ["dependencies"],
+};
+
 const install = async (options) => {
   const packageJson = JSON.parse(
     await fs.readFile(join(options.cwd, "package.json"))
   );
 
-  const installTargets =
-    options.dependencies ||
-    Object.keys(
-      (options.devDeps
-        ? packageJson.devDependencies
-        : packageJson.dependencies) || {}
-    );
+  const installTargets = Array.isArray(options.dependencies)
+    ? options.dependencies
+    : (DEPENDENCY_OPTION_MAP[options.dependencies] || [])
+        .map((key) => Object.keys(packageJson[key] || {}))
+        .flat();
 
   if (installTargets.length === 0) {
-    console.warn(
-      `No ESM dependencies to install. Add "devDependencies" or "dependencies" to your package (toggle which one using "devDeps"). Restrict the list by specifying "dependencies".`
-    );
+    console.warn(`No ESM dependencies to install. Set "options.dependency".`);
     return;
   }
 

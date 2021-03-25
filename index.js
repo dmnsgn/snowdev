@@ -30,8 +30,7 @@ const DEFAULTS_OPTIONS = {
   gitHubUsername: null,
   files: "{*.+(t|j||mj)s,src/**/*.+(t|j||mj)s}",
   ignore: ["**/node_modules/**", "**/web_modules/**"],
-  devDeps: false,
-  dependencies: null,
+  dependencies: "all",
 
   // Process
   ts: false,
@@ -167,17 +166,12 @@ const parser = yargs(hideBin(process.argv))
       describe: `Files to be ignored by build command.`,
       defaultDescription: `["**/node_modules/**", "**/web_modules/**"]`,
     },
-    devDeps: {
-      group: "Input/meta options:",
-      type: "boolean",
-      describe: `Only install devDependencies as web_modules.`,
-      defaultDescription: `false. Uses options.dependencies or package.json dependencies.`,
-    },
     dependencies: {
       group: "Input/meta options:",
-      type: "array",
-      describe: `Specify list of dependencies to install as web_modules.`,
-      defaultDescription: `null. Uses package.json dependencies.`,
+      type: "string",
+      choices: ["all", "dev", "dep"],
+      describe: `Install all dependencies from package.json, only devDependencies ("dev"), only dependencies ("dep") or an array of dependency as ES module into web_modules.`,
+      defaultDescription: `all`,
     },
 
     ts: {
