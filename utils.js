@@ -10,4 +10,8 @@ const exec = promisify(execCb);
 const ncp = promisify(ncpCb);
 const rimraf = promisify(rimrafCb);
 
-export { glob, exec, ncp, rimraf };
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
+}
+
+export { glob, exec, ncp, rimraf, escapeRegExp };

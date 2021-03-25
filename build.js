@@ -14,7 +14,7 @@ import { ESLint } from "eslint";
 import jsdoc2md from "jsdoc-to-markdown";
 import TypeDoc from "typedoc";
 
-import { glob, rimraf } from "./utils.js";
+import { glob, rimraf, escapeRegExp } from "./utils.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
@@ -115,10 +115,6 @@ const docs = async (cwd, files, options) => {
       parser: "markdown",
       ...((await prettier.resolveConfig(readmePath)) || {}),
     });
-
-    function escapeRegExp(string) {
-      return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
-    }
 
     await fs.writeFile(
       readmePath,

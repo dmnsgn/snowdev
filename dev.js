@@ -31,7 +31,7 @@ const dev = async (options = {}) => {
     }
 
     // Install on package.json change
-    bs.watch("package.json", async (event, file) => {
+    bs.watch("package.json", async (event) => {
       if (event === "change") {
         await install(options);
       }
