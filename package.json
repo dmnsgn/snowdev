@@ -43,6 +43,7 @@
   "author": "Damien Seguin (https://github.com/dmnsgn)",
   "type": "module",
   "main": "index.js",
+  "types": "types/index.d.ts",
   "bin": {
     "snowdev": "index.js"
   },
