@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [1.3.0](https://github.com/dmnsgn/snowdev/compare/v1.2.0...v1.3.0) (2021-03-25)
+
+
+### Features
+
+* default to all for options.dependencies ([42a0ccd](https://github.com/dmnsgn/snowdev/commit/42a0ccd0b8986d8b46a842ee8bbd1c24263faa88))
+
+
+
 # [1.2.0](https://github.com/dmnsgn/snowdev/compare/v1.1.0...v1.2.0) (2021-03-25)
 
 
