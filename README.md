@@ -113,7 +113,7 @@ Input/meta options:
   --dependencies    Install all dependencies from package.json, only devDependencies ("dev"), only dependencies ("dep") or an array of dependency as ES module into web_modules.  [string] [choices: "all", "dev", "dep"] [default: all]
 
 Process options:
-  --ts               Use TypeScript for init, dev and build commands (create index.ts, watch files or build files).  [boolean] [default: false]
+  --ts               Use TypeScript for init, dev and build commands (create index.ts, watch files or build files). Auto-detected if a "tsconfig.json" is detected with a "compilerOptions.outDir" set.  [boolean] [default: undefined]
   --serve            Start Browsersync on dev command.  [boolean] [default: true]
   --lint             Lint on build command.  [boolean] [default: true]
   --format           Format on build command.  [boolean] [default: true]

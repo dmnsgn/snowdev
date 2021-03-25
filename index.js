@@ -14,6 +14,7 @@ import dev from "./dev.js";
 import build from "./build.js";
 import release from "./release.js";
 import install from "./install.js";
+import { isTypeScriptProject } from "./utils.js";
 
 const { version, name: NAME } = JSON.parse(
   await fs.readFile(new URL("./package.json", import.meta.url))
@@ -33,7 +34,7 @@ const DEFAULTS_OPTIONS = {
   dependencies: "all",
 
   // Process
-  ts: false,
+  ts: undefined,
   serve: true,
   lint: true,
   format: true,
@@ -177,8 +178,8 @@ const parser = yargs(hideBin(process.argv))
     ts: {
       group: "Process options:",
       type: "boolean",
-      describe: `Use TypeScript for init, dev and build commands (create index.ts, watch files or build files).`,
-      defaultDescription: `false`,
+      describe: `Use TypeScript for init, dev and build commands (create index.ts, watch files or build files). Auto-detected if a "tsconfig.json" is detected with a "compilerOptions.outDir" set.`,
+      defaultDescription: `undefined`,
     },
     serve: {
       group: "Process options:",
@@ -247,6 +248,12 @@ commands.forEach((fn) => {
         console.info(`${fn.name} in '${options.cwd}'`);
 
         await fs.access(options.cwd, constants.R_OK | constants.W_OK);
+
+        // Auto-detect TypeScript project
+        options.ts =
+          options.ts !== undefined
+            ? options.ts
+            : isTypeScriptProject(options.cwd);
 
         fn(options);
       } catch (error) {
