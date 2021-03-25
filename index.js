@@ -70,6 +70,7 @@ const DEFAULTS_OPTIONS = {
       babelOptions: {},
     },
     env: {
+      es2021: true,
       browser: true,
     },
     overrides: [
@@ -87,7 +88,7 @@ const DEFAULTS_OPTIONS = {
         files: ["test/**/*.js"],
         parser: "esprima",
         env: {
-          es6: true,
+          es2021: true,
           browser: true,
           jest: true,
           jasmine: true,
