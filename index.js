@@ -233,10 +233,17 @@ commands.forEach((fn) => {
     fn.description,
     () => {},
     async (argv) => {
+      const {
+        [fn.name]: cosmiconfigCommandOptions,
+        ...cosmiconfigGlobalOptions
+      } = cosmiconfigOptions || {};
+
       const options = {
         ...DEFAULTS_OPTIONS,
-        ...(cosmiconfigOptions[fn.name] || {}),
+        ...(cosmiconfigGlobalOptions || {}),
+        ...(cosmiconfigCommandOptions || {}),
         ...argv,
+        command: fn.name,
         argv,
       };
 
