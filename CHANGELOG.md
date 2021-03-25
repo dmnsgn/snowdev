@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [1.4.0](https://github.com/dmnsgn/snowdev/compare/v1.3.0...v1.4.0) (2021-03-25)
+
+
+### Features
+
+* auto-detect TypeScript projects ([95ee936](https://github.com/dmnsgn/snowdev/commit/95ee9362cb70792cee2d9d83d1ec4c8e9012b98b))
+
+
+
 # [1.3.0](https://github.com/dmnsgn/snowdev/compare/v1.2.0...v1.3.0) (2021-03-25)
 
 
