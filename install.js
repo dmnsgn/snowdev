@@ -65,7 +65,7 @@ const install = async (options) => {
         plugins: [
           babel({
             cwd: options.cwd,
-            babelHelpers: "bundled",
+            babelHelpers: "runtime",
             ...(options.babel || {}),
           }),
         ],

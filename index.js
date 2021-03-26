@@ -106,16 +106,23 @@ const DEFAULTS_OPTIONS = {
     },
   },
   babel: {
+    ignore: [/core-js/, /@babel\/runtime/],
     presets: [
       [
         require.resolve("@babel/preset-env"),
         {
-          modules: false,
-          corejs: { version: 3, proposals: true },
-          useBuiltIns: "usage",
-          debug: false,
           targets: [`defaults and supports es6-module`],
+          bugfixes: true,
+          debug: false,
+          useBuiltIns: "usage",
+          corejs: { version: "3.9", proposals: true },
         },
+      ],
+    ],
+    plugins: [
+      [
+        require.resolve("@babel/plugin-transform-runtime"),
+        { useESModules: true },
       ],
     ],
   },
