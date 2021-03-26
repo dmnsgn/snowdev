@@ -40,6 +40,7 @@ const dev = async (options = {}) => {
     bs.init(
       {
         server: { baseDir: options.cwd },
+        logPrefix: "snowdev:browser-sync",
         ...(options.browsersync || {}),
         ...(options.argv || {}),
       },
