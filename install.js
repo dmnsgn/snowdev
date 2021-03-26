@@ -13,9 +13,15 @@ const DEPENDENCY_OPTION_MAP = {
 };
 
 const install = async (options) => {
-  const packageJson = JSON.parse(
-    await fs.readFile(join(options.cwd, "package.json"))
-  );
+  let packageJson;
+  try {
+    packageJson = JSON.parse(
+      await fs.readFile(join(options.cwd, "package.json"))
+    );
+  } catch (error) {
+    console.error(`install - error reading package.json\n`, error);
+    return;
+  }
 
   const installTargets = Array.isArray(options.dependencies)
     ? options.dependencies
