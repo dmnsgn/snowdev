@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.2](https://github.com/dmnsgn/snowdev/compare/v1.4.1...v1.4.2) (2021-03-26)
+
+
+### Bug Fixes
+
+* add es-module-shims to babel ignore ([cc4b561](https://github.com/dmnsgn/snowdev/commit/cc4b561f861ede77b4c7555f151a12ded5f70c43))
+* add web_modules to .npmignore ([495ab7a](https://github.com/dmnsgn/snowdev/commit/495ab7a6d37929df83d134469ce6a00888e70f0e))
+* try/catch package.json read in install ([e926670](https://github.com/dmnsgn/snowdev/commit/e926670dbe213a4c297d0e18ba1d17d07c0a488b))
+
+
+
 ## [1.4.1](https://github.com/dmnsgn/snowdev/compare/v1.4.0...v1.4.1) (2021-03-26)
 
 
