@@ -106,7 +106,7 @@ const DEFAULTS_OPTIONS = {
     },
   },
   babel: {
-    ignore: [/core-js/, /@babel\/runtime/],
+    ignore: [/core-js/, /@babel\/runtime/, /es-module-shims/],
     presets: [
       [
         require.resolve("@babel/preset-env"),
