@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.4](https://github.com/dmnsgn/snowdev/compare/v1.4.3...v1.4.4) (2021-04-08)
+
+
+### Bug Fixes
+
+* **template:** use es-modules-shims from web_modules instead of cdn ([75f6263](https://github.com/dmnsgn/snowdev/commit/75f6263f5369fce6baf795f3906ba58de113fc29))
+
+
+
 ## [1.4.3](https://github.com/dmnsgn/snowdev/compare/v1.4.2...v1.4.3) (2021-04-01)
 
 
