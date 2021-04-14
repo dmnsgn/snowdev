@@ -1,5 +1,5 @@
 import { promises as fs } from "fs";
-import { join } from "path";
+import { join, extname } from "path";
 import { fileURLToPath } from "url";
 
 import console from "console-ansi";
@@ -11,8 +11,10 @@ import sortPackageJson from "sort-package-json";
 
 import { ESLint } from "eslint";
 
+import jsdoc from "jsdoc-api";
 import jsdoc2md from "jsdoc-to-markdown";
 import TypeDoc from "typedoc";
+import concatMd from "concat-md";
 
 import { glob, rimraf, escapeRegExp } from "./utils.js";
 
@@ -83,9 +85,15 @@ format.description = `build: format sources`;
 const docs = async (cwd, files, options) => {
   console.time(docs.description);
 
+  const isFile = !!extname(options.docs);
+  const docsFolder = isFile ? ".temp_docs" : options.docs;
+  const isMarkdown = options.docsFormat === "md";
+
+  let inlinedDocs;
+
   if (options.ts) {
     try {
-      await rimraf(join(cwd, options.docsFolder));
+      await rimraf(join(cwd, docsFolder));
 
       const app = new TypeDoc.Application();
       app.options.addReader(new TypeDoc.TSConfigReader());
@@ -95,40 +103,77 @@ const docs = async (cwd, files, options) => {
         entryPoints: files,
         exclude: options.ignore,
         logger: console,
+        ...(isMarkdown
+          ? {
+              readme: "none",
+              plugin: "typedoc-plugin-markdown",
+              hideInPageTOC: true,
+              hideBreadcrumbs: true,
+            }
+          : {}),
         ...(options.typedoc || {}),
       });
+      const configPath = ts.findConfigFile(
+        cwd,
+        ts.sys.fileExists,
+        "tsconfig.json"
+      );
+      if (!configPath) {
+        app.options.setCompilerOptions(
+          files.flat(),
+          options.tsconfig.compilerOptions
+        );
+      }
 
       const project = app.convert();
-      if (project) await app.generateDocs(project, options.docsFolder);
-      await fs.writeFile(
-        join(cwd, options.docsFolder, ".nojekyll"),
-        "",
-        "utf-8"
-      );
+      if (project) await app.generateDocs(project, docsFolder);
+      await fs.writeFile(join(cwd, docsFolder, ".nojekyll"), "", "utf-8");
+
+      if (isMarkdown && isFile) {
+        inlinedDocs = await concatMd.default(join(cwd, docsFolder));
+      }
     } catch (error) {
       console.error(error);
     }
   } else {
-    const readmePath = join(cwd, "README.md");
+    if (isMarkdown) {
+      inlinedDocs = await jsdoc2md.render({ files });
+    } else {
+      jsdoc.renderSync({ files, destination: join(cwd, docsFolder) });
+      if (isFile) {
+        console.error("Output html to a file not supported.");
+        return;
+      }
+    }
+  }
 
-    const formattedDocs = prettier.format(await jsdoc2md.render({ files }), {
-      parser: "markdown",
-      ...((await prettier.resolveConfig(readmePath)) || {}),
+  if (isFile) {
+    await rimraf(join(cwd, docsFolder));
+
+    const filePath = join(cwd, options.docs);
+    const formattedDocs = prettier.format(inlinedDocs, {
+      parser: isMarkdown ? "markdown" : "html",
+      ...((await prettier.resolveConfig(filePath)) || {}),
     });
 
-    await fs.writeFile(
-      readmePath,
-      (await fs.readFile(readmePath, "utf-8")).replace(
-        new RegExp(
-          `${escapeRegExp(options.docsStart)}([\\s\\S]*?)${escapeRegExp(
-            options.docsEnd
-          )}`
+    if (options.docsStart && options.docsEnd) {
+      await fs.writeFile(
+        filePath,
+        (await fs.readFile(filePath, "utf-8")).replace(
+          new RegExp(
+            `${escapeRegExp(options.docsStart)}([\\s\\S]*?)${escapeRegExp(
+              options.docsEnd
+            )}`
+          ),
+          `${options.docsStart}\n\n${formattedDocs}\n${options.docsEnd}`
         ),
-        `${options.docsStart}\n\n${formattedDocs}\n${options.docsEnd}`
-      ),
-      "utf-8"
-    );
+        "utf-8"
+      );
+    } else {
+      await fs.writeFile(filePath, formattedDocs, "utf-8");
+    }
   }
+
   console.timeEnd(docs.description);
 };
 docs.description = `build: update docs`;

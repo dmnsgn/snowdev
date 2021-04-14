@@ -39,10 +39,10 @@ const DEFAULTS_OPTIONS = {
   lint: true,
   format: true,
   types: true,
-  docs: true,
+  docs: undefined,
+  docsFormat: undefined,
   docsStart: "<!-- api-start -->",
   docsEnd: "<!-- api-end -->",
-  docsFolder: "docs",
   standardVersion: true,
 
   // External tools
@@ -115,7 +115,7 @@ const DEFAULTS_OPTIONS = {
           bugfixes: true,
           debug: false,
           useBuiltIns: "usage",
-          corejs: { version: "3.9", proposals: true },
+          corejs: { version: "3.10", proposals: true },
         },
       ],
     ],
@@ -183,43 +183,50 @@ const parser = yargs(hideBin(process.argv))
     },
 
     ts: {
-      group: "Process options:",
+      group: "Commands options:",
       type: "boolean",
       describe: `Use TypeScript for init, dev and build commands (create index.ts, watch files or build files). Auto-detected if a "tsconfig.json" is detected with a "compilerOptions.outDir" set.`,
       defaultDescription: `undefined`,
     },
     serve: {
-      group: "Process options:",
+      group: "Commands options:",
       type: "boolean",
       describe: `Start Browsersync on dev command.`,
       defaultDescription: `true`,
     },
     lint: {
-      group: "Process options:",
+      group: "Commands options:",
       type: "boolean",
       describe: `Lint on build command.`,
       defaultDescription: `true`,
     },
     format: {
-      group: "Process options:",
+      group: "Commands options:",
       type: "boolean",
       describe: `Format on build command.`,
       defaultDescription: `true`,
     },
     types: {
-      group: "Process options:",
+      group: "Commands options:",
       type: "boolean",
       describe: `Run TypeScript (generate types or compile) on build command or watch on dev command.`,
       defaultDescription: `true`,
     },
     docs: {
-      group: "Process options:",
-      type: "boolean",
-      describe: `Generate documentation via "JSDoc" for JS only packages and inserted in README or via "typedoc" in a "docs" folder with --ts on build command.`,
-      defaultDescription: `true`,
+      group: "Commands options:",
+      type: "string",
+      describe: `Generate documentation (using "JSDoc" or "typedoc") in file (between "options.docsStart" and "options.docsEnd") or directory. Default to "README.md" but "docs" if "options.ts".`,
+      defaultDescription: `undefined`,
+    },
+    docsFormat: {
+      group: "Commands options:",
+      type: "string",
+      choices: ["md", "html"],
+      describe: `Default to "md" but "html" if "options.ts".`,
+      defaultDescription: `undefined`,
     },
     standardVersion: {
-      group: "Process options:",
+      group: "Commands options:",
       type: "boolean|Object",
       describe: `Bump the version, generate changelog release, create a new commit with git tag on release command.`,
       defaultDescription: `true`,
@@ -257,10 +264,11 @@ commands.forEach((fn) => {
         await fs.access(options.cwd, constants.R_OK | constants.W_OK);
 
         // Auto-detect TypeScript project
-        options.ts =
-          options.ts !== undefined
-            ? options.ts
-            : isTypeScriptProject(options.cwd);
+        options.ts ??= isTypeScriptProject(options.cwd);
+
+        // Set default docs
+        options.docs = options.docs ?? (options.ts ? "docs" : "README.md");
+        options.docsFormat = options.docsFormat ?? (options.ts ? "html" : "md");
 
         fn(options);
       } catch (error) {

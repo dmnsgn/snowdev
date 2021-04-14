@@ -112,13 +112,14 @@ Input/meta options:
   --ignore          Files to be ignored by build command.  [array] [default: ["**/node_modules/**", "**/web_modules/**"]]
   --dependencies    Install all dependencies from package.json, only devDependencies ("dev"), only dependencies ("dep") or an array of dependency as ES module into web_modules.  [string] [choices: "all", "dev", "dep"] [default: all]
 
-Process options:
+Commands options:
   --ts               Use TypeScript for init, dev and build commands (create index.ts, watch files or build files). Auto-detected if a "tsconfig.json" is detected with a "compilerOptions.outDir" set.  [boolean] [default: undefined]
   --serve            Start Browsersync on dev command.  [boolean] [default: true]
   --lint             Lint on build command.  [boolean] [default: true]
   --format           Format on build command.  [boolean] [default: true]
   --types            Run TypeScript (generate types or compile) on build command or watch on dev command.  [boolean] [default: true]
-  --docs             Generate documentation via "JSDoc" for JS only packages and inserted in README or via "typedoc" in a "docs" folder with --ts on build command.  [boolean] [default: true]
+  --docs             Generate documentation (using "JSDoc" or "typedoc") in file (between "options.docsStart" and "options.docsEnd") or directory. Default to "README.md" but "docs" if "options.ts".  [string] [default: undefined]
+  --docsFormat       Default to "md" but "html" if "options.ts".  [string] [choices: "md", "html"] [default: undefined]
   --standardVersion  Bump the version, generate changelog release, create a new commit with git tag on release command.  [default: true]
 
 Options:
