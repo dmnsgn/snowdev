@@ -218,7 +218,7 @@ const types = async (cwd, files, options, watch) => {
           : { line: 0, character: 0 };
 
         console[diagnosticToConsoleMethod[diagnostic.category] || "log"](
-          `TypeScript\n${diagnostic.file.fileName} (${line + 1}, ${
+          `TypeScript\n${diagnostic.file?.fileName} (${line + 1}, ${
             character + 1
           }): ${ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")}`
         );
