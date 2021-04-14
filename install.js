@@ -30,7 +30,7 @@ const install = async (options) => {
         .flat();
 
   if (installTargets.length === 0) {
-    console.warn(`No ESM dependencies to install. Set "options.dependency".`);
+    console.warn(`No ESM dependencies to install. Set "options.dependencies".`);
     return;
   }
 
