@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.1](https://github.com/dmnsgn/snowdev/compare/v1.5.0...v1.5.1) (2021-04-14)
+
+
+### Bug Fixes
+
+* add jsdoc-tsimport-plugin ([0c05388](https://github.com/dmnsgn/snowdev/commit/0c05388a3531f8ab70073068e27f497e73a583c4))
+
+
+
 # [1.5.0](https://github.com/dmnsgn/snowdev/compare/v1.4.4...v1.5.0) (2021-04-14)
 
 
