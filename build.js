@@ -137,7 +137,10 @@ const docs = async (cwd, files, options) => {
     }
   } else {
     if (isMarkdown) {
-      inlinedDocs = await jsdoc2md.render({ files });
+      inlinedDocs = await jsdoc2md.render({
+        files,
+        configure: join(__dirname, "jsdoc.json"),
+      });
     } else {
       jsdoc.renderSync({ files, destination: join(cwd, docsFolder) });
       if (isFile) {
