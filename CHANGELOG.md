@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [1.5.0](https://github.com/dmnsgn/snowdev/compare/v1.4.4...v1.5.0) (2021-04-14)
+
+
+### Bug Fixes
+
+* ensure diagnostic file before logging its fileName ([36456a3](https://github.com/dmnsgn/snowdev/commit/36456a36a9676817428709c2b1c5c47e9b4cec99))
+
+
+### Features
+
+* add docsFormat option ([30c09d4](https://github.com/dmnsgn/snowdev/commit/30c09d4294d973af8525939054d5c3d90727ef26))
+
+
+
 ## [1.4.4](https://github.com/dmnsgn/snowdev/compare/v1.4.3...v1.4.4) (2021-04-08)
 
 
