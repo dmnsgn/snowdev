@@ -204,7 +204,7 @@ const types = async (cwd, files, options, watch) => {
           {},
           // config.compilerOptions,
           ts.sys,
-          ts.createSemanticDiagnosticsBuilderProgram,
+          ts.createEmitAndSemanticDiagnosticsBuilderProgram,
           function (diagnostic) {
             console.info(diagnostic.file.path);
             const results = `Error ${
