@@ -141,6 +141,15 @@ const docs = async (cwd, files, options) => {
         files,
         configure: join(__dirname, "jsdoc.json"),
       });
+      if (!isFile) {
+        await fs.mkdir(join(cwd, docsFolder), { recursive: true });
+        await fs.writeFile(
+          join(cwd, docsFolder, "README.md"),
+          inlinedDocs,
+          "utf-8"
+        );
+        return;
+      }
     } else {
       jsdoc.renderSync({ files, destination: join(cwd, docsFolder) });
       if (isFile) {
