@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.2](https://github.com/dmnsgn/snowdev/compare/v1.5.1...v1.5.2) (2021-04-27)
+
+
+### Bug Fixes
+
+* output docs to README.md for options.docs as folder and md ([d5f41ea](https://github.com/dmnsgn/snowdev/commit/d5f41ea141361537908ae286204fdf9c36976aa3))
+* use ts.createEmitAndSemanticDiagnosticsBuilderProgram in watch mode ([1221c98](https://github.com/dmnsgn/snowdev/commit/1221c98cf6be83f5badd12517348b6dd69c2bcfe))
+
+
+
 ## [1.5.1](https://github.com/dmnsgn/snowdev/compare/v1.5.0...v1.5.1) (2021-04-14)
 
 
