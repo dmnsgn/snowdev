@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [1.6.0](https://github.com/dmnsgn/snowdev/compare/v1.5.2...v1.6.0) (2021-09-10)
+
+
+### Features
+
+* add exports field to package.json ([7cc4861](https://github.com/dmnsgn/snowdev/commit/7cc48619b18bb3627a88825420cea037076217b8))
+
+
+
 ## [1.5.2](https://github.com/dmnsgn/snowdev/compare/v1.5.1...v1.5.2) (2021-04-27)
 
 

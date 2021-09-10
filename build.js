@@ -171,7 +171,9 @@ const docs = async (cwd, files, options) => {
     if (options.docsStart && options.docsEnd) {
       await fs.writeFile(
         filePath,
-        (await fs.readFile(filePath, "utf-8")).replace(
+        (
+          await fs.readFile(filePath, "utf-8")
+        ).replace(
           new RegExp(
             `${escapeRegExp(options.docsStart)}([\\s\\S]*?)${escapeRegExp(
               options.docsEnd
