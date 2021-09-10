@@ -24,6 +24,7 @@
   "license": "MIT",
   "author": "authorName (https://github.com/gitHubUsername)",
   "type": "module",
+  "exports": "./index.js",
   "main": "index.js",
   "types": "types/index.d.ts",
   "engines": {

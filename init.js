@@ -90,6 +90,7 @@ const init = async (options = {}) => {
         await fs.readFile(packageJsonFile, "utf-8")
       );
       packageJson.main = "lib/index.js";
+      packageJson.exports = "./lib/index.js";
       await fs.writeFile(
         packageJsonFile,
         JSON.stringify(packageJson, null, 2),
