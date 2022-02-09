@@ -163,10 +163,14 @@ const docs = async (cwd, files, options) => {
     await rimraf(join(cwd, docsFolder));
 
     const filePath = join(cwd, options.docs);
-    const formattedDocs = prettier.format(inlinedDocs, {
-      parser: isMarkdown ? "markdown" : "html",
-      ...((await prettier.resolveConfig(filePath)) || {}),
-    });
+    const formattedDocs = prettier
+      .format(inlinedDocs, {
+        parser: isMarkdown ? "markdown" : "html",
+        ...((await prettier.resolveConfig(filePath)) || {}),
+      })
+      .split("\n")
+      .map((line) => line.trimEnd())
+      .join("\n");
 
     if (options.docsStart && options.docsEnd) {
       await fs.writeFile(
