@@ -129,6 +129,7 @@ const DEFAULTS_OPTIONS = {
   prettier: null,
   rollup: null,
   typedoc: null,
+  jsdoc: null,
 };
 
 let cosmiconfigOptions = {};

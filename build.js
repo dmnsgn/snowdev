@@ -139,7 +139,7 @@ const docs = async (cwd, files, options) => {
     if (isMarkdown) {
       inlinedDocs = await jsdoc2md.render({
         files,
-        configure: join(__dirname, "jsdoc.json"),
+        configure: options.jsdoc || join(__dirname, "jsdoc.json"),
       });
       if (!isFile) {
         await fs.mkdir(join(cwd, docsFolder), { recursive: true });
