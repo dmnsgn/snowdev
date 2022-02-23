@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [1.8.0](https://github.com/dmnsgn/snowdev/compare/v1.7.0...v1.8.0) (2022-02-23)
+
+
+### Features
+
+* add jdoc-plugin-intersection ([e08f00f](https://github.com/dmnsgn/snowdev/commit/e08f00fcc0874d519229ed1a7a7f242b36235b38))
+* add jsdoc config file path option ([7623cb2](https://github.com/dmnsgn/snowdev/commit/7623cb23d3d1da273f29afaf5779af880d009079))
+
+
+
 # [1.7.0](https://github.com/dmnsgn/snowdev/compare/v1.6.2...v1.7.0) (2022-02-09)
 
 
