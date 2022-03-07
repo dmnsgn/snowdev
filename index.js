@@ -13,6 +13,7 @@ import init from "./init.js";
 import dev from "./dev.js";
 import build from "./build.js";
 import release from "./release.js";
+import deploy from "./deploy.js";
 import install from "./install.js";
 import { isTypeScriptProject } from "./utils.js";
 
@@ -237,7 +238,7 @@ const parser = yargs(hideBin(process.argv))
   .version(version)
   .help();
 
-const commands = [init, dev, build, release, install];
+const commands = [init, dev, build, release, deploy, install];
 commands.forEach((fn) => {
   parser.command(
     fn.name,
