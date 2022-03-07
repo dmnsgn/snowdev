@@ -306,9 +306,9 @@ const build = async (options) => {
 
   console.log(`build files:\n- ${files.join("\n- ")}`);
 
+  if (options.format) await format(cwd, files, options);
   await Promise.all(
     [
-      options.format ? format(cwd, files, options) : 0,
       options.types ? types(cwd, files, options) : 0,
       options.docs ? docs(cwd, files, options) : 0,
     ].filter(Boolean)
