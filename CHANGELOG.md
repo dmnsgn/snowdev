@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [1.9.0](https://github.com/dmnsgn/snowdev/compare/v1.8.0...v1.9.0) (2022-03-07)
+
+
+### Bug Fixes
+
+* move format before types and docs in build command ([0906733](https://github.com/dmnsgn/snowdev/commit/09067330487f218c238e95da1cbc153ca1036757))
+
+
+### Features
+
+* add deploy to gh-pages ([d909b4a](https://github.com/dmnsgn/snowdev/commit/d909b4aae4800016e3586003b46ed5f6d15205f6))
+
+
+
 # [1.8.0](https://github.com/dmnsgn/snowdev/compare/v1.7.0...v1.8.0) (2022-02-23)
 
 
