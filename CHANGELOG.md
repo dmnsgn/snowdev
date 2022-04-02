@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [1.10.0](https://github.com/dmnsgn/snowdev/compare/v1.9.0...v1.10.0) (2022-04-02)
+
+
+### Bug Fixes
+
+* correct babel exclude regex ([b0a8459](https://github.com/dmnsgn/snowdev/commit/b0a8459dd4b8052d4fba8af883f605200f46f8ed))
+
+
+### Features
+
+* alias core-js and babel-runtime ([e922343](https://github.com/dmnsgn/snowdev/commit/e922343a263ee9a54566c3fbbeeab4bad7ba4c3a))
+
+
+
 # [1.9.0](https://github.com/dmnsgn/snowdev/compare/v1.8.0...v1.9.0) (2022-03-07)
 
 
