@@ -30,6 +30,9 @@ const lint = async (cwd, files, options) => {
       ...(options.eslint.parserOptions.babelOptions || {}),
     };
 
+    // https://github.com/eslint/eslintrc/issues/75
+    delete options.eslint.parserOptions.babelOptions.exclude;
+
     const eslint = new ESLint({
       cwd,
       baseConfig: options.eslint,
