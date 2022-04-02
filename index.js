@@ -62,16 +62,13 @@ const DEFAULTS_OPTIONS = {
       "prettier/prettier": "error",
     },
     parserOptions: {
-      ecmaVersion: 2021,
+      ecmaVersion: 2022,
       sourceType: "module",
-      ecmaFeatures: {
-        experimentalObjectRestSpread: false,
-      },
       requireConfigFile: false,
       babelOptions: {},
     },
     env: {
-      es2021: true,
+      es2022: true,
       browser: true,
     },
     overrides: [
@@ -89,7 +86,7 @@ const DEFAULTS_OPTIONS = {
         files: ["test/**/*.js"],
         parser: "esprima",
         env: {
-          es2021: true,
+          es2022: true,
           browser: true,
           jest: true,
           jasmine: true,
@@ -116,7 +113,7 @@ const DEFAULTS_OPTIONS = {
           bugfixes: true,
           debug: false,
           useBuiltIns: "usage",
-          corejs: { version: "3.10", proposals: true },
+          corejs: { version: "3.21", proposals: true },
         },
       ],
     ],
