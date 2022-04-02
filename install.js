@@ -1,10 +1,13 @@
 import { promises as fs } from "fs";
-import { join } from "path";
+import { dirname, join } from "path";
+import { createRequire } from "module";
 
 import console from "console-ansi";
 
 import { babel } from "@rollup/plugin-babel";
 import { install as installDependencies, printStats } from "esinstall";
+
+const require = createRequire(import.meta.url);
 
 const DEPENDENCY_OPTION_MAP = {
   all: ["dependencies", "devDependencies"],
@@ -67,6 +70,10 @@ const install = async (options) => {
       treeshake: true,
       polyfillNode: true,
       logger: console,
+      alias: {
+        "@babel/runtime": dirname(require.resolve("@babel/runtime/package")),
+        "core-js": dirname(require.resolve("core-js")),
+      },
       rollup: {
         plugins: [
           babel({
