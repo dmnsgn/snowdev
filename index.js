@@ -104,7 +104,7 @@ const DEFAULTS_OPTIONS = {
     },
   },
   babel: {
-    exclude: /node_modules\/(assert|core-js|@babel\/runtime|es-module-shims)/,
+    exclude: /node_modules\/(assert|core-js|@babel\/runtime)/,
     presets: [
       [
         require.resolve("@babel/preset-env"),
