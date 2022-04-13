@@ -78,7 +78,7 @@ const deploy = async (options = {}) => {
 
     if (!options.dryRun) {
       // Push
-      await execCommand(`git push origin gh-pages"`, options);
+      await execCommand(`git push origin gh-pages`, options);
       // Go back to current branch
       await execCommand(`git checkout ${currentBranch}"`, options);
     }
