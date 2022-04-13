@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.10.2](https://github.com/dmnsgn/snowdev/compare/v1.10.1...v1.10.2) (2022-04-13)
+
+
+### Bug Fixes
+
+* deploy push git command ([8241651](https://github.com/dmnsgn/snowdev/commit/82416516be907638bfc9a146e6f0b5bc15542621))
+
+
+
 ## [1.10.1](https://github.com/dmnsgn/snowdev/compare/v1.10.0...v1.10.1) (2022-04-02)
 
 
