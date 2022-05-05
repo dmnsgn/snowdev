@@ -88,6 +88,12 @@ const install = async (options) => {
     printStats(stats);
     delete console.levels.debug;
     console.log("install - complete.");
+
+    await fs.writeFile(
+      join(options.cwd, "web_modules", ".nojekyll"),
+      "",
+      "utf-8"
+    );
   } catch (error) {
     console.error(error);
   }
