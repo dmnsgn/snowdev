@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.10.3](https://github.com/dmnsgn/snowdev/compare/v1.10.2...v1.10.3) (2022-05-05)
+
+
+### Bug Fixes
+
+* add .nojekyll to web_modules ([2e6528e](https://github.com/dmnsgn/snowdev/commit/2e6528ee856339ebc6b30e78a1944b0d6bf61c2a))
+
+
+
 ## [1.10.2](https://github.com/dmnsgn/snowdev/compare/v1.10.1...v1.10.2) (2022-04-13)
 
 
