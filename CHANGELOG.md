@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.10.4](https://github.com/dmnsgn/snowdev/compare/v1.10.3...v1.10.4) (2022-05-20)
+
+
+### Bug Fixes
+
+* include jsdoc.json file ([43b06da](https://github.com/dmnsgn/snowdev/commit/43b06da6ce4299e60caf7900a8f9a60c4feeb38e))
+
+
+
 ## [1.10.3](https://github.com/dmnsgn/snowdev/compare/v1.10.2...v1.10.3) (2022-05-05)
 
 
