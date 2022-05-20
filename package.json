@@ -50,6 +50,7 @@
   },
   "files": [
     "*.js",
+    "jsdoc.json",
     "template/**/*",
     "!.DS_Store"
   ],
