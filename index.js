@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { promises as fs, constants } from "fs";
-import { resolve } from "path";
+import { join, resolve } from "path";
 import { createRequire } from "module";
 
 import console from "console-ansi";
@@ -176,8 +176,8 @@ const parser = yargs(hideBin(process.argv))
     dependencies: {
       group: "Input/meta options:",
       type: "string",
-      choices: ["all", "dev", "dep"],
-      describe: `Install all dependencies from package.json, only devDependencies ("dev"), only dependencies ("dep") or an array of dependency as ES module into web_modules.`,
+      choices: ["all", "dev", "prod"],
+      describe: `Install all dependencies from package.json, only devDependencies ("dev"), only dependencies ("prod") or an array of dependency as ES module into web_modules.`,
       defaultDescription: `all`,
     },
 
@@ -258,6 +258,7 @@ commands.forEach((fn) => {
 
       try {
         options.cwd = resolve(options.cwd);
+        options.cacheFolder = join(options.cwd, "node_modules", ".cache", NAME);
         console.info(`${fn.name} in '${options.cwd}'`);
 
         await fs.access(options.cwd, constants.R_OK | constants.W_OK);

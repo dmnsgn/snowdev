@@ -110,7 +110,7 @@ Input/meta options:
   --gitHubUsername  Specify a GitHub user name for the init command.  [string] [default: options.username]
   --files           A glob pattern for files to be processed by build command. All JS and TS files in root or "src/" folder.  [string] [default: "{*.+(t|j||mj)s,src/**/*.+(t|j||mj)s}"]
   --ignore          Files to be ignored by build command.  [array] [default: ["**/node_modules/**", "**/web_modules/**"]]
-  --dependencies    Install all dependencies from package.json, only devDependencies ("dev"), only dependencies ("dep") or an array of dependency as ES module into web_modules.  [string] [choices: "all", "dev", "dep"] [default: all]
+  --dependencies    Install all dependencies from package.json, only devDependencies ("dev"), only dependencies ("prod") or an array of dependency as ES module into web_modules.  [string] [choices: "all", "dev", "prod"] [default: all]
 
 Commands options:
   --ts               Use TypeScript for init, dev and build commands (create index.ts, watch files or build files). Auto-detected if a "tsconfig.json" is detected with a "compilerOptions.outDir" set.  [boolean] [default: undefined]

@@ -1,6 +1,7 @@
 import { promises as fs } from "fs";
 import { dirname, join } from "path";
 import { createRequire } from "module";
+import Arborist from "@npmcli/arborist";
 
 import console from "console-ansi";
 
@@ -9,10 +10,35 @@ import { install as installDependencies, printStats } from "esinstall";
 
 const require = createRequire(import.meta.url);
 
+const DEPENDENCY_TYPES = Object.freeze({
+  ALL: "all",
+  DEV: "dev",
+  PROD: "prod",
+  CUSTOM: "custom",
+});
+
 const DEPENDENCY_OPTION_MAP = {
-  all: ["dependencies", "devDependencies"],
-  dev: ["devDependencies"],
-  dep: ["dependencies"],
+  [DEPENDENCY_TYPES.ALL]: ["dependencies", "devDependencies"],
+  [DEPENDENCY_TYPES.DEV]: ["devDependencies"],
+  [DEPENDENCY_TYPES.PROD]: ["dependencies"],
+};
+
+const DEPENDENCY_SAVE_TYPE_MAP = {
+  [DEPENDENCY_TYPES.ALL]: ["prod", "dev"],
+  [DEPENDENCY_TYPES.DEV]: ["dev"],
+  [DEPENDENCY_TYPES.PROD]: ["prod"],
+};
+
+const listFormat = new Intl.ListFormat("en");
+
+const getDependencies = async (options, type) => {
+  const tree = await new Arborist({ path: options.cwd }).loadActual();
+  const dependencies = Array.from(tree.edgesOut.values());
+  return type === DEPENDENCY_TYPES.CUSTOM
+    ? dependencies
+    : dependencies.filter((dependency) =>
+        DEPENDENCY_SAVE_TYPE_MAP[type].includes(dependency.type)
+      );
 };
 
 const install = async (options) => {
@@ -26,39 +52,65 @@ const install = async (options) => {
     return;
   }
 
-  const installTargets = Array.isArray(options.dependencies)
-    ? options.dependencies
-    : (DEPENDENCY_OPTION_MAP[options.dependencies] || [])
-        .map((key) => Object.keys(packageJson[key] || {}))
-        .flat();
+  // Get install type
+  const type = Array.isArray(options.dependencies)
+    ? DEPENDENCY_TYPES.CUSTOM
+    : options.dependencies;
+
+  // Get cached dependencies
+  const dependenciesCacheFile = join(options.cacheFolder, "dependencies.json");
+  await fs.mkdir(options.cacheFolder, { recursive: true });
+
+  let cachedDependencies = [];
+  let cachedType = DEPENDENCY_TYPES.CUSTOM;
+  try {
+    ({ dependencies: cachedDependencies, type: cachedType } = JSON.parse(
+      await fs.readFile(dependenciesCacheFile, "utf-8")
+    ));
+  } catch (error) {
+    console.info(`install - no dependencies cached.`);
+  }
+
+  // Get current dependencies
+  const dependencies = await getDependencies(options, type);
+
+  // Check type or list of dependencies change
+  if (type !== cachedType) {
+    console.info("install - dependency type changed.");
+  } else if (dependencies.length !== cachedDependencies.length) {
+    console.info("install - dependency list changed.");
+  } else if (options.command !== "install") {
+    const changedDependencies = dependencies.filter(
+      ({ spec }) => !cachedDependencies.some(({ spec: s }) => spec === s)
+    );
+
+    if (!changedDependencies.length) {
+      console.log("install - all dependencies installed.");
+      return;
+    } else {
+      console.log(
+        `install - dependencies changed: ${listFormat.format(
+          changedDependencies.map((dependency) => dependency.name)
+        )}.`
+      );
+    }
+  }
+
+  const installTargets =
+    type === DEPENDENCY_TYPES.CUSTOM
+      ? options.dependencies
+      : (DEPENDENCY_OPTION_MAP[options.dependencies] || [])
+          .map((key) => Object.keys(packageJson[key] || {}))
+          .flat();
 
   if (installTargets.length === 0) {
     console.warn(`No ESM dependencies to install. Set "options.dependencies".`);
     return;
   }
 
-  console.info(`ESM dependencies: ${installTargets.join(", ")}`);
-
-  if (options.command !== "install") {
-    try {
-      const { imports = {} } = JSON.parse(
-        await fs.readFile(join(options.cwd, "web_modules", "import-map.json"))
-      );
-      const installedDependencies = Object.keys(imports).sort();
-
-      if (
-        installTargets.length === installedDependencies.length &&
-        [...installTargets]
-          .sort()
-          .every((value, index) => value === installedDependencies[index])
-      ) {
-        console.log("install - all dependencies installed.");
-        return;
-      }
-    } catch (error) {
-      console.info("install - initial installation.");
-    }
-  }
+  console.info(
+    `install - ESM dependencies: ${listFormat.format(installTargets)}`
+  );
 
   try {
     console.log("install - installing...");
@@ -87,13 +139,21 @@ const install = async (options) => {
     });
     printStats(stats);
     delete console.levels.debug;
-    console.log("install - complete.");
 
     await fs.writeFile(
       join(options.cwd, "web_modules", ".nojekyll"),
       "",
       "utf-8"
     );
+
+    // Write cache
+    await fs.writeFile(
+      dependenciesCacheFile,
+      JSON.stringify({ type, dependencies }),
+      "utf-8"
+    );
+
+    console.log("install - complete.");
   } catch (error) {
     console.error(error);
   }
