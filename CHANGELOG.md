@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [1.11.0](https://github.com/dmnsgn/snowdev/compare/v1.10.4...v1.11.0) (2022-06-13)
+
+
+### Features
+
+* cache dependencies versions from package.json to allow install on change ([224e01c](https://github.com/dmnsgn/snowdev/commit/224e01caea9f2b943358d9e130b6b94dae023eaa))
+
+
+
 ## [1.10.4](https://github.com/dmnsgn/snowdev/compare/v1.10.3...v1.10.4) (2022-05-20)
 
 
