@@ -23,4 +23,17 @@ function isTypeScriptProject(cwd) {
     ?.outDir;
 }
 
-export { glob, exec, ncp, rimraf, escapeRegExp, isTypeScriptProject };
+const pathExists = (path) =>
+  access(path)
+    .then(() => true)
+    .catch(() => false);
+
+export {
+  glob,
+  exec,
+  ncp,
+  rimraf,
+  escapeRegExp,
+  isTypeScriptProject,
+  pathExists,
+};

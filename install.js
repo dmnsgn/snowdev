@@ -8,6 +8,8 @@ import console from "console-ansi";
 import { babel } from "@rollup/plugin-babel";
 import { install as installDependencies, printStats } from "esinstall";
 
+import { pathExists } from "./utils.js";
+
 const require = createRequire(import.meta.url);
 
 const DEPENDENCY_TYPES = Object.freeze({
@@ -74,25 +76,30 @@ const install = async (options) => {
   // Get current dependencies
   const dependencies = await getDependencies(options, type);
 
-  // Check type or list of dependencies change
-  if (type !== cachedType) {
-    console.info("install - dependency type changed.");
-  } else if (dependencies.length !== cachedDependencies.length) {
-    console.info("install - dependency list changed.");
-  } else if (options.command !== "install") {
-    const changedDependencies = dependencies.filter(
-      ({ spec }) => !cachedDependencies.some(({ spec: s }) => spec === s)
-    );
-
-    if (!changedDependencies.length) {
-      console.log("install - all dependencies installed.");
-      return;
-    } else {
-      console.log(
-        `install - dependencies changed: ${listFormat.format(
-          changedDependencies.map((dependency) => dependency.name)
-        )}.`
+  // Check if web_modules folder exists
+  if (!(await pathExists(join(options.cwd, "web_modules")))) {
+    console.info("install - initial installation.");
+  } else {
+    // Check type or list of dependencies change
+    if (type !== cachedType) {
+      console.info("install - dependency type changed.");
+    } else if (dependencies.length !== cachedDependencies.length) {
+      console.info("install - dependency list changed.");
+    } else if (options.command !== "install") {
+      const changedDependencies = dependencies.filter(
+        ({ spec }) => !cachedDependencies.some(({ spec: s }) => spec === s)
       );
+
+      if (!changedDependencies.length) {
+        console.log("install - all dependencies installed.");
+        return;
+      } else {
+        console.log(
+          `install - dependencies changed: ${listFormat.format(
+            changedDependencies.map((dependency) => dependency.name)
+          )}.`
+        );
+      }
     }
   }
 
