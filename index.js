@@ -101,6 +101,7 @@ const DEFAULTS_OPTIONS = {
       declaration: true,
       declarationDir: "types",
       emitDeclarationOnly: true,
+      lib: ["ESNext"],
     },
   },
   babel: {
