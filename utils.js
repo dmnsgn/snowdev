@@ -1,6 +1,6 @@
-import { promisify } from "util";
+import { promisify } from "node:util";
+import { exec as execCb } from "node:child_process";
 
-import { exec as execCb } from "child_process";
 import globCb from "glob";
 import ncpCb from "ncp";
 import rimrafCb from "rimraf";

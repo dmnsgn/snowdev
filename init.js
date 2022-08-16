@@ -1,6 +1,6 @@
-import { promises as fs } from "fs";
-import { basename, join } from "path";
-import { fileURLToPath } from "url";
+import { promises as fs } from "node:fs";
+import { basename, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import console from "console-ansi";
 import replaceInFile from "replace-in-file";

@@ -1,6 +1,6 @@
-import { promises as fs } from "fs";
-import { dirname, join } from "path";
-import { createRequire } from "module";
+import { promises as fs } from "node:fs";
+import { dirname, join } from "node:path";
+import { createRequire } from "node:module";
 import Arborist from "@npmcli/arborist";
 
 import console from "console-ansi";

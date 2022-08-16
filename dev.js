@@ -1,4 +1,5 @@
-import { join } from "path";
+import { join } from "node:path";
+
 import { create as browserSyncCreate } from "browser-sync";
 
 import install from "./install.js";

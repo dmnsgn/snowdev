@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-import { promises as fs, constants } from "fs";
-import { join, resolve } from "path";
-import { createRequire } from "module";
+import { promises as fs, constants } from "node:fs";
+import { join, resolve } from "node:path";
+import { createRequire } from "node:module";
 
 import console from "console-ansi";
 import yargs from "yargs";
