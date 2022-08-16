@@ -1,3 +1,4 @@
+import { promises as fs } from "node:fs";
 import { promisify } from "node:util";
 import { exec as execCb } from "node:child_process";
 
@@ -24,7 +25,8 @@ function isTypeScriptProject(cwd) {
 }
 
 const pathExists = (path) =>
-  access(path)
+  fs
+    .access(path)
     .then(() => true)
     .catch(() => false);
 
