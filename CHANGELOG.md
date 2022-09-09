@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [1.12.0](https://github.com/dmnsgn/snowdev/compare/v1.11.0...v1.12.0) (2022-09-09)
+
+
+### Bug Fixes
+
+* add missing fs.access import ([871ed3d](https://github.com/dmnsgn/snowdev/commit/871ed3d7521b70010e14c06aeae174a31395b245))
+* check for web_modules on install ([0666e22](https://github.com/dmnsgn/snowdev/commit/0666e2237d31fe5f1fd3c561a9766f2996897625))
+
+
+### Features
+
+* add ESNext to tsconfig lib ([74a7b4d](https://github.com/dmnsgn/snowdev/commit/74a7b4d958d2dfbeb13ab267b69c90186c0c47d0))
+* add lib DOM to tsconfig ([4aa13d8](https://github.com/dmnsgn/snowdev/commit/4aa13d8e703c36ed1421587f48bcbf0798471cd6))
+
+
+
 # [1.11.0](https://github.com/dmnsgn/snowdev/compare/v1.10.4...v1.11.0) (2022-06-13)
 
 
