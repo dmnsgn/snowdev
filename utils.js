@@ -13,6 +13,18 @@ const exec = promisify(execCb);
 const ncp = promisify(ncpCb);
 const rimraf = promisify(rimrafCb);
 
+const execCommand = async (command, options) => {
+  const { stdout, stderr } = await exec(command, options);
+  if (stderr) throw new Error(stderr);
+  return stdout.trim();
+};
+
+const checkUncommitedChanges = async (options) => {
+  if (await execCommand(`git status --porcelain`, options)) {
+    throw new Error("Commit your changes first");
+  }
+};
+
 function escapeRegExp(string) {
   return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
 }
@@ -35,6 +47,8 @@ export {
   exec,
   ncp,
   rimraf,
+  execCommand,
+  checkUncommitedChanges,
   escapeRegExp,
   isTypeScriptProject,
   pathExists,

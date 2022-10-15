@@ -7,18 +7,18 @@ import standardVersion from "standard-version";
 
 import build from "./build.js";
 
-import { exec } from "./utils.js";
+import { checkUncommitedChanges, exec } from "./utils.js";
 
 const require = createRequire(import.meta.url);
 
 const release = async (options) => {
   try {
+    await checkUncommitedChanges(options);
+
     await build(options);
 
     if (options.standardVersion) {
-      const { stdout, stderr } = await exec(`git add -A`, {
-        cwd: options.cwd,
-      });
+      const { stdout, stderr } = await exec(`git add -A`, { cwd: options.cwd });
       if (stderr) throw new Error(stderr);
       console.log(stdout);
 

@@ -6,19 +6,11 @@ import console from "console-ansi";
 import install from "./install.js";
 import build from "./build.js";
 
-import { exec } from "./utils.js";
-
-const execCommand = async (command, options) => {
-  const { stdout, stderr } = await exec(command, options);
-  if (stderr) throw new Error(stderr);
-  return stdout.trim();
-};
+import { checkUncommitedChanges, execCommand } from "./utils.js";
 
 const deploy = async (options = {}) => {
   try {
-    // Check for uncommited changes
-    const hasChanges = await execCommand(`git status --porcelain`, options);
-    if (hasChanges) throw new Error("Commit your changes first");
+    await checkUncommitedChanges(options);
 
     // Keep track of current branch
     const currentBranch = await execCommand(
