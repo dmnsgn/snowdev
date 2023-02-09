@@ -23,6 +23,7 @@
   ],
   "license": "MIT",
   "author": "authorName (https://github.com/gitHubUsername)",
+  "sideEffects": false,
   "type": "module",
   "exports": "./index.js",
   "main": "index.js",
