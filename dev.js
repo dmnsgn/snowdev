@@ -40,7 +40,16 @@ const dev = async (options = {}) => {
 
     bs.init(
       {
-        server: { baseDir: options.cwd },
+        server: {
+          baseDir: options.cwd,
+          middleware(req, res, next) {
+            if (options.crossOriginIsolation) {
+              res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+              res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+            }
+            next();
+          },
+        },
         logPrefix: "snowdev:browser-sync",
         ...(options.browsersync || {}),
         ...(options.argv || {}),

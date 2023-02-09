@@ -53,6 +53,7 @@ const DEFAULTS_OPTIONS = {
     single: true,
     watch: true,
   },
+  crossOriginIsolation: false,
   // TODO: lint and format config in code editor? Do I need config in package.json instead?
   eslint: {
     parser: require.resolve("@babel/eslint-parser"),
@@ -230,6 +231,12 @@ const parser = yargs(hideBin(process.argv))
       type: "boolean|Object",
       describe: `Bump the version, generate changelog release, create a new commit with git tag on release command.`,
       defaultDescription: `true`,
+    },
+    crossOriginIsolation: {
+      group: "Commands options:",
+      type: "boolean",
+      describe: `Add Cross-Origin-Opener-Policy (COOP) and Cross-Origin-Embedder-Policy (COEP) headers to browsersync. Required for the use of SharedArrayBuffer.`,
+      defaultDescription: `false`,
     },
   })
   .wrap(null)
