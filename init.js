@@ -73,6 +73,7 @@ const init = async (options = {}) => {
         /gitHubUsername/g,
         /username/g,
         /authorName/g,
+        /year/g,
       ],
       to: [
         camelcase(name),
@@ -80,6 +81,7 @@ const init = async (options = {}) => {
         username,
         options.gitHubUsername || username,
         user.name || username,
+        new Date().getFullYear(),
       ],
     });
 
