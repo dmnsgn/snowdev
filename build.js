@@ -15,8 +15,9 @@ import jsdoc from "jsdoc-api";
 import jsdoc2md from "jsdoc-to-markdown";
 import TypeDoc from "typedoc";
 import concatMd from "concat-md";
+import rimraf from "rimraf";
 
-import { glob, rimraf, escapeRegExp } from "./utils.js";
+import { glob, escapeRegExp } from "./utils.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
