@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [1.14.0](https://github.com/dmnsgn/snowdev/compare/v1.13.0...v1.14.0) (2023-02-09)
+
+
+### Features
+
+* add COOP and COEP headers ([cea47a4](https://github.com/dmnsgn/snowdev/commit/cea47a487738069a917bdfb2c417545604af0722))
+* **template:** add current year to LICENSE ([92f4ed7](https://github.com/dmnsgn/snowdev/commit/92f4ed7f87085d88f050b1dabd42209be95890dd))
+* **template:** add es-module-shims as type module and import-map as importmap-shim ([929fecf](https://github.com/dmnsgn/snowdev/commit/929fecf445a4eeaec6e87dd4745ddc55b2ff5833))
+* **template:** add side effect to package.json ([4026b88](https://github.com/dmnsgn/snowdev/commit/4026b88ab72a37c7fb592b05e576c6177c3d2750))
+* **template:** bump engine versions to LTS ([ad6350b](https://github.com/dmnsgn/snowdev/commit/ad6350b02abcffe29c82916011e261f42b89a7ad))
+
+
+
 # [1.13.0](https://github.com/dmnsgn/snowdev/compare/v1.12.0...v1.13.0) (2022-10-15)
 
 
