@@ -15,7 +15,7 @@ const init = async (options = {}) => {
   const label = `init`;
   console.time(label);
 
-  const name = basename(options.cwd);
+  const packageName = basename(options.cwd);
 
   // Check for empty directory
   if (
@@ -27,24 +27,29 @@ const init = async (options = {}) => {
   }
 
   // Get npm infos
-  let username = options.username;
-  if (!username) {
-    const { stdout, stderr } = await exec("npm whoami");
+  let user = { ...options };
+
+  if (!user.username) {
+    const { stdout, stderr } = await exec("npm profile get --json");
     if (stderr) console.error(stderr);
-    username = stdout;
-  }
-  username = username.trim();
-
-  console.info(`username: ${username}`);
-
-  let user = {};
-  if (username) {
+    const npmProfile = JSON.parse(stdout);
+    user.username ||= npmProfile.name;
+    user.authorName ||= npmProfile.fullname || user.username;
+    user.gitHubUsername ||= npmProfile.github || user.username;
+  } else {
+    user.username = user.username.trim();
     try {
-      user = await npmUser(username);
+      const npmProfile = await npmUser(user.username);
+      user.authorName ||= npmProfile.name || user.username;
+      user.gitHubUsername ||= npmProfile.github || user.username;
     } catch (error) {
       console.error(error);
     }
   }
+
+  console.info(
+    `user: ${user.authorName} (npm: "${user.username}", github: "${user.gitHubUsername}")`
+  );
 
   try {
     // Copy template files
@@ -76,11 +81,11 @@ const init = async (options = {}) => {
         /year/g,
       ],
       to: [
-        camelcase(name),
-        name,
-        username,
-        options.gitHubUsername || username,
-        user.name || username,
+        camelcase(packageName),
+        packageName,
+        user.gitHubUsername,
+        user.username,
+        user.authorName,
         new Date().getFullYear(),
       ],
     });
