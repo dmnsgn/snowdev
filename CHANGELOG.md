@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [1.15.0](https://github.com/dmnsgn/snowdev/compare/v1.14.0...v1.15.0) (2023-02-10)
+
+
+### Features
+
+* **template:** update tsconfig to latest ([7813358](https://github.com/dmnsgn/snowdev/commit/78133581d7dc0ba1460386e07457185c6f7fb133))
+* use npm user profile for init unless --username is specified ([e10ee07](https://github.com/dmnsgn/snowdev/commit/e10ee07fb4c244ff1940618bf729705ad69e98a5))
+
+
+
 # [1.14.0](https://github.com/dmnsgn/snowdev/compare/v1.13.0...v1.14.0) (2023-02-09)
 
 
