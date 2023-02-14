@@ -79,12 +79,19 @@ git add -A && git commit -m "feat: add feature"
 # - generate documentation and insert it directly in README
 # - generate TypeScript types from JSDoc
 npx snowdev build
-# ...optionally generate documentation in docs folder and compiling ts files and types using tsconfig.json
+# ...optionally generate documentation in docs folder and compiling ts
+# files and types using tsconfig.json
 npx snowdev build --ts
 
-# or directly prepare a release (build then run standard-version committing all artefacts eg. docs)
+# or directly prepare a release
+# (build then run standard-version committing all artefacts eg. docs)
 npx snowdev release
-# ...optionally passing options to standard-version
+# ...optionally passing options to standard-version like prerelease
+# setting a specific package distribution tag for "npm i package@alpha"
+npx snowdev release --prerelease alpha
+# ...optionally passing options to standard-version like --dry-run
+# to test release without committing to git or updating files
+# or --first-release to only generate an initial changelog
 npx snowdev release --first-release --dry-run
 
 # and push/publish it
@@ -102,25 +109,28 @@ Commands:
   snowdev dev      Start dev server and install ESM dependencies.
   snowdev build    Lint and Format sources, run TypeScript, update README API.
   snowdev release  Bump the version, generate changelog release, create a new commit with git tag.
+  snowdev deploy   Deploy to gh-pages.
   snowdev install  Install ESM dependencies.
 
 Input/meta options:
   --cwd             Specify the current working directory for all commands.  [string] [default: process.cwd()]
-  --username        Specify a user name for the init command.  [string] [default: $ npm whoami]
-  --gitHubUsername  Specify a GitHub user name for the init command.  [string] [default: options.username]
+  --username        Specify a user name for the init command.  [string] [default: $ npm profile get name]
+  --gitHubUsername  Specify a GitHub user name for the init command. Default from current npm profile or scraped from profile page.  [string] [default: options.username]
+  --authorName      Specify an author name for the init command. Default from current npm profile or scraped from profile page.  [string] [default: $ npm profile get fullname]
   --files           A glob pattern for files to be processed by build command. All JS and TS files in root or "src/" folder.  [string] [default: "{*.+(t|j||mj)s,src/**/*.+(t|j||mj)s}"]
   --ignore          Files to be ignored by build command.  [array] [default: ["**/node_modules/**", "**/web_modules/**"]]
   --dependencies    Install all dependencies from package.json, only devDependencies ("dev"), only dependencies ("prod") or an array of dependency as ES module into web_modules.  [string] [choices: "all", "dev", "prod"] [default: all]
 
 Commands options:
-  --ts               Use TypeScript for init, dev and build commands (create index.ts, watch files or build files). Auto-detected if a "tsconfig.json" is detected with a "compilerOptions.outDir" set.  [boolean] [default: undefined]
-  --serve            Start Browsersync on dev command.  [boolean] [default: true]
-  --lint             Lint on build command.  [boolean] [default: true]
-  --format           Format on build command.  [boolean] [default: true]
-  --types            Run TypeScript (generate types or compile) on build command or watch on dev command.  [boolean] [default: true]
-  --docs             Generate documentation (using "JSDoc" or "typedoc") in file (between "options.docsStart" and "options.docsEnd") or directory. Default to "README.md" but "docs" if "options.ts".  [string] [default: undefined]
-  --docsFormat       Default to "md" but "html" if "options.ts".  [string] [choices: "md", "html"] [default: undefined]
-  --standardVersion  Bump the version, generate changelog release, create a new commit with git tag on release command.  [default: true]
+  --ts                    Use TypeScript for init, dev and build commands (create index.ts, watch files or build files). Auto-detected if a "tsconfig.json" is detected with a "compilerOptions.outDir" set.  [boolean] [default: undefined]
+  --serve                 Start Browsersync on dev command.  [boolean] [default: true]
+  --lint                  Lint on build command.  [boolean] [default: true]
+  --format                Format on build command.  [boolean] [default: true]
+  --types                 Run TypeScript (generate types or compile) on build command or watch on dev command.  [boolean] [default: true]
+  --docs                  Generate documentation (using "JSDoc" or "typedoc") in file (between "options.docsStart" and "options.docsEnd") or directory. Default to "README.md" but "docs" if "options.ts".  [string] [default: undefined]
+  --docsFormat            Default to "md" but "html" if "options.ts".  [string] [choices: "md", "html"] [default: undefined]
+  --standardVersion       Bump the version, generate changelog release, create a new commit with git tag on release command.  [default: true]
+  --crossOriginIsolation  Add Cross-Origin-Opener-Policy (COOP) and Cross-Origin-Embedder-Policy (COEP) headers to browsersync. Required for the use of SharedArrayBuffer.  [boolean] [default: false]
 
 Options:
   --version  Show version number  [boolean]
