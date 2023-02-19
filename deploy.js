@@ -72,7 +72,7 @@ const deploy = async (options = {}) => {
       // Push
       await execCommand(`git push origin gh-pages`, options);
       // Go back to current branch
-      await execCommand(`git checkout ${currentBranch}"`, options);
+      await execCommand(`git checkout ${currentBranch}`, options);
     }
   } catch (error) {
     console.error(error);
