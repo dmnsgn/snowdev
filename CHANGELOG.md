@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.15.2](https://github.com/dmnsgn/snowdev/compare/v1.15.1...v1.15.2) (2023-02-19)
+
+
+### Bug Fixes
+
+* typo in deploy's git checkout ([4e130ee](https://github.com/dmnsgn/snowdev/commit/4e130ee76ea510af7d1f57b48cf7a66f7eeeb8f5))
+
+
+
 ## [1.15.1](https://github.com/dmnsgn/snowdev/compare/v1.15.0...v1.15.1) (2023-02-14)
 
 
