@@ -1,4 +1,5 @@
 import { promises as fs } from "node:fs";
+import { parse } from "node:path";
 import { promisify } from "node:util";
 import { exec as execCb } from "node:child_process";
 
@@ -40,6 +41,8 @@ const pathExists = (path) =>
     .then(() => true)
     .catch(() => false);
 
+const getFileExtension = (file) => parse(file).ext;
+
 export {
   glob,
   exec,
@@ -49,4 +52,5 @@ export {
   escapeRegExp,
   isTypeScriptProject,
   pathExists,
+  getFileExtension,
 };
