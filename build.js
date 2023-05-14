@@ -15,9 +15,10 @@ import jsdoc from "jsdoc-api";
 import jsdoc2md from "jsdoc-to-markdown";
 import TypeDoc from "typedoc";
 import concatMd from "concat-md";
-import rimraf from "rimraf";
+import { rimraf } from "rimraf";
+import { glob } from "glob";
 
-import { glob, escapeRegExp } from "./utils.js";
+import { escapeRegExp } from "./utils.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
@@ -103,14 +104,14 @@ const docs = async (cwd, files, options) => {
       app.options.addReader(new TypeDoc.TSConfigReader());
       app.options.addReader(new TypeDoc.TypeDocReader());
 
-      app.bootstrap({
+      await app.bootstrapWithPlugins({
         entryPoints: files,
         exclude: options.ignore,
-        logger: console,
+        logLevel: "Info",
         ...(isMarkdown
           ? {
               readme: "none",
-              plugin: "typedoc-plugin-markdown",
+              plugin: ["typedoc-plugin-markdown"],
               hideInPageTOC: true,
               hideBreadcrumbs: true,
             }

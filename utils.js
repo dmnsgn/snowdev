@@ -3,12 +3,10 @@ import { parse } from "node:path";
 import { promisify } from "node:util";
 import { exec as execCb } from "node:child_process";
 
-import globCb from "glob";
 import ncpCb from "ncp";
 
 import ts from "typescript";
 
-const glob = promisify(globCb);
 const exec = promisify(execCb);
 const ncp = promisify(ncpCb);
 
@@ -44,7 +42,6 @@ const pathExists = (path) =>
 const getFileExtension = (file) => parse(file).ext;
 
 export {
-  glob,
   exec,
   ncp,
   execCommand,
