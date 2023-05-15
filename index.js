@@ -55,6 +55,7 @@ const DEFAULTS_OPTIONS = {
     watch: true,
   },
   hmr: true,
+  http2: true,
   crossOriginIsolation: false,
   // TODO: lint and format config in code editor? Do I need config in package.json instead?
   eslint: {
@@ -259,6 +260,12 @@ const parser = yargs(hideBin(process.argv))
       type: "boolean",
       describe: `Add Cross-Origin-Opener-Policy (COOP) and Cross-Origin-Embedder-Policy (COEP) headers to browsersync. Required for the use of SharedArrayBuffer.`,
       defaultDescription: `false`,
+    },
+    http2: {
+      group: "Commands options:",
+      type: "boolean",
+      describe: `Serve with "node:http2".`,
+      defaultDescription: `true`,
     },
     hmr: {
       group: "Commands options:",

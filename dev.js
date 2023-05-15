@@ -1,5 +1,6 @@
 import { promises as fs, readFileSync } from "node:fs";
 import { join } from "node:path";
+import http2 from "node:http2";
 
 import console from "console-ansi";
 import { create as browserSyncCreate } from "browser-sync";
@@ -74,6 +75,8 @@ const dev = async (options = {}) => {
       );
     }
 
+    if (options.http2) http2.createServer = http2.createSecureServer;
+
     bs.init(
       {
         server: {
@@ -92,6 +95,7 @@ const dev = async (options = {}) => {
             }
           },
         },
+        httpModule: options.http2 && "node:http2",
         codeSync: !options.hmr,
         logPrefix: "snowdev:browser-sync",
         ...(options.browsersync || {}),
