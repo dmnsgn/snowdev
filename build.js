@@ -43,7 +43,7 @@ const lint = async (cwd, files, options) => {
     const lintResults = await eslint.lintFiles(files);
     const results = (await eslint.loadFormatter("stylish")).format(lintResults);
 
-    if (results) console.error(results);
+    if (results) console.log(lint.description, results);
     console.timeEnd(lint.description);
 
     return results;
