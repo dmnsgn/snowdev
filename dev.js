@@ -19,6 +19,8 @@ const dev = async (options = {}) => {
     const bs = browserSyncCreate();
 
     if (options.lint || options.ts) {
+      if (options.lint) await lint(options.cwd, options.files, options);
+
       bs.use({
         plugin() {},
         hooks: {

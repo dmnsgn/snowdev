@@ -76,6 +76,7 @@
     "esinstall": "^1.1.7",
     "eslint": "^8.40.0",
     "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-jsdoc": "^44.2.3",
     "eslint-plugin-prettier": "^4.2.1",
     "glob": "^10.2.3",
     "jsdoc-api": "^8.0.0",

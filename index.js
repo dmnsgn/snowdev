@@ -59,10 +59,24 @@ const DEFAULTS_OPTIONS = {
   // TODO: lint and format config in code editor? Do I need config in package.json instead?
   eslint: {
     parser: require.resolve("@babel/eslint-parser"),
-    extends: ["eslint:recommended", "plugin:prettier/recommended"],
-    plugins: ["eslint-plugin-prettier"],
+    extends: [
+      "eslint:recommended",
+      "plugin:prettier/recommended",
+      "plugin:jsdoc/recommended",
+    ],
+    plugins: ["eslint-plugin-prettier", "eslint-plugin-jsdoc"],
     rules: {
       "prettier/prettier": "error",
+      "jsdoc/require-jsdoc": 0,
+      "jsdoc/require-param-description": 0,
+      "jsdoc/require-property-description": 0,
+      "jsdoc/require-returns-description": 0,
+      "jsdoc/tag-lines": 0,
+    },
+    settings: {
+      jsdoc: {
+        ignorePrivate: true,
+      },
     },
     parserOptions: {
       ecmaVersion: 2022,
