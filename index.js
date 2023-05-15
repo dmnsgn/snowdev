@@ -255,12 +255,13 @@ const parser = yargs(hideBin(process.argv))
   })
   .wrap(null)
   .version(version)
+  .strict()
   .help();
 
 const commands = [init, dev, build, release, deploy, install];
 commands.forEach((fn) => {
   parser.command(
-    fn.name,
+    fn.name === "dev" ? [fn.name, "$0"] : fn.name,
     fn.description,
     () => {},
     async (argv) => {
