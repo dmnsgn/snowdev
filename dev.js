@@ -3,16 +3,10 @@ import { join } from "node:path";
 
 import console from "console-ansi";
 import { create as browserSyncCreate } from "browser-sync";
-import * as cheerio from "cheerio";
 
 import install from "./install.js";
 import { types, lint } from "./build.js";
-import { getFileExtension } from "./utils.js";
-
-const HMR_HOOK = await fs.readFile(
-  new URL("./hot.js", import.meta.url),
-  "utf-8"
-);
+import { getFileExtension, htmlHotInject } from "./utils.js";
 
 const dev = async (options = {}) => {
   if (options.serve) {
@@ -46,6 +40,7 @@ const dev = async (options = {}) => {
     bs.watch("package.json", async (event) => {
       if (event === "change") {
         await install(options);
+        if (options.hmr) bs.sockets.emit("reload");
       }
     });
 
@@ -83,7 +78,7 @@ const dev = async (options = {}) => {
       {
         server: {
           baseDir: options.cwd,
-          middleware(req, res, next) {
+          middleware: async (req, res, next) => {
             if (options.crossOriginIsolation) {
               res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
               res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
@@ -91,18 +86,7 @@ const dev = async (options = {}) => {
 
             // HMR
             if (options.hmr && getFileExtension(req.url) === ".html") {
-              const html = readFileSync(join(options.cwd, req.url), "utf8");
-              const $ = cheerio.load(html);
-              const esmsOptions = JSON.parse(
-                $("script[type='esms-options']").text() || "{}"
-              );
-              esmsOptions.shimMode = true;
-              $("head").append(
-                `<script type="esms-options">${JSON.stringify(
-                  esmsOptions
-                )}</script><script type="module">${HMR_HOOK}</script>`
-              );
-              res.end($.html());
+              res.end(await htmlHotInject(options, req));
             } else {
               next();
             }
