@@ -117,14 +117,14 @@ const DEFAULTS_OPTIONS = {
           bugfixes: true,
           debug: false,
           useBuiltIns: "usage",
-          corejs: { version: "3.21", proposals: true },
+          corejs: { version: "3.30", proposals: true },
         },
       ],
     ],
     plugins: [
       [
         require.resolve("@babel/plugin-transform-runtime"),
-        { useESModules: true },
+        { corejs: { version: 3, proposals: true } },
       ],
     ],
   },
