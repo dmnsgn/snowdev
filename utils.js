@@ -10,6 +10,7 @@ import * as acorn from "acorn";
 import * as acornWalk from "acorn-walk";
 import * as aString from "astring";
 
+const RF_OPTIONS = { recursive: true, force: true };
 const exec = promisify(execCb);
 const ncp = promisify(ncpCb);
 
@@ -112,6 +113,7 @@ const htmlHotInject = async (options, req) => {
 };
 
 export {
+  RF_OPTIONS,
   exec,
   ncp,
   execCommand,

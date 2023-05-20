@@ -15,10 +15,9 @@ import jsdoc from "jsdoc-api";
 import jsdoc2md from "jsdoc-to-markdown";
 import TypeDoc from "typedoc";
 import concatMd from "concat-md";
-import { rimraf } from "rimraf";
 import { glob } from "glob";
 
-import { escapeRegExp } from "./utils.js";
+import { RF_OPTIONS, escapeRegExp } from "./utils.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
@@ -98,7 +97,7 @@ const docs = async (cwd, files, options) => {
 
   if (options.ts) {
     try {
-      await rimraf(join(cwd, docsFolder));
+      await fs.rm(join(cwd, docsFolder), RF_OPTIONS);
 
       const app = new TypeDoc.Application();
       app.options.addReader(new TypeDoc.TSConfigReader());
@@ -165,7 +164,7 @@ const docs = async (cwd, files, options) => {
   }
 
   if (isFile) {
-    await rimraf(join(cwd, docsFolder));
+    await fs.rm(join(cwd, docsFolder), RF_OPTIONS);
 
     const filePath = join(cwd, options.docs);
     const formattedDocs = prettier
@@ -251,10 +250,13 @@ const types = async (cwd, files, options, watch) => {
       if (!configPath) config.include = files;
 
       if (config.compilerOptions.declarationDir) {
-        await rimraf(join(cwd, config.compilerOptions.declarationDir));
+        await fs.rm(
+          join(cwd, config.compilerOptions.declarationDir),
+          RF_OPTIONS
+        );
       }
       if (config.compilerOptions.outDir) {
-        await rimraf(join(cwd, config.compilerOptions.outDir));
+        await fs.rm(join(cwd, config.compilerOptions.outDir), RF_OPTIONS);
       }
 
       const parsedCommandLine = ts.parseJsonConfigFileContent(
