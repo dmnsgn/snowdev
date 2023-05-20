@@ -73,7 +73,7 @@ const format = async (cwd, files, options) => {
   }
 
   try {
-    const packageJsonFile = join(options.cwd, "package.json");
+    const packageJsonFile = join(cwd, "package.json");
     await fs.writeFile(
       packageJsonFile,
       sortPackageJson(await fs.readFile(packageJsonFile, "utf-8")),
@@ -260,7 +260,7 @@ const types = async (cwd, files, options, watch) => {
       const parsedCommandLine = ts.parseJsonConfigFileContent(
         config,
         ts.sys,
-        options.cwd
+        cwd
       );
       const program = ts.createProgram({
         options: parsedCommandLine.options,
