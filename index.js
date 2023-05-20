@@ -276,7 +276,6 @@ const parser = yargs(hideBin(process.argv))
   })
   .wrap(null)
   .version(version)
-  .strict()
   .help();
 
 const commands = [init, dev, build, release, deploy, install];
