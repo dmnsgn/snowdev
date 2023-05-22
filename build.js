@@ -305,11 +305,13 @@ types.description = `build: run TypeScript (generate types, watch or compile)`;
 
 const build = async (options) => {
   const cwd = options.cwd;
-  const files = await glob(options.files, {
-    cwd,
-    ignore: options.ignore,
-    absolute: true,
-  });
+  const files = (
+    await glob(options.files, {
+      cwd,
+      ignore: options.ignore,
+      absolute: true,
+    })
+  ).sort();
 
   console.log(`build files:\n- ${files.join("\n- ")}`);
 
