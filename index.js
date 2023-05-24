@@ -159,7 +159,8 @@ try {
 }
 
 // CLI
-const parser = yargs(hideBin(process.argv))
+const parser = yargs(hideBin(process.argv));
+parser
   .demandCommand(1)
   .options({
     cwd: {
@@ -274,7 +275,7 @@ const parser = yargs(hideBin(process.argv))
       defaultDescription: `true`,
     },
   })
-  .wrap(null)
+  .wrap(parser.terminalWidth())
   .version(version)
   .help();
 
