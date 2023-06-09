@@ -47,7 +47,8 @@ const DEFAULTS_OPTIONS = {
   docsEnd: "<!-- api-end -->",
   standardVersion: true,
 
-  // External tools
+  // Server
+  /** @type {import("browser-sync").Options} */
   browsersync: {
     open: true,
     https: true,
@@ -57,7 +58,12 @@ const DEFAULTS_OPTIONS = {
   hmr: true,
   http2: true,
   crossOriginIsolation: false,
+
+  // Formatter and linter
   // TODO: lint and format config in code editor? Do I need config in package.json instead?
+  /** @type {import("prettier").RequiredOptions} */
+  prettier: null,
+  /** @type {import("eslint").Linter.Config} */
   eslint: {
     parser: require.resolve("@babel/eslint-parser"),
     extends: [
@@ -113,6 +119,7 @@ const DEFAULTS_OPTIONS = {
       },
     ],
   },
+  /** @type {import("typescript").TranspileOptions} */
   tsconfig: {
     compilerOptions: {
       allowJs: true,
@@ -122,6 +129,7 @@ const DEFAULTS_OPTIONS = {
       lib: ["ESNext", "DOM"],
     },
   },
+  /** @type {import("@rollup/plugin-babel").RollupBabelInputPluginOptions} */
   babel: {
     exclude: /node_modules\/(assert|core-js|@babel\/runtime)/,
     presets: [
@@ -143,8 +151,8 @@ const DEFAULTS_OPTIONS = {
       ],
     ],
   },
-  prettier: null,
   rollup: null,
+  // Docs
   typedoc: null,
   jsdoc: null,
 };
