@@ -25,6 +25,7 @@ console.prefix = `[${NAME}]`;
 const require = createRequire(import.meta.url);
 
 // Options
+const TARGETS = `defaults and supports es6-module`;
 const DEFAULTS_OPTIONS = {
   // Inputs/meta
   cwd: process.cwd(),
@@ -139,7 +140,7 @@ const DEFAULTS_OPTIONS = {
       [
         require.resolve("@babel/preset-env"),
         {
-          targets: [`defaults and supports es6-module`],
+          targets: [TARGETS],
           bugfixes: true,
           debug: false,
           useBuiltIns: "usage",
