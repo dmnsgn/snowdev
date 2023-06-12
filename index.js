@@ -87,7 +87,7 @@ const DEFAULTS_OPTIONS = {
       },
     },
     parserOptions: {
-      ecmaVersion: 2022,
+      ecmaVersion: "latest",
       sourceType: "module",
       requireConfigFile: false,
       babelOptions: {},
@@ -95,6 +95,8 @@ const DEFAULTS_OPTIONS = {
     env: {
       es2022: true,
       browser: true,
+      node: true,
+      worker: true,
     },
     overrides: [
       {
