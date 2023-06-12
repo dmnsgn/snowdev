@@ -1,4 +1,3 @@
-import { promises as fs, readFileSync } from "node:fs";
 import { join } from "node:path";
 import http2 from "node:http2";
 
@@ -56,7 +55,7 @@ const dev = async (options = {}) => {
       bs.watch(
         [
           options.files,
-          "web_modules/**/*.js",
+          `${options.dist}/**/*.js`,
           "examples/**/*.js",
           "**/*.{html,css}",
         ],

@@ -28,11 +28,12 @@ const require = createRequire(import.meta.url);
 const DEFAULTS_OPTIONS = {
   // Inputs/meta
   cwd: process.cwd(),
+  dist: "web_modules",
   username: null,
   gitHubUsername: null,
   authorName: null,
   files: "{*.+(t|j||mj)s,src/**/*.+(t|j||mj)s}",
-  ignore: ["**/node_modules/**", "**/web_modules/**"],
+  ignore: ["**/node_modules/**"],
   dependencies: "all",
 
   // Process
@@ -314,6 +315,8 @@ commands.forEach((fn) => {
         console.info(`${fn.name} in '${options.cwd}'`);
 
         await fs.access(options.cwd, constants.R_OK | constants.W_OK);
+
+        options.ignore.push(`**/${options.dist}/**`);
 
         // Auto-detect TypeScript project
         options.ts ??= isTypeScriptProject(options.cwd);

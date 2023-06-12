@@ -77,7 +77,7 @@ const install = async (options) => {
   const dependencies = await getDependencies(options, type);
 
   // Check if web_modules folder exists
-  if (!(await pathExists(join(options.cwd, "web_modules")))) {
+  if (!(await pathExists(join(options.cwd, options.dist)))) {
     console.info("install - initial installation.");
   } else {
     // Check type or list of dependencies change
@@ -125,7 +125,7 @@ const install = async (options) => {
     const { stats } = await installDependencies(installTargets, {
       cwd: options.cwd,
       verbose: true,
-      dest: "web_modules",
+      dest: options.dist,
       treeshake: true,
       polyfillNode: true,
       logger: console,
@@ -148,7 +148,7 @@ const install = async (options) => {
     delete console.levels.debug;
 
     await fs.writeFile(
-      join(options.cwd, "web_modules", ".nojekyll"),
+      join(options.cwd, options.dist, ".nojekyll"),
       "",
       "utf-8"
     );

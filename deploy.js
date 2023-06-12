@@ -54,7 +54,7 @@ const deploy = async (options = {}) => {
     const REGEX_SPLITALL_CRLF = /\r?\n/g;
     const ignored = gitIgnore
       .split(REGEX_SPLITALL_CRLF)
-      ?.filter((ignore) => !["web_modules", "lib"].includes(ignore));
+      ?.filter((ignore) => ![options.dist, "lib"].includes(ignore));
     await fs.writeFile(
       gitIgnorePath,
       ignored?.join("\n") || gitIgnore,
