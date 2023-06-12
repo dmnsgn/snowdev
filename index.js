@@ -56,7 +56,7 @@ const DEFAULTS_OPTIONS = {
     single: true,
     watch: true,
   },
-  hmr: true,
+  hmr: false,
   http2: true,
   crossOriginIsolation: false,
 
