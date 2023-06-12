@@ -33,7 +33,7 @@ const DEFAULTS_OPTIONS = {
   username: null,
   gitHubUsername: null,
   authorName: null,
-  files: "{*.+(t|j||mj)s,src/**/*.+(t|j||mj)s}",
+  files: "{*.+(j|t|mj|mt|cj|ct)s,src/**/*.+(j|t|mj|mt|cj|ct)s}",
   ignore: ["**/node_modules/**"],
   dependencies: "all",
 
