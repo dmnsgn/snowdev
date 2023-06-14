@@ -1,34 +1,30 @@
-#!/usr/bin/env node
-
 import { promises as fs, constants } from "node:fs";
 import { join, resolve } from "node:path";
 import { createRequire } from "node:module";
 
 import console from "console-ansi";
-import yargs from "yargs";
-import { hideBin } from "yargs/helpers";
-import cosmiconfig from "cosmiconfig";
+import deepmerge from "deepmerge";
+import browserslistToEsbuild from "browserslist-to-esbuild";
 
 import init from "./init.js";
 import dev from "./dev.js";
 import build from "./build.js";
+import bundle from "./bundle.js";
 import release from "./release.js";
 import deploy from "./deploy.js";
 import install from "./install.js";
-import { isTypeScriptProject } from "./utils.js";
-
-const { version, name: NAME } = JSON.parse(
-  await fs.readFile(new URL("./package.json", import.meta.url))
-);
-console.prefix = `[${NAME}]`;
+import { NAME, isTypeScriptProject } from "./utils.js";
 
 const require = createRequire(import.meta.url);
 
+console.prefix = `[${NAME}]`;
+
 // Options
 const TARGETS = `defaults and supports es6-module`;
-const DEFAULTS_OPTIONS = {
+export const DEFAULTS_OPTIONS = {
   // Inputs/meta
   cwd: process.cwd(),
+  NODE_ENV: process.env.NODE_ENV || "development",
   dist: "web_modules",
   username: null,
   gitHubUsername: null,
@@ -133,6 +129,9 @@ const DEFAULTS_OPTIONS = {
       lib: ["ESNext", "DOM"],
     },
   },
+
+  // Transpile
+  transpiler: "swc",
   /** @type {import("@rollup/plugin-babel").RollupBabelInputPluginOptions} */
   babel: {
     exclude: /node_modules\/(assert|core-js|@babel\/runtime)/,
@@ -155,186 +154,76 @@ const DEFAULTS_OPTIONS = {
       ],
     ],
   },
-  rollup: null,
+  /** @type {import("esbuild").BuildOptions} */
+  esbuild: {
+    exclude: [""],
+    target: browserslistToEsbuild(TARGETS),
+  },
+  /** @type {import("@swc/core").Options} */
+  swc: {
+    env: {
+      targets: TARGETS,
+      mode: "entry", // "usage" is not working properly
+      coreJs: "3.19",
+      shippedProposals: true,
+    },
+  },
+  importMap: {},
+  resolve: {
+    // include: [/\.((j|t|mj|mt|cj|ct)sx?)$/],
+    include: ["**.js", "**.ts", "**.mjs", "**.mts", "**.cjs", "**.cts"],
+    exclude: ["**.d.ts"],
+    conditions: ["module", "import", "default"],
+    mainFields: ["module", "jsnext:main", "jsnext", "main"],
+    browserField: true,
+    overrides: {},
+  },
+  rollup: {
+    /** @type {import("rollup").InputOptions} */
+    input: {},
+    /** @type {import("rollup").OutputOptions} */
+    output: {},
+  },
+
   // Docs
   typedoc: null,
   jsdoc: null,
 };
 
-let cosmiconfigOptions = {};
-try {
-  const result = cosmiconfig.cosmiconfigSync(NAME).search() || {};
-  cosmiconfigOptions = result.config || {};
-} catch (error) {
-  console.error(error);
-  process.exit(0);
-}
+export const commands = { init, dev, build, bundle, release, deploy, install };
 
-// CLI
-const parser = yargs(hideBin(process.argv));
-parser
-  .demandCommand(1)
-  .options({
-    cwd: {
-      group: "Input/meta options:",
-      type: "string",
-      describe: `Specify the current working directory for all commands.`,
-      defaultDescription: `process.cwd()`,
-    },
-    username: {
-      group: "Input/meta options:",
-      type: "string",
-      describe: `Specify a user name for the init command.`,
-      defaultDescription: `$ npm profile get name`,
-    },
-    gitHubUsername: {
-      group: "Input/meta options:",
-      type: "string",
-      describe: `Specify a GitHub user name for the init command. Default from current npm profile or scraped from profile page.`,
-      defaultDescription: `options.username`,
-    },
-    authorName: {
-      group: "Input/meta options:",
-      type: "string",
-      describe: `Specify an author name for the init command. Default from current npm profile or scraped from profile page.`,
-      defaultDescription: `$ npm profile get fullname`,
-    },
-    files: {
-      group: "Input/meta options:",
-      type: "string",
-      describe: `A glob pattern for files to be processed by build command. All JS and TS files in root or "src/" folder.`,
-      defaultDescription: `"{*.+(t|j||mj)s,src/**/*.+(t|j||mj)s}"`,
-    },
-    ignore: {
-      group: "Input/meta options:",
-      type: "array",
-      describe: `Files to be ignored by build command.`,
-      defaultDescription: `["**/node_modules/**", "**/web_modules/**"]`,
-    },
-    dependencies: {
-      group: "Input/meta options:",
-      type: "string",
-      choices: ["all", "dev", "prod"],
-      describe: `Install all dependencies from package.json, only devDependencies ("dev"), only dependencies ("prod") or an array of dependency as ES module into web_modules.`,
-      defaultDescription: `all`,
-    },
+export const run = async (fn, options) => {
+  const { [fn.name]: commandOptions, ...globalOptions } = options;
 
-    ts: {
-      group: "Commands options:",
-      type: "boolean",
-      describe: `Use TypeScript for init, dev and build commands (create index.ts, watch files or build files). Auto-detected if a "tsconfig.json" is detected with a "compilerOptions.outDir" set.`,
-      defaultDescription: `undefined`,
-    },
-    serve: {
-      group: "Commands options:",
-      type: "boolean",
-      describe: `Start Browsersync on dev command.`,
-      defaultDescription: `true`,
-    },
-    lint: {
-      group: "Commands options:",
-      type: "boolean",
-      describe: `Lint on build command.`,
-      defaultDescription: `true`,
-    },
-    format: {
-      group: "Commands options:",
-      type: "boolean",
-      describe: `Format on build command.`,
-      defaultDescription: `true`,
-    },
-    types: {
-      group: "Commands options:",
-      type: "boolean",
-      describe: `Run TypeScript (generate types or compile) on build command or watch on dev command.`,
-      defaultDescription: `true`,
-    },
-    docs: {
-      group: "Commands options:",
-      type: "string",
-      describe: `Generate documentation (using "JSDoc" or "typedoc") in file (between "options.docsStart" and "options.docsEnd") or directory. Default to "README.md" but "docs" if "options.ts".`,
-      defaultDescription: `undefined`,
-    },
-    docsFormat: {
-      group: "Commands options:",
-      type: "string",
-      choices: ["md", "html"],
-      describe: `Default to "md" but "html" if "options.ts".`,
-      defaultDescription: `undefined`,
-    },
-    standardVersion: {
-      group: "Commands options:",
-      type: "boolean|Object",
-      describe: `Bump the version, generate changelog release, create a new commit with git tag on release command.`,
-      defaultDescription: `true`,
-    },
-    crossOriginIsolation: {
-      group: "Commands options:",
-      type: "boolean",
-      describe: `Add Cross-Origin-Opener-Policy (COOP) and Cross-Origin-Embedder-Policy (COEP) headers to browsersync. Required for the use of SharedArrayBuffer.`,
-      defaultDescription: `false`,
-    },
-    http2: {
-      group: "Commands options:",
-      type: "boolean",
-      describe: `Serve with "node:http2".`,
-      defaultDescription: `true`,
-    },
-    hmr: {
-      group: "Commands options:",
-      type: "boolean",
-      describe: `Add Hot Module Replacement to browsersync. Requires "es-module-shims" with "shimMode".`,
-      defaultDescription: `true`,
-    },
-  })
-  .wrap(parser.terminalWidth())
-  .version(version)
-  .help();
-
-const commands = [init, dev, build, release, deploy, install];
-commands.forEach((fn) => {
-  parser.command(
-    fn.name === "dev" ? [fn.name, "$0"] : fn.name,
-    fn.description,
-    () => {},
-    async (argv) => {
-      const {
-        [fn.name]: cosmiconfigCommandOptions,
-        ...cosmiconfigGlobalOptions
-      } = cosmiconfigOptions || {};
-
-      const options = {
-        ...DEFAULTS_OPTIONS,
-        ...(cosmiconfigGlobalOptions || {}),
-        ...(cosmiconfigCommandOptions || {}),
-        ...argv,
-        command: fn.name,
-        argv,
-      };
-
-      try {
-        options.cwd = resolve(options.cwd);
-        options.cacheFolder = join(options.cwd, "node_modules", ".cache", NAME);
-        console.info(`${fn.name} in '${options.cwd}'`);
-
-        await fs.access(options.cwd, constants.R_OK | constants.W_OK);
-
-        options.ignore.push(`**/${options.dist}/**`);
-
-        // Auto-detect TypeScript project
-        options.ts ??= isTypeScriptProject(options.cwd);
-
-        // Set default docs
-        options.docs = options.docs ?? (options.ts ? "docs" : "README.md");
-        options.docsFormat = options.docsFormat ?? (options.ts ? "html" : "md");
-
-        fn(options);
-      } catch (error) {
-        console.error(`Can't access cwd.`);
-        console.error(error);
-      }
-    }
+  options = deepmerge(
+    DEFAULTS_OPTIONS,
+    options,
+    globalOptions || {},
+    commandOptions || {}
   );
-});
 
-parser.parse();
+  try {
+    options.command = fn.name;
+    options.cwd = resolve(options.cwd);
+    options.cacheFolder = join(options.cwd, "node_modules", ".cache", NAME);
+    console.info(`${fn.name} in '${options.cwd}'`);
+
+    await fs.access(options.cwd, constants.R_OK | constants.W_OK);
+
+    options.ignore.push(`**/${options.dist}/**`);
+
+    // Auto-detect TypeScript project
+    options.ts ??= isTypeScriptProject(options.cwd);
+
+    // Set default docs
+    options.docs = options.docs ?? (options.ts ? "docs" : "README.md");
+    options.docsFormat = options.docsFormat ?? (options.ts ? "html" : "md");
+
+    // console.debug(options);
+
+    fn(options);
+  } catch (error) {
+    console.error(`Can't access cwd.`);
+    console.error(error);
+  }
+};

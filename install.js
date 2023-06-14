@@ -1,17 +1,16 @@
 import { promises as fs } from "node:fs";
-import { dirname, join } from "node:path";
-import { createRequire } from "node:module";
+import { extname, join } from "node:path";
 import Arborist from "@npmcli/arborist";
 
 import console from "console-ansi";
+import deepmerge from "deepmerge";
+import slash from "slash";
 
-import { babel } from "@rollup/plugin-babel";
-import { install as installDependencies, printStats } from "esinstall";
+import { createFilter } from "@rollup/pluginutils";
 
-import { pathExists } from "./utils.js";
-import { VERSION } from "./utils.js";
+import { RF_OPTIONS, resolveExports, pathExists, VERSION } from "./utils.js";
 
-const require = createRequire(import.meta.url);
+import bundle from "./bundle.js";
 
 const DEPENDENCY_TYPES = Object.freeze({
   ALL: "all",
@@ -80,8 +79,12 @@ const install = async (options) => {
   // Get current dependencies
   const dependencies = await getDependencies(options, type);
 
-  // Check if web_modules folder exists
-  if (!(await pathExists(join(options.cwd, options.dist)))) {
+  // TODO: handle snowdev.dependencies options manual change?
+
+  const outputDir = join(options.cwd, options.dist);
+
+  // Check if dist folder exists
+  if (!(await pathExists(outputDir))) {
     console.info("install - initial installation.");
   } else {
     // Check type or list of dependencies change
@@ -121,43 +124,100 @@ const install = async (options) => {
     return;
   }
 
+  const label = `install`;
+  console.time(label);
+
   console.info(
     `install - ESM dependencies: ${listFormat.format(installTargets)}`
   );
 
-  try {
-    console.log("install - installing...");
-    console.levels.debug = 0;
-    const { stats } = await installDependencies(installTargets, {
-      cwd: options.cwd,
-      verbose: true,
-      dest: options.dist,
-      treeshake: true,
-      polyfillNode: true,
-      logger: console,
-      alias: {
-        "@babel/runtime": dirname(require.resolve("@babel/runtime/package")),
-        "core-js": dirname(require.resolve("core-js")),
-      },
-      rollup: {
-        plugins: [
-          babel({
-            cwd: options.cwd,
-            babelHelpers: "runtime",
-            ...(options.babel || {}),
-          }),
-        ],
-        ...(options.rollup || {}),
-      },
-    });
-    printStats(stats);
-    delete console.levels.debug;
+  let input = {};
+  let importMap = { imports: {} };
 
-    await fs.writeFile(
-      join(options.cwd, options.dist, ".nojekyll"),
-      "",
-      "utf-8"
+  try {
+    console.log(`install - installing (${options.transpiler})...`);
+
+    await fs.rm(outputDir, RF_OPTIONS);
+
+    const resolvedExportsMap = deepmerge(
+      Object.fromEntries(
+        await Promise.all(
+          installTargets.map(async (dependency) => [
+            dependency,
+            await resolveExports(options, dependency),
+          ])
+        )
+      ),
+      options.resolve.overrides
     );
+
+    const filter = createFilter(
+      options.resolve.include,
+      options.resolve.exclude,
+      { resolve: options.cwd }
+    );
+
+    // TODO: copy .css/.wasm/package.json
+    for (let [dependency, entryPoints] of Object.entries(resolvedExportsMap)) {
+      for (let [specifier, entryPoint] of Object.entries(entryPoints)) {
+        const isMain = specifier === ".";
+        const id = isMain ? dependency : slash(join(dependency, specifier));
+
+        if (!entryPoint) {
+          console.error(
+            `Unresolved export: "${dependency}" "${specifier}": is "${dependency}" installed or not exporting anything?`
+          );
+          continue;
+        }
+
+        try {
+          const depEntryPoint = join(dependency, entryPoint);
+          const resolvedExport = join(
+            options.cwd,
+            "node_modules",
+            depEntryPoint
+          );
+
+          if (!filter(resolvedExport)) {
+            console.info(`Filtered out export: ${resolvedExport}`);
+            continue;
+          }
+
+          if (!(await pathExists(resolvedExport))) {
+            console.error(`Unknown export: ${resolvedExport}`);
+            continue;
+          }
+
+          input[id] = resolvedExport;
+          importMap.imports[id] = isMain
+            ? `./${dependency}${extname(entryPoint)}`
+            : `./${slash(depEntryPoint)}`;
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    }
+
+    // console.log(resolvedExportsMap);
+
+    if (!Object.values(input).length) {
+      console.error(`No input dependency to install.`);
+      return;
+    }
+
+    // Bundle
+    options.rollup.input.input = input;
+    options.rollup.output.dir = outputDir;
+    await bundle(options);
+
+    // Write import map
+    importMap = deepmerge(importMap, options.importMap);
+    await fs.writeFile(
+      join(outputDir, "import-map.json"),
+      JSON.stringify(importMap, null, 2)
+    );
+
+    await fs.writeFile(join(outputDir, ".nojekyll"), "", "utf-8");
 
     // Write cache
     await fs.writeFile(
@@ -170,6 +230,9 @@ const install = async (options) => {
   } catch (error) {
     console.error(error);
   }
+  console.timeEnd(label);
+
+  return { input, importMap };
 };
 install.description = `Install ESM dependencies.`;
 
