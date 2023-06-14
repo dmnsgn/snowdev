@@ -9,6 +9,7 @@ import { babel } from "@rollup/plugin-babel";
 import { install as installDependencies, printStats } from "esinstall";
 
 import { pathExists } from "./utils.js";
+import { VERSION } from "./utils.js";
 
 const require = createRequire(import.meta.url);
 
@@ -63,12 +64,15 @@ const install = async (options) => {
   const dependenciesCacheFile = join(options.cacheFolder, "dependencies.json");
   await fs.mkdir(options.cacheFolder, { recursive: true });
 
-  let cachedDependencies = [];
+  let cachedVersion = "";
   let cachedType = DEPENDENCY_TYPES.CUSTOM;
+  let cachedDependencies = [];
   try {
-    ({ dependencies: cachedDependencies, type: cachedType } = JSON.parse(
-      await fs.readFile(dependenciesCacheFile, "utf-8")
-    ));
+    ({
+      version: cachedVersion,
+      type: cachedType,
+      dependencies: cachedDependencies,
+    } = JSON.parse(await fs.readFile(dependenciesCacheFile, "utf-8")));
   } catch (error) {
     console.info(`install - no dependencies cached.`);
   }
@@ -83,6 +87,8 @@ const install = async (options) => {
     // Check type or list of dependencies change
     if (type !== cachedType) {
       console.info("install - dependency type changed.");
+    } else if (VERSION !== cachedVersion) {
+      console.info("install - snowdev version changed.");
     } else if (dependencies.length !== cachedDependencies.length) {
       console.info("install - dependency list changed.");
     } else if (options.command !== "install") {
@@ -156,7 +162,7 @@ const install = async (options) => {
     // Write cache
     await fs.writeFile(
       dependenciesCacheFile,
-      JSON.stringify({ type, dependencies }),
+      JSON.stringify({ version: VERSION, type, dependencies }),
       "utf-8"
     );
 

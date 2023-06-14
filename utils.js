@@ -14,6 +14,10 @@ const RF_OPTIONS = { recursive: true, force: true };
 const exec = promisify(execCb);
 const ncp = promisify(ncpCb);
 
+const { version: VERSION, name: NAME } = JSON.parse(
+  await fs.readFile(new URL("./package.json", import.meta.url))
+);
+
 const execCommand = async (command, options) => {
   const { stdout, stderr } = await exec(command, options);
   if (stderr) throw new Error(stderr);
@@ -113,6 +117,8 @@ const htmlHotInject = async (options, req) => {
 };
 
 export {
+  NAME,
+  VERSION,
   RF_OPTIONS,
   exec,
   ncp,
