@@ -2,6 +2,43 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [2.0.0-alpha.0](https://github.com/dmnsgn/snowdev/compare/v1.15.2...v2.0.0-alpha.0) (2023-06-15)
+
+
+### Bug Fixes
+
+* add --porcelain to git push command ([d880725](https://github.com/dmnsgn/snowdev/commit/d88072564237a3fbc2356715cf6d8219f60ed22c))
+* add missing mts cjs and cts extensions to file regex ([8fe427b](https://github.com/dmnsgn/snowdev/commit/8fe427b7e901176de292b35327489970857b5dd6))
+* glob sort files ([4e39f21](https://github.com/dmnsgn/snowdev/commit/4e39f218ed3333ed5c2611058f53b73146615b73))
+* handle esm init options on window ([49ebf2a](https://github.com/dmnsgn/snowdev/commit/49ebf2ac63c297fc6caff3f46252031d9e9100d5))
+* update babel corejs options ([d01e75a](https://github.com/dmnsgn/snowdev/commit/d01e75a87a56dcca712a2de2cc73557a69b8fc99))
+
+
+### Features
+
+* add eslint-plugin-jsdoc ([68f744d](https://github.com/dmnsgn/snowdev/commit/68f744daea61cc7b39828eafd938f13be9fecb1a))
+* add HMR (Hot Module Replacement) support ([12185a6](https://github.com/dmnsgn/snowdev/commit/12185a63c118a066dcdfdbf9a4824a97777f93c8))
+* add http2 support ([e3e2348](https://github.com/dmnsgn/snowdev/commit/e3e234806a19d2596017cb1131a0bb864f535333))
+* add node and worker to eslint env + use latest parser version ([6f846f5](https://github.com/dmnsgn/snowdev/commit/6f846f5fddd5b8f79d3911393be1a2f10c21d7bc))
+* add options.dist for cold built dependencies ([f2f1b74](https://github.com/dmnsgn/snowdev/commit/f2f1b7477213c666e3738c18eb3d568c9bd61d23))
+* add programmatic API + add bundle command using rollup ([a79cace](https://github.com/dmnsgn/snowdev/commit/a79cacece2fff8531b5fd78e764f71e64cd56568))
+* add snowdev version to cache ([e84bc1d](https://github.com/dmnsgn/snowdev/commit/e84bc1db7c1cd4f96d45db20331f47f3f10cf697))
+* **template:** update tsconfig ([3cabf9b](https://github.com/dmnsgn/snowdev/commit/3cabf9bc37d9011f912f84a561a3a8a4b44d441c))
+* use dev as default command ([d3cca92](https://github.com/dmnsgn/snowdev/commit/d3cca92e5a5efa801e3e0ae1709f6584a2010f57))
+* wrap yargs to terminal width ([0e2b22b](https://github.com/dmnsgn/snowdev/commit/0e2b22bc294fcb7b26a1bf9ea52d6a9d60476bb3))
+
+
+### Reverts
+
+* remove yargs strict ([9fc7528](https://github.com/dmnsgn/snowdev/commit/9fc752812e0f7659259bdf4e954915cf30a5615c))
+
+
+### BREAKING CHANGES
+
+* use swc via rollup
+
+
+
 ## [1.15.2](https://github.com/dmnsgn/snowdev/compare/v1.15.1...v1.15.2) (2023-02-19)
 
 
