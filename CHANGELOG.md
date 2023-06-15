@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [2.0.0-alpha.2](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.1...v2.0.0-alpha.2) (2023-06-15)
+
+
+### Features
+
+* remove options.dist in favour of options.rollup.output.dir ([f004e29](https://github.com/dmnsgn/snowdev/commit/f004e29af1523f754504082c179b1b09fa62b0a0))
+* return and await command result in run ([b4f9690](https://github.com/dmnsgn/snowdev/commit/b4f9690e7d3c0c913a49af7c38628e70d5b268c6))
+
+
+
 # [2.0.0-alpha.1](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.0...v2.0.0-alpha.1) (2023-06-15)
 
 
