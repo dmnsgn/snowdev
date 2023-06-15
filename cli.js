@@ -153,6 +153,7 @@ Object.values(commands).forEach((fn) => {
     fn.description,
     () => {},
     async (argv) => {
+      console.debug(`v${VERSION}`);
       await run(fn, { ...getConfig(), ...argv, argv });
     }
   );
