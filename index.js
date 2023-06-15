@@ -222,7 +222,7 @@ export const run = async (fn, options) => {
 
     // console.debug(options);
 
-    fn(options);
+    return await fn(options);
   } catch (error) {
     console.error(`Can't access cwd.`);
     console.error(error);
