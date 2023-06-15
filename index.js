@@ -25,7 +25,6 @@ export const DEFAULTS_OPTIONS = {
   // Inputs/meta
   cwd: process.cwd(),
   NODE_ENV: process.env.NODE_ENV || "development",
-  dist: "web_modules",
   username: null,
   gitHubUsername: null,
   authorName: null,
@@ -182,7 +181,9 @@ export const DEFAULTS_OPTIONS = {
     /** @type {import("rollup").InputOptions} */
     input: {},
     /** @type {import("rollup").OutputOptions} */
-    output: {},
+    output: {
+      dir: "web_modules",
+    },
   },
 
   // Docs
@@ -210,7 +211,7 @@ export const run = async (fn, options) => {
 
     await fs.access(options.cwd, constants.R_OK | constants.W_OK);
 
-    options.ignore.push(`**/${options.dist}/**`);
+    options.ignore.push(`**/${options.rollup.output.dir}/**`);
 
     // Auto-detect TypeScript project
     options.ts ??= isTypeScriptProject(options.cwd);

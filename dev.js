@@ -55,7 +55,7 @@ const dev = async (options = {}) => {
       bs.watch(
         [
           options.files,
-          `${options.dist}/**/*.js`,
+          `${options.rollup.output.dir}/**/*.js`,
           "examples/**/*.js",
           "**/*.{html,css}",
         ],

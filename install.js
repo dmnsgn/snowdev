@@ -1,5 +1,5 @@
 import { promises as fs } from "node:fs";
-import { extname, join } from "node:path";
+import { extname, isAbsolute, join } from "node:path";
 import Arborist from "@npmcli/arborist";
 
 import console from "console-ansi";
@@ -79,10 +79,11 @@ const install = async (options) => {
   // Get current dependencies
   const dependencies = await getDependencies(options, type);
 
+  const outputDir = isAbsolute(options.rollup.output.dir)
+    ? options.rollup.output.dir
+    : join(options.cwd, options.rollup.output.dir);
+
   // TODO: handle snowdev.dependencies options manual change?
-
-  const outputDir = join(options.cwd, options.dist);
-
   // Check if dist folder exists
   if (!(await pathExists(outputDir))) {
     console.info("install - initial installation.");
@@ -207,7 +208,6 @@ const install = async (options) => {
 
     // Bundle
     options.rollup.input.input = input;
-    options.rollup.output.dir = outputDir;
     await bundle(options);
 
     // Write import map
