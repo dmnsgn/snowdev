@@ -51,6 +51,8 @@
   "files": [
     "*.js",
     "jsdoc.json",
+    "utils/**/*",
+    "types/**/*",
     "template/**/*",
     "!.DS_Store"
   ],
