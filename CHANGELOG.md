@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [2.0.0-alpha.3](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.2...v2.0.0-alpha.3) (2023-06-16)
+
+
+### Features
+
+* add module to default tsconfig.compilerOptions ([cbee12a](https://github.com/dmnsgn/snowdev/commit/cbee12a0c7643f085ed3f08f7d2c53cdd468b653))
+* set entryFileNames only for install command ([fc282b1](https://github.com/dmnsgn/snowdev/commit/fc282b1133e8532cf2b0a6abf6cfb62944281020))
+
+
+
 # [2.0.0-alpha.2](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.1...v2.0.0-alpha.2) (2023-06-15)
 
 
