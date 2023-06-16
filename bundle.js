@@ -1,4 +1,4 @@
-import { extname, join } from "node:path";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import console from "console-ansi";

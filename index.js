@@ -126,6 +126,7 @@ export const DEFAULTS_OPTIONS = {
       declarationDir: "types",
       emitDeclarationOnly: true,
       lib: ["ESNext", "DOM"],
+      module: "esnext",
     },
   },
 
