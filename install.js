@@ -208,6 +208,8 @@ const install = async (options) => {
 
     // Bundle
     options.rollup.input.input = input;
+    options.rollup.output.entryFileNames = ({ name }) =>
+      installTargets.includes(name) ? `${name}.js` : name;
     await bundle(options);
 
     // Write import map

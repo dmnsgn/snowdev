@@ -48,11 +48,9 @@ const bundle = async (options = {}) => {
       // input,
       onwarn({ code, loc, frame, message }) {
         if (
-          ["THIS_IS_UNDEFINED", "EVAL", "CIRCULAR_DEPENDENCY"].includes(code) ||
+          ["THIS_IS_UNDEFINED", "EVAL"].includes(code) ||
           (code === "CIRCULAR_DEPENDENCY" &&
-            ["polyfill-node", "@babel", "d3"].some((lib) =>
-              message.includes(lib)
-            ))
+            ["polyfill-node", "@babel"].some((lib) => message.includes(lib)))
         ) {
           return;
         }
@@ -84,8 +82,6 @@ const bundle = async (options = {}) => {
 
     await bundle.write({
       // dir: outputDir,
-      // interop: "auto",
-      entryFileNames: ({ name }) => (extname(name) ? name : `${name}.js`),
       chunkFileNames: "_chunks/[name]-[hash].js",
       manualChunks(id) {
         if (id.includes("core-js/") || id.includes("polyfill-node")) {
