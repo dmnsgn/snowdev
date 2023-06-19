@@ -95,7 +95,7 @@ const install = async (options) => {
       console.info("install - snowdev version changed.");
     } else if (dependencies.length !== cachedDependencies.length) {
       console.info("install - dependency list changed.");
-    } else if (options.command !== "install") {
+    } else if (options.caller !== "cli") {
       const changedDependencies = dependencies.filter(
         ({ spec }) => !cachedDependencies.some(({ spec: s }) => spec === s)
       );

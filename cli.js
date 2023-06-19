@@ -154,7 +154,7 @@ Object.values(commands).forEach((fn) => {
     () => {},
     async (argv) => {
       console.debug(`v${VERSION}`);
-      await run(fn, { ...getConfig(), ...argv, argv });
+      await run(fn, { caller: "cli", ...getConfig(), ...argv, argv });
     }
   );
 });
