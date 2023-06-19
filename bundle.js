@@ -62,8 +62,7 @@ const bundle = async (options = {}) => {
         );
         if (frame) globalThis.console.warn(frame);
       },
-      // TODO: make plugins more configurable
-      plugins: [
+      plugins: options.rollup.plugins || [
         resolve({ modulePaths: [join(__dirname, "node_modules")] }),
         cjs(),
         cjsNamedExports(),
