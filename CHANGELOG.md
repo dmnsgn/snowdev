@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [2.0.0-alpha.4](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.3...v2.0.0-alpha.4) (2023-06-19)
+
+
+### Features
+
+* add caller option ([032e72d](https://github.com/dmnsgn/snowdev/commit/032e72dc1b61b058702b94942590d641c5694aaf))
+* make rollup plugins configurable ([11c5d0f](https://github.com/dmnsgn/snowdev/commit/11c5d0f8b01be0eb679ea5527063f4886386c74e))
+
+
+
 # [2.0.0-alpha.3](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.2...v2.0.0-alpha.3) (2023-06-16)
 
 
