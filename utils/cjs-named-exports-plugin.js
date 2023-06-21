@@ -15,6 +15,7 @@ const SUFFIX = `?${PLUGIN_NAME}`;
 const isValidNamedExport = (name) =>
   name !== "default" && name !== "__esModule" && isValidIdentifier(name);
 
+// TODO: should visited be by invocation? "?cjs-named-exports?cjs-named-exports" can appear
 const getCjsNamedExports = (filename, visited = new Set()) => {
   if (visited.has(filename)) return [];
 

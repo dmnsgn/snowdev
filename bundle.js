@@ -62,21 +62,24 @@ const bundle = async (options = {}) => {
         );
         if (frame) globalThis.console.warn(frame);
       },
-      plugins: options.rollup.plugins || [
-        resolve({ modulePaths: [join(__dirname, "node_modules")] }),
-        cjs(),
-        cjsNamedExports(),
-        nodePolyfills({ include: options.resolve.include }), // Transform all files
-        replace({
-          "process.env.NODE_ENV": JSON.stringify(options.NODE_ENV),
-          preventAssignment: true,
-        }),
-        json({ compact: minify }),
-        transpiler,
-        minifier,
-        noOpPlugin({ ids: ["inspector"] }),
-      ],
       ...options.rollup.input,
+      plugins:
+        options.rollup.plugins ||
+        [
+          resolve({ modulePaths: [join(__dirname, "node_modules")] }),
+          cjs(),
+          cjsNamedExports(),
+          nodePolyfills({ include: options.resolve.include }), // Transform all files
+          replace({
+            "process.env.NODE_ENV": JSON.stringify(options.NODE_ENV),
+            preventAssignment: true,
+          }),
+          json({ compact: minify }),
+          transpiler,
+          minifier,
+          noOpPlugin({ ids: ["inspector"] }),
+          ...(options.rollup.input?.plugins || []),
+        ].filter(Boolean),
     });
 
     await bundle.write({

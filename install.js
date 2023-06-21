@@ -84,6 +84,7 @@ const install = async (options) => {
     : join(options.cwd, options.rollup.output.dir);
 
   // TODO: handle snowdev.dependencies options manual change?
+  // TODO: handle options.importMap change
   // Check if dist folder exists
   if (!(await pathExists(outputDir))) {
     console.info("install - initial installation.");
