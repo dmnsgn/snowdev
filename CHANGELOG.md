@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [2.0.0-alpha.5](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.4...v2.0.0-alpha.5) (2023-06-21)
+
+
+### Bug Fixes
+
+* order of plugin override ([02643a7](https://github.com/dmnsgn/snowdev/commit/02643a73bcfc7c261bacc3e3ee52e932c5b98bde))
+
+
+
 # [2.0.0-alpha.4](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.3...v2.0.0-alpha.4) (2023-06-19)
 
 
