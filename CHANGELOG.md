@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [2.0.0-alpha.6](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.5...v2.0.0-alpha.6) (2023-06-23)
+
+
+### Features
+
+* use rollup.extraPlugins for additional plugins and rollup.input.plugins for overrides + add rollup.pluginsOptions ([deb95d3](https://github.com/dmnsgn/snowdev/commit/deb95d396acc803a8c8d326af1dc35d58e3ec322))
+
+
+
 # [2.0.0-alpha.5](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.4...v2.0.0-alpha.5) (2023-06-21)
 
 
