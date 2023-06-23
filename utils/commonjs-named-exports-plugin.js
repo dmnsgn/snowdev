@@ -9,13 +9,13 @@ await cjsModuleLexer.init();
 // Based on:
 // - https://github.com/FredKSchott/snowpack/blob/main/esinstall/src/rollup-plugins/rollup-plugin-wrap-install-targets.ts
 // - https://github.com/jspm/rollup-plugin-jspm/blob/main/jspm-rollup.js
-const PLUGIN_NAME = "cjs-named-exports";
+const PLUGIN_NAME = "commonjs-named-exports";
 const SUFFIX = `?${PLUGIN_NAME}`;
 
 const isValidNamedExport = (name) =>
   name !== "default" && name !== "__esModule" && isValidIdentifier(name);
 
-// TODO: should visited be by invocation? "?cjs-named-exports?cjs-named-exports" can appear
+// TODO: should visited be by invocation? "?commonjs-named-exports?commonjs-named-exports" can appear
 const getCjsNamedExports = (filename, visited = new Set()) => {
   if (visited.has(filename)) return [];
 
@@ -80,7 +80,7 @@ export default () => ({
       if (meta?.commonjs?.isCommonJS) {
         const uniqueNamedExports = getCjsNamedExports(entryId) || [];
         if (uniqueNamedExports.length) {
-          code += `export {${uniqueNamedExports.join(",")}} from ${file};`;
+          code += `export { ${uniqueNamedExports.join(",")} } from ${file};`;
         }
       }
       return code;

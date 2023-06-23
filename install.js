@@ -5,7 +5,6 @@ import Arborist from "@npmcli/arborist";
 import console from "console-ansi";
 import deepmerge from "deepmerge";
 import slash from "slash";
-
 import { createFilter } from "@rollup/pluginutils";
 
 import { RF_OPTIONS, resolveExports, pathExists, VERSION } from "./utils.js";

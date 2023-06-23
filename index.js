@@ -186,7 +186,8 @@ export const DEFAULTS_OPTIONS = {
       dir: "web_modules",
     },
     /** @type {import("rollup").InputPluginOption} */
-    plugins: null,
+    extraPlugins: [],
+    pluginsOptions: {},
   },
 
   // Docs
