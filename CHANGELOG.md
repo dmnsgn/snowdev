@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [2.0.0-alpha.7](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.6...v2.0.0-alpha.7) (2023-06-26)
+
+
+### Features
+
+* add extra plugins enforce property to sort them similarly to Vite and webpack ([407de00](https://github.com/dmnsgn/snowdev/commit/407de00932fad97e9bbb02ef2eb5da8ef41df944))
+
+
+
 # [2.0.0-alpha.6](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.5...v2.0.0-alpha.6) (2023-06-23)
 
 
