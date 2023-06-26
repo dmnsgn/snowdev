@@ -26,6 +26,18 @@ const parsePluginOptions = (plugins, options) =>
     })
     .map(([name, pluginFactory]) => pluginFactory(options[name]));
 
+const groupExtraPlugins = (plugins) =>
+  plugins.reduce(
+    (groupedPlugins, plugin) => {
+      if (plugin.enforce === "pre") groupedPlugins["pre"].push(plugin);
+      else if (plugin.enforce === "post") groupedPlugins["post"].push(plugin);
+      else groupedPlugins["normal"].push(plugin);
+      delete plugin.enforce;
+      return groupedPlugins;
+    },
+    { pre: [], normal: [], post: [] }
+  );
+
 const bundle = async (options = {}) => {
   const label = `bundle`;
   console.time(label);
@@ -68,7 +80,12 @@ const bundle = async (options = {}) => {
       }
     }
 
+    const { pre, normal, post } = groupExtraPlugins(
+      options.rollup.extraPlugins.filter(Boolean)
+    );
+
     plugins = [
+      ...pre,
       ...parsePluginOptions(
         {
           nodeResolve,
@@ -81,10 +98,11 @@ const bundle = async (options = {}) => {
         },
         pluginsOptions
       ),
+      ...normal,
       transpiler,
+      ...post,
       minifier,
-      ...options.rollup.extraPlugins,
-    ].filter(Boolean); // TODO: sort
+    ].filter(Boolean);
   }
 
   let bundle;
