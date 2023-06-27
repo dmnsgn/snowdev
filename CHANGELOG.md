@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [2.0.0-alpha.9](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.8...v2.0.0-alpha.9) (2023-06-27)
+
+
+### Bug Fixes
+
+* double deepmerged options ([4ce4209](https://github.com/dmnsgn/snowdev/commit/4ce4209c8dd4098b99fcd3b8b9108035f4ff43d8))
+
+
+
 # [2.0.0-alpha.8](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.7...v2.0.0-alpha.8) (2023-06-27)
 
 
