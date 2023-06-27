@@ -142,6 +142,7 @@ const install = async (options) => {
     console.log(`install - installing (${options.transpiler})...`);
 
     await fs.rm(outputDir, RF_OPTIONS);
+    await fs.mkdir(outputDir, { recursive: true });
 
     const resolvedExportsMap = deepmerge(
       Object.fromEntries(
@@ -202,32 +203,32 @@ const install = async (options) => {
       }
     }
 
-    if (Object.values(input).length) {
-      // Bundle
-      options.rollup.input.input = input;
-      options.rollup.output.entryFileNames = ({ name }) =>
-        dependenciesNames.includes(name) ? `${name}.js` : name;
-      result = await bundle(options);
-    } else {
-      const message = `No input dependency to install.`;
-      console.warn(message);
-      result = { warn: message };
+    if (!Object.values(input).length) {
+      throw new Error(`No input dependency to install.`);
     }
 
-    // Write import map
-    importMap = deepmerge(importMap, options.importMap);
-    await fs.writeFile(importMapFile, JSON.stringify(importMap, null, 2));
+    // Bundle
+    options.rollup.input.input = input;
+    options.rollup.output.entryFileNames = ({ name }) =>
+      dependenciesNames.includes(name) ? `${name}.js` : name;
+    result = await bundle(options);
 
-    await fs.writeFile(join(outputDir, ".nojekyll"), "", "utf-8");
+    if (!result.error) {
+      // Write import map
+      importMap = deepmerge(importMap, options.importMap);
+      await fs.writeFile(importMapFile, JSON.stringify(importMap, null, 2));
 
-    // Write cache
-    await fs.writeFile(
-      dependenciesCacheFile,
-      JSON.stringify({ version: VERSION, type, dependencies }),
-      "utf-8"
-    );
+      await fs.writeFile(join(outputDir, ".nojekyll"), "", "utf-8");
 
-    console.log("install - complete.");
+      // Write cache
+      await fs.writeFile(
+        dependenciesCacheFile,
+        JSON.stringify({ version: VERSION, type, dependencies }),
+        "utf-8"
+      );
+
+      console.log("install - complete.");
+    }
   } catch (error) {
     console.error(error);
     result = { error };
