@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [2.0.0-alpha.8](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.7...v2.0.0-alpha.8) (2023-06-27)
+
+
+### Bug Fixes
+
+* deepmerge all options ([c1510e1](https://github.com/dmnsgn/snowdev/commit/c1510e1ef494615ccad2be5624b47203b906013e))
+* handle bundle result error in install ([e4bff55](https://github.com/dmnsgn/snowdev/commit/e4bff55f0902d7906e081780a6e7781c7d523687))
+
+
+### Features
+
+* add force install + use tree dependency names + check cache only if output folder exists ([554432c](https://github.com/dmnsgn/snowdev/commit/554432cc093f5ca1824c08fe971ea26a753152c5))
+* always return values for install command ([4e076b5](https://github.com/dmnsgn/snowdev/commit/4e076b55329e9ae965c2dc45ef8feb0151cdbd00))
+
+
+
 # [2.0.0-alpha.7](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.6...v2.0.0-alpha.7) (2023-06-26)
 
 
