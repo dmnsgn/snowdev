@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [2.0.0-alpha.10](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.9...v2.0.0-alpha.10) (2023-06-27)
+
+
+### Bug Fixes
+
+* force .js extension for all entries ([616fb05](https://github.com/dmnsgn/snowdev/commit/616fb052c248604f11054f2cc8372189c6054416))
+
+
+
 # [2.0.0-alpha.9](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.8...v2.0.0-alpha.9) (2023-06-27)
 
 
