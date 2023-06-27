@@ -18,12 +18,6 @@ const DEPENDENCY_TYPES = Object.freeze({
   CUSTOM: "custom",
 });
 
-const DEPENDENCY_OPTION_MAP = {
-  [DEPENDENCY_TYPES.ALL]: ["dependencies", "devDependencies"],
-  [DEPENDENCY_TYPES.DEV]: ["devDependencies"],
-  [DEPENDENCY_TYPES.PROD]: ["dependencies"],
-};
-
 const DEPENDENCY_SAVE_TYPE_MAP = {
   [DEPENDENCY_TYPES.ALL]: ["prod", "dev"],
   [DEPENDENCY_TYPES.DEV]: ["dev"],
@@ -43,14 +37,12 @@ const getDependencies = async (options, type) => {
 };
 
 const install = async (options) => {
-  let packageJson;
+  // Check package.json exists
   try {
-    packageJson = JSON.parse(
-      await fs.readFile(join(options.cwd, "package.json"))
-    );
+    JSON.parse(await fs.readFile(join(options.cwd, "package.json")));
   } catch (error) {
     console.error(`install - error reading package.json\n`, error);
-    return;
+    return { error };
   }
 
   // Get install type: an array of custom dependencies or one of DEPENDENCY_TYPES values
@@ -59,12 +51,13 @@ const install = async (options) => {
     : options.dependencies;
 
   // Resolve cache and output paths
-  const dependenciesCacheFile = join(options.cacheFolder, "dependencies.json");
   await fs.mkdir(options.cacheFolder, { recursive: true });
 
+  const dependenciesCacheFile = join(options.cacheFolder, "dependencies.json");
   const outputDir = isAbsolute(options.rollup.output.dir)
     ? options.rollup.output.dir
     : join(options.cwd, options.rollup.output.dir);
+  const importMapFile = join(outputDir, "import-map.json");
 
   // Get current dependencies
   const dependencies = await getDependencies(options, type);
@@ -104,7 +97,13 @@ const install = async (options) => {
 
         if (!changedDependencies.length) {
           console.log("install - all dependencies installed.");
-          return; // TODO: return importMap?
+
+          return {
+            importMap: deepmerge(
+              JSON.parse(await fs.readFile(importMapFile, "utf-8")),
+              options.importMap
+            ),
+          };
         } else {
           console.log(
             `install - dependencies changed: ${listFormat.format(
@@ -118,23 +117,24 @@ const install = async (options) => {
     }
   }
 
-  const installTargets =
+  const dependenciesNames =
     type === DEPENDENCY_TYPES.CUSTOM
       ? options.dependencies
       : dependencies.map(({ name }) => name);
 
-  if (installTargets.length === 0) {
+  if (dependenciesNames.length === 0) {
     console.warn(`No ESM dependencies to install. Set "options.dependencies".`);
-    return;
+    return { importMap: options.importMap };
   }
 
   const label = `install`;
   console.time(label);
 
   console.info(
-    `install - ESM dependencies: ${listFormat.format(installTargets)}`
+    `install - ESM dependencies: ${listFormat.format(dependenciesNames)}`
   );
 
+  let result;
   let input = {};
   let importMap = { imports: {} };
 
@@ -146,7 +146,7 @@ const install = async (options) => {
     const resolvedExportsMap = deepmerge(
       Object.fromEntries(
         await Promise.all(
-          installTargets.map(async (dependency) => [
+          dependenciesNames.map(async (dependency) => [
             dependency,
             await resolveExports(options, dependency),
           ])
@@ -202,23 +202,21 @@ const install = async (options) => {
       }
     }
 
-    if (!Object.values(input).length) {
-      console.error(`No input dependency to install.`);
-      return;
+    if (Object.values(input).length) {
+      // Bundle
+      options.rollup.input.input = input;
+      options.rollup.output.entryFileNames = ({ name }) =>
+        dependenciesNames.includes(name) ? `${name}.js` : name;
+      result = await bundle(options);
+    } else {
+      const message = `No input dependency to install.`;
+      console.warn(message);
+      result = { warn: message };
     }
-
-    // Bundle
-    options.rollup.input.input = input;
-    options.rollup.output.entryFileNames = ({ name }) =>
-      installTargets.includes(name) ? `${name}.js` : name;
-    await bundle(options);
 
     // Write import map
     importMap = deepmerge(importMap, options.importMap);
-    await fs.writeFile(
-      join(outputDir, "import-map.json"),
-      JSON.stringify(importMap, null, 2)
-    );
+    await fs.writeFile(importMapFile, JSON.stringify(importMap, null, 2));
 
     await fs.writeFile(join(outputDir, ".nojekyll"), "", "utf-8");
 
@@ -232,10 +230,11 @@ const install = async (options) => {
     console.log("install - complete.");
   } catch (error) {
     console.error(error);
+    result = { error };
   }
   console.timeEnd(label);
 
-  return { input, importMap };
+  return { ...result, input, importMap };
 };
 install.description = `Install ESM dependencies.`;
 
