@@ -53,72 +53,75 @@ const install = async (options) => {
     return;
   }
 
-  // Get install type
+  // Get install type: an array of custom dependencies or one of DEPENDENCY_TYPES values
   const type = Array.isArray(options.dependencies)
     ? DEPENDENCY_TYPES.CUSTOM
     : options.dependencies;
 
-  // Get cached dependencies
+  // Resolve cache and output paths
   const dependenciesCacheFile = join(options.cacheFolder, "dependencies.json");
   await fs.mkdir(options.cacheFolder, { recursive: true });
-
-  let cachedVersion = "";
-  let cachedType = DEPENDENCY_TYPES.CUSTOM;
-  let cachedDependencies = [];
-  try {
-    ({
-      version: cachedVersion,
-      type: cachedType,
-      dependencies: cachedDependencies,
-    } = JSON.parse(await fs.readFile(dependenciesCacheFile, "utf-8")));
-  } catch (error) {
-    console.info(`install - no dependencies cached.`);
-  }
-
-  // Get current dependencies
-  const dependencies = await getDependencies(options, type);
 
   const outputDir = isAbsolute(options.rollup.output.dir)
     ? options.rollup.output.dir
     : join(options.cwd, options.rollup.output.dir);
 
-  // TODO: handle snowdev.dependencies options manual change?
-  // TODO: handle options.importMap change
-  // Check if dist folder exists
-  if (!(await pathExists(outputDir))) {
+  // Get current dependencies
+  const dependencies = await getDependencies(options, type);
+
+  if (options.force) {
+    console.info("install - force install.");
+  } else if (!(await pathExists(outputDir))) {
+    // Check if dist folder exists
     console.info("install - initial installation.");
   } else {
-    // Check type or list of dependencies change
-    if (type !== cachedType) {
-      console.info("install - dependency type changed.");
-    } else if (VERSION !== cachedVersion) {
-      console.info("install - snowdev version changed.");
-    } else if (dependencies.length !== cachedDependencies.length) {
-      console.info("install - dependency list changed.");
-    } else if (options.caller !== "cli") {
-      const changedDependencies = dependencies.filter(
-        ({ spec }) => !cachedDependencies.some(({ spec: s }) => spec === s)
-      );
+    try {
+      // Get cached values
+      // TODO: handle snowdev.dependencies options manual change?
+      // TODO: handle options.importMap change
+      let cachedVersion = "";
+      let cachedType = DEPENDENCY_TYPES.CUSTOM;
+      let cachedDependencies = [];
 
-      if (!changedDependencies.length) {
-        console.log("install - all dependencies installed.");
-        return;
-      } else {
-        console.log(
-          `install - dependencies changed: ${listFormat.format(
-            changedDependencies.map((dependency) => dependency.name)
-          )}.`
+      ({
+        version: cachedVersion,
+        type: cachedType,
+        dependencies: cachedDependencies,
+      } = JSON.parse(await fs.readFile(dependenciesCacheFile, "utf-8")));
+
+      // Check type or list of dependencies change
+      // Calling install from CLI will always force install
+      if (type !== cachedType) {
+        console.info("install - dependency type changed.");
+      } else if (VERSION !== cachedVersion) {
+        console.info("install - snowdev version changed.");
+      } else if (dependencies.length !== cachedDependencies.length) {
+        console.info("install - dependency list changed.");
+      } else if (options.caller !== "cli") {
+        const changedDependencies = dependencies.filter(
+          ({ spec }) => !cachedDependencies.some(({ spec: s }) => spec === s)
         );
+
+        if (!changedDependencies.length) {
+          console.log("install - all dependencies installed.");
+          return; // TODO: return importMap?
+        } else {
+          console.log(
+            `install - dependencies changed: ${listFormat.format(
+              changedDependencies.map((dependency) => dependency.name)
+            )}.`
+          );
+        }
       }
+    } catch (error) {
+      console.info(`install - no dependencies cached.`);
     }
   }
 
   const installTargets =
     type === DEPENDENCY_TYPES.CUSTOM
       ? options.dependencies
-      : (DEPENDENCY_OPTION_MAP[options.dependencies] || [])
-          .map((key) => Object.keys(packageJson[key] || {}))
-          .flat();
+      : dependencies.map(({ name }) => name);
 
   if (installTargets.length === 0) {
     console.warn(`No ESM dependencies to install. Set "options.dependencies".`);
@@ -198,8 +201,6 @@ const install = async (options) => {
         }
       }
     }
-
-    // console.log(resolvedExportsMap);
 
     if (!Object.values(input).length) {
       console.error(`No input dependency to install.`);

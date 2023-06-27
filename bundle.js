@@ -131,7 +131,7 @@ const bundle = async (options = {}) => {
     });
 
     result = await bundle.write({
-      // dir: outputDir,
+      // dir,
       chunkFileNames: "_chunks/[name]-[hash].js",
       manualChunks(id) {
         if (id.includes("core-js/") || id.includes("polyfill-node")) {
