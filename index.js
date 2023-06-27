@@ -200,12 +200,12 @@ export const commands = { init, dev, build, bundle, release, deploy, install };
 export const run = async (fn, options) => {
   const { [fn.name]: commandOptions, ...globalOptions } = options;
 
-  options = deepmerge(
+  options = deepmerge.all([
     DEFAULTS_OPTIONS,
     options,
     globalOptions || {},
-    commandOptions || {}
-  );
+    commandOptions || {},
+  ]);
 
   try {
     options.command = fn.name;
