@@ -202,7 +202,6 @@ export const run = async (fn, options) => {
 
   options = deepmerge.all([
     DEFAULTS_OPTIONS,
-    options,
     globalOptions || {},
     commandOptions || {},
   ]);
