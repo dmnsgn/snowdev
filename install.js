@@ -209,8 +209,11 @@ const install = async (options) => {
 
     // Bundle
     options.rollup.input.input = input;
-    options.rollup.output.entryFileNames = ({ name }) =>
-      dependenciesNames.includes(name) ? `${name}.js` : name;
+    options.rollup.output.entryFileNames = ({ name }) => {
+      return dependenciesNames.includes(name) || extname(name) !== ".js"
+        ? `${name}.js`
+        : name;
+    };
     result = await bundle(options);
 
     if (!result.error) {
