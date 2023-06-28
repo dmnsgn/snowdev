@@ -8,10 +8,9 @@ import commonjs from "@rollup/plugin-commonjs";
 import polyfillNode from "rollup-plugin-polyfill-node";
 import json from "@rollup/plugin-json";
 import replace from "@rollup/plugin-replace";
+import commonjsNamedExports from "rollup-plugin-commonjs-named-exports";
+import noOp from "rollup-plugin-no-op";
 import deepmerge from "deepmerge";
-
-import commonjsNamedExports from "./utils/commonjs-named-exports-plugin.js";
-import noOp from "./utils/no-op-plugin.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
