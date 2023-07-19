@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env node --max-old-space-size=6144
 
 import console from "console-ansi";
 import yargs from "yargs";
