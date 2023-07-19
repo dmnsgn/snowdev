@@ -27,7 +27,7 @@ const dev = async (options = {}) => {
           const results = await lint(
             options.cwd,
             [join(options.cwd, file)],
-            options
+            options,
           );
           if (results) {
             bs.sockets.emit("console:log", `[snowdev] ESLint Error:${results}`);
@@ -70,7 +70,7 @@ const dev = async (options = {}) => {
               bs.sockets.emit("reload");
             }
           }
-        }
+        },
       );
     }
 
@@ -109,7 +109,7 @@ const dev = async (options = {}) => {
               if (results) {
                 bs.sockets.emit(
                   "console:log",
-                  `[snowdev] TypeScript Error:\n${results}`
+                  `[snowdev] TypeScript Error:\n${results}`,
                 );
               }
             });
@@ -117,7 +117,7 @@ const dev = async (options = {}) => {
         } catch (error) {
           console.error(error);
         }
-      }
+      },
     );
   } else if (options.ts) {
     await types(options.cwd, null, options, true);

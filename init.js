@@ -20,7 +20,7 @@ const init = async (options = {}) => {
   // Check for empty directory
   if (
     (await fs.readdir(options.cwd)).filter(
-      (file) => ![".DS_Store"].includes(file)
+      (file) => ![".DS_Store"].includes(file),
     ).length > 0
   ) {
     console.warn(`Directory not empty. Files will not be overwritten.`);
@@ -48,7 +48,7 @@ const init = async (options = {}) => {
   }
 
   console.info(
-    `user: ${user.authorName} (npm: "${user.username}", github: "${user.gitHubUsername}")`
+    `user: ${user.authorName} (npm: "${user.username}", github: "${user.gitHubUsername}")`,
   );
 
   try {
@@ -65,7 +65,7 @@ const init = async (options = {}) => {
     // Rename gitignore otherwise ignored on npm publish
     await fs.rename(
       join(options.cwd, "gitignore"),
-      join(options.cwd, ".gitignore")
+      join(options.cwd, ".gitignore"),
     );
 
     // Rewrite package name to folder name
@@ -94,14 +94,14 @@ const init = async (options = {}) => {
     if (options.ts) {
       const packageJsonFile = join(options.cwd, "package.json");
       const packageJson = JSON.parse(
-        await fs.readFile(packageJsonFile, "utf-8")
+        await fs.readFile(packageJsonFile, "utf-8"),
       );
       packageJson.main = "lib/index.js";
       packageJson.exports = "./lib/index.js";
       await fs.writeFile(
         packageJsonFile,
         JSON.stringify(packageJson, null, 2),
-        "utf-8"
+        "utf-8",
       );
     }
   } catch (error) {

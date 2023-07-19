@@ -15,7 +15,7 @@ const deploy = async (options = {}) => {
     // Keep track of current branch
     const currentBranch = await execCommand(
       `git rev-parse --abbrev-ref HEAD`,
-      options
+      options,
     );
     console.log(`Current branch: ${currentBranch}`);
 
@@ -24,7 +24,7 @@ const deploy = async (options = {}) => {
     try {
       await execCommand(
         `git show-ref --quiet --verify -- "refs/heads/gh-pages"`,
-        options
+        options,
       );
     } catch (error) {
       if (error.code === 1) {
@@ -36,11 +36,11 @@ const deploy = async (options = {}) => {
     }
     await execCommand(
       `git checkout --quiet ${ghPagesBranchExist ? "" : "-b"} gh-pages`,
-      options
+      options,
     );
     const ghBranch = await execCommand(
       `git rev-parse --abbrev-ref HEAD`,
-      options
+      options,
     );
     console.log(`Checked out: ${ghBranch}`);
 
@@ -55,12 +55,12 @@ const deploy = async (options = {}) => {
     const ignored = gitIgnore
       .split(REGEX_SPLITALL_CRLF)
       ?.filter(
-        (ignore) => ![options.rollup.output.dir, "lib"].includes(ignore)
+        (ignore) => ![options.rollup.output.dir, "lib"].includes(ignore),
       );
     await fs.writeFile(
       gitIgnorePath,
       ignored?.join("\n") || gitIgnore,
-      "utf-8"
+      "utf-8",
     );
 
     await install(options);

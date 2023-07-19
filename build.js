@@ -64,7 +64,7 @@ const format = async (cwd, files, options) => {
           ...((await prettier.resolveConfig(file)) || {}),
           ...(options.prettier || {}),
         }),
-        "utf-8"
+        "utf-8",
       );
     } catch (error) {
       console.error(error);
@@ -76,7 +76,7 @@ const format = async (cwd, files, options) => {
     await fs.writeFile(
       packageJsonFile,
       sortPackageJson(await fs.readFile(packageJsonFile, "utf-8")),
-      "utf-8"
+      "utf-8",
     );
   } catch (error) {
     console.error(error);
@@ -120,12 +120,12 @@ const docs = async (cwd, files, options) => {
       const configPath = ts.findConfigFile(
         cwd,
         ts.sys.fileExists,
-        "tsconfig.json"
+        "tsconfig.json",
       );
       if (!configPath) {
         app.options.setCompilerOptions(
           files.flat(),
-          options.tsconfig.compilerOptions
+          options.tsconfig.compilerOptions,
         );
       }
 
@@ -150,7 +150,7 @@ const docs = async (cwd, files, options) => {
         await fs.writeFile(
           join(cwd, docsFolder, "README.md"),
           inlinedDocs,
-          "utf-8"
+          "utf-8",
         );
         return;
       }
@@ -180,17 +180,15 @@ const docs = async (cwd, files, options) => {
     if (options.docsStart && options.docsEnd) {
       await fs.writeFile(
         filePath,
-        (
-          await fs.readFile(filePath, "utf-8")
-        ).replace(
+        (await fs.readFile(filePath, "utf-8")).replace(
           new RegExp(
             `${escapeRegExp(options.docsStart)}([\\s\\S]*?)${escapeRegExp(
-              options.docsEnd
-            )}`
+              options.docsEnd,
+            )}`,
           ),
-          `${options.docsStart}\n\n${formattedDocs}\n${options.docsEnd}`
+          `${options.docsStart}\n\n${formattedDocs}\n${options.docsEnd}`,
         ),
-        "utf-8"
+        "utf-8",
       );
     } else {
       await fs.writeFile(filePath, formattedDocs, "utf-8");
@@ -208,7 +206,7 @@ const types = async (cwd, files, options, watch) => {
     const configPath = ts.findConfigFile(
       cwd,
       ts.sys.fileExists,
-      "tsconfig.json"
+      "tsconfig.json",
     );
 
     const formatHost = {
@@ -231,7 +229,7 @@ const types = async (cwd, files, options, watch) => {
               diagnostic.code
             } : ${ts.flattenDiagnosticMessageText(
               diagnostic.messageText,
-              formatHost.getNewLine()
+              formatHost.getNewLine(),
             )}`;
             console.error(results);
             if (typeof watch === "function") {
@@ -240,8 +238,8 @@ const types = async (cwd, files, options, watch) => {
           },
           function (diagnostic) {
             console.info(ts.formatDiagnostic(diagnostic, formatHost));
-          }
-        )
+          },
+        ),
       );
     } else {
       const config = configPath
@@ -253,7 +251,7 @@ const types = async (cwd, files, options, watch) => {
       if (config.compilerOptions.declarationDir) {
         await fs.rm(
           join(cwd, config.compilerOptions.declarationDir),
-          RF_OPTIONS
+          RF_OPTIONS,
         );
       }
       if (config.compilerOptions.outDir) {
@@ -263,7 +261,7 @@ const types = async (cwd, files, options, watch) => {
       const parsedCommandLine = ts.parseJsonConfigFileContent(
         config,
         ts.sys,
-        cwd
+        cwd,
       );
       const program = ts.createProgram({
         options: parsedCommandLine.options,
@@ -291,7 +289,7 @@ const types = async (cwd, files, options, watch) => {
         console[diagnosticToConsoleMethod[diagnostic.category] || "log"](
           `TypeScript\n${diagnostic.file?.fileName} (${line + 1}, ${
             character + 1
-          }): ${ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")}`
+          }): ${ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")}`,
         );
       });
 
@@ -321,7 +319,7 @@ const build = async (options) => {
     [
       options.types ? types(cwd, files, options) : 0,
       options.docs ? docs(cwd, files, options) : 0,
-    ].filter(Boolean)
+    ].filter(Boolean),
   );
   if (options.lint) await lint(cwd, files, options);
 };

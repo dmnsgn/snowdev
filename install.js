@@ -32,7 +32,7 @@ const getDependencies = async (options, type) => {
   return type === DEPENDENCY_TYPES.CUSTOM
     ? dependencies
     : dependencies.filter((dependency) =>
-        DEPENDENCY_SAVE_TYPE_MAP[type].includes(dependency.type)
+        DEPENDENCY_SAVE_TYPE_MAP[type].includes(dependency.type),
       );
 };
 
@@ -92,7 +92,7 @@ const install = async (options) => {
         console.info("install - dependency list changed.");
       } else if (options.caller !== "cli") {
         const changedDependencies = dependencies.filter(
-          ({ spec }) => !cachedDependencies.some(({ spec: s }) => spec === s)
+          ({ spec }) => !cachedDependencies.some(({ spec: s }) => spec === s),
         );
 
         if (!changedDependencies.length) {
@@ -101,14 +101,14 @@ const install = async (options) => {
           return {
             importMap: deepmerge(
               JSON.parse(await fs.readFile(importMapFile, "utf-8")),
-              options.importMap
+              options.importMap,
             ),
           };
         } else {
           console.log(
             `install - dependencies changed: ${listFormat.format(
-              changedDependencies.map((dependency) => dependency.name)
-            )}.`
+              changedDependencies.map((dependency) => dependency.name),
+            )}.`,
           );
         }
       }
@@ -131,7 +131,7 @@ const install = async (options) => {
   console.time(label);
 
   console.info(
-    `install - ESM dependencies: ${listFormat.format(dependenciesNames)}`
+    `install - ESM dependencies: ${listFormat.format(dependenciesNames)}`,
   );
 
   let result;
@@ -150,16 +150,16 @@ const install = async (options) => {
           dependenciesNames.map(async (dependency) => [
             dependency,
             await resolveExports(options, dependency),
-          ])
-        )
+          ]),
+        ),
       ),
-      options.resolve.overrides
+      options.resolve.overrides,
     );
 
     const filter = createFilter(
       options.resolve.include,
       options.resolve.exclude,
-      { resolve: options.cwd }
+      { resolve: options.cwd },
     );
 
     // TODO: copy .css/.wasm/package.json
@@ -170,7 +170,7 @@ const install = async (options) => {
 
         if (!entryPoint) {
           console.error(
-            `Unresolved export: "${dependency}" "${specifier}": is "${dependency}" installed or not exporting anything?`
+            `Unresolved export: "${dependency}" "${specifier}": is "${dependency}" installed or not exporting anything?`,
           );
           continue;
         }
@@ -180,7 +180,7 @@ const install = async (options) => {
           const resolvedExport = join(
             options.cwd,
             "node_modules",
-            depEntryPoint
+            depEntryPoint,
           );
 
           if (!filter(resolvedExport)) {
@@ -227,7 +227,7 @@ const install = async (options) => {
       await fs.writeFile(
         dependenciesCacheFile,
         JSON.stringify({ version: VERSION, type, dependencies }),
-        "utf-8"
+        "utf-8",
       );
 
       console.log("install - complete.");

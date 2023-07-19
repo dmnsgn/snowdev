@@ -18,7 +18,7 @@ const exec = promisify(execCb);
 const ncp = promisify(ncpCb);
 
 const { version: VERSION, name: NAME } = JSON.parse(
-  await fs.readFile(new URL("./package.json", import.meta.url))
+  await fs.readFile(new URL("./package.json", import.meta.url)),
 );
 
 const execCommand = async (command, options) => {
@@ -54,7 +54,7 @@ const getFileExtension = (file) => parse(file).ext;
 
 const HMR_HOOK = await fs.readFile(
   new URL("./utils/hot.js", import.meta.url),
-  "utf-8"
+  "utf-8",
 );
 
 const htmlHotInject = async (options, req) => {
@@ -71,8 +71,8 @@ const htmlHotInject = async (options, req) => {
     if (esmsOptionsJSON.length) {
       $("script[type='esms-options']").text(
         JSON.stringify(
-          Object.assign(JSON.parse(esmsOptionsJSON.text()), { shimMode: true })
-        )
+          Object.assign(JSON.parse(esmsOptionsJSON.text()), { shimMode: true }),
+        ),
       );
       hasOptions = true;
     } else {
@@ -109,7 +109,7 @@ const htmlHotInject = async (options, req) => {
     }
     if (!hasOptions) {
       $("head").append(
-        `<script type="esms-options">{ "shimMode": true }</script>`
+        `<script type="esms-options">{ "shimMode": true }</script>`,
       );
     }
   } catch (error) {
@@ -143,7 +143,7 @@ const getWildcardEntries = async (cwd, key, value) => {
           return [normalizedKey, normalizedFilePath];
         }
       })
-      .filter(Boolean)
+      .filter(Boolean),
   );
 };
 
@@ -154,7 +154,7 @@ const resolveEntryPoint = async (cwd, key, value, out = {}) => {
     } catch (error) {
       console.error(
         `Error resolving "${cwd}" export: { "${key}": "${value}" }\n`,
-        error
+        error,
       );
     }
   } else {

@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [2.0.0-alpha.12](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.11...v2.0.0-alpha.12) (2023-07-19)
+
+
+### Bug Fixes
+
+* add max-old-space-size to cli ([cb2a91c](https://github.com/dmnsgn/snowdev/commit/cb2a91cfc30ecb7dcfe7af654eb9b7064061e937))
+* sourceMap declaration ([645d730](https://github.com/dmnsgn/snowdev/commit/645d730a1a0e56e6fc098e1b2f3ed8de6e766f48))
+* upgrade prettier.format to new syntax ([4241b46](https://github.com/dmnsgn/snowdev/commit/4241b46ae35cc8359a78e1a228a27c24c4a24266))
+
+
+### Features
+
+* add jsdoc eslint no-defaults ([e146c43](https://github.com/dmnsgn/snowdev/commit/e146c43f66a8679cee9d6afc317755da0dc7cdd0))
+* add watch and sourceMap to bundle ([261ee73](https://github.com/dmnsgn/snowdev/commit/261ee73674e0ae7d43accc4becd77cf789f0fe36))
+
+
+
 # [2.0.0-alpha.11](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.10...v2.0.0-alpha.11) (2023-06-28)
 
 
