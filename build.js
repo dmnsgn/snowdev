@@ -59,7 +59,7 @@ const format = async (cwd, files, options) => {
     try {
       await fs.writeFile(
         file,
-        prettier.format(await fs.readFile(file, "utf-8"), {
+        await prettier.format(await fs.readFile(file, "utf-8"), {
           parser: options.ts ? "typescript" : "babel",
           ...((await prettier.resolveConfig(file)) || {}),
           ...(options.prettier || {}),
@@ -167,11 +167,12 @@ const docs = async (cwd, files, options) => {
     await fs.rm(join(cwd, docsFolder), RF_OPTIONS);
 
     const filePath = join(cwd, options.docs);
-    const formattedDocs = prettier
-      .format(inlinedDocs, {
+    const formattedDocs = (
+      await prettier.format(inlinedDocs, {
         parser: isMarkdown ? "markdown" : "html",
         ...((await prettier.resolveConfig(filePath)) || {}),
       })
+    )
       .split("\n")
       .map((line) => line.trimEnd())
       .join("\n");
