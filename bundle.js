@@ -2,7 +2,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import console from "console-ansi";
-import { rollup } from "rollup";
+import { rollup, watch } from "rollup";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import polyfillNode from "rollup-plugin-polyfill-node";
@@ -34,7 +34,7 @@ const groupExtraPlugins = (plugins) =>
       delete plugin.enforce;
       return groupedPlugins;
     },
-    { pre: [], normal: [], post: [] }
+    { pre: [], normal: [], post: [] },
   );
 
 const bundle = async (options = {}) => {
@@ -44,12 +44,14 @@ const bundle = async (options = {}) => {
   let plugins = options.rollup.input?.plugins;
 
   if (!plugins) {
+    const sourceMap = options.rollup.sourceMap;
     let minify = options.minify;
     minify ??= options.NODE_ENV === "production";
 
     const pluginsOptions = deepmerge(
       {
         nodeResolve: { modulePaths: [join(__dirname, "node_modules")] },
+        commonjs: { sourceMap },
         polyfillNode: { include: options.resolve.include }, // Transform all files
         replace: {
           "process.env.NODE_ENV": JSON.stringify(options.NODE_ENV),
@@ -58,17 +60,24 @@ const bundle = async (options = {}) => {
         json: { compact: minify },
         noOp: { ids: ["inspector"] },
       },
-      options.rollup.pluginsOptions
+      options.rollup.pluginsOptions,
     );
 
     if (options.transpiler === "esbuild") {
       transpiler = await (
         await import("rollup-plugin-esbuild")
-      ).default({ minify, ...options.esbuild });
+      ).default({ minify, sourceMap, ...options.esbuild });
     } else if (options.transpiler === "swc") {
       transpiler = await (
         await import("@rollup/plugin-swc")
-      ).default({ swc: { cwd: options.cwd, minify, ...options.swc } });
+      ).default({
+        swc: {
+          cwd: options.cwd,
+          minify,
+          sourceMaps: sourceMap,
+          ...options.swc,
+        },
+      });
     } else {
       transpiler = await (
         await import("@rollup/plugin-babel")
@@ -80,7 +89,7 @@ const bundle = async (options = {}) => {
     }
 
     const { pre, normal, post } = groupExtraPlugins(
-      options.rollup.extraPlugins.filter(Boolean)
+      options.rollup.extraPlugins.filter(Boolean),
     );
 
     plugins = [
@@ -95,7 +104,7 @@ const bundle = async (options = {}) => {
           json,
           noOp,
         },
-        pluginsOptions
+        pluginsOptions,
       ),
       ...normal,
       transpiler,
@@ -107,7 +116,8 @@ const bundle = async (options = {}) => {
   let bundle;
   let result;
   try {
-    bundle = await rollup({
+    /** @type {import("rollup").InputOptions} */
+    const inputOptions = {
       // input,
       onwarn({ code, loc, frame, message }) {
         if (
@@ -121,16 +131,18 @@ const bundle = async (options = {}) => {
         console.warn(
           `rollup: ${
             loc ? `${loc.file}(${loc.line},${loc.column}): ` : ""
-          }${message}`
+          }${message}`,
         );
         if (frame) globalThis.console.warn(frame);
       },
       ...options.rollup.input,
       plugins,
-    });
+    };
 
-    result = await bundle.write({
+    /** @type {import("rollup").OutputOptions} */
+    const outputOptions = {
       // dir,
+      sourcemap: sourceMap,
       chunkFileNames: "_chunks/[name]-[hash].js",
       manualChunks(id) {
         if (id.includes("core-js/") || id.includes("polyfill-node")) {
@@ -138,9 +150,29 @@ const bundle = async (options = {}) => {
         }
       },
       ...options.rollup.output,
-    });
+    };
 
-    await bundle.close();
+    if (options.rollup.watch) {
+      console.info(`bundle: watching...`);
+
+      const watcher = watch({
+        ...inputOptions,
+        output: outputOptions,
+        watch: options.rollup.watch,
+      });
+
+      watcher.on("event", ({ code, result }) => {
+        if (code === "BUNDLE_START") console.time(label);
+        if (code === "BUNDLE_END") console.timeEnd(label);
+        if (result) result.close();
+      });
+      result = watcher;
+    } else {
+      bundle = await rollup(inputOptions);
+      result = await bundle.write(outputOptions);
+
+      await bundle.close();
+    }
   } catch (error) {
     console.error(error);
     if (bundle) await bundle.close();

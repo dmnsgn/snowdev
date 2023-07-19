@@ -188,6 +188,8 @@ export const DEFAULTS_OPTIONS = {
     /** @type {import("rollup").InputPluginOption} */
     extraPlugins: [],
     pluginsOptions: {},
+    watch: false,
+    sourceMap: false,
   },
 
   // Docs
