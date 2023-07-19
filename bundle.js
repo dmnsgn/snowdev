@@ -41,10 +41,10 @@ const bundle = async (options = {}) => {
   const label = `bundle`;
   console.time(label);
 
+  const sourceMap = options.rollup.sourceMap;
   let plugins = options.rollup.input?.plugins;
 
   if (!plugins) {
-    const sourceMap = options.rollup.sourceMap;
     let minify = options.minify;
     minify ??= options.NODE_ENV === "production";
 
