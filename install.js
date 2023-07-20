@@ -7,7 +7,13 @@ import deepmerge from "deepmerge";
 import slash from "slash";
 import { createFilter } from "@rollup/pluginutils";
 
-import { RF_OPTIONS, resolveExports, pathExists, VERSION } from "./utils.js";
+import {
+  RF_OPTIONS,
+  resolveExports,
+  pathExists,
+  VERSION,
+  listFormatter,
+} from "./utils.js";
 
 import bundle from "./bundle.js";
 
@@ -23,8 +29,6 @@ const DEPENDENCY_SAVE_TYPE_MAP = {
   [DEPENDENCY_TYPES.DEV]: ["dev"],
   [DEPENDENCY_TYPES.PROD]: ["prod"],
 };
-
-const listFormat = new Intl.ListFormat("en");
 
 const getDependencies = async (options, type) => {
   const tree = await new Arborist({ path: options.cwd }).loadActual();
@@ -106,7 +110,7 @@ const install = async (options) => {
           };
         } else {
           console.log(
-            `install - dependencies changed: ${listFormat.format(
+            `install - dependencies changed: ${listFormatter.format(
               changedDependencies.map((dependency) => dependency.name),
             )}.`,
           );
@@ -131,7 +135,7 @@ const install = async (options) => {
   console.time(label);
 
   console.info(
-    `install - ESM dependencies: ${listFormat.format(dependenciesNames)}`,
+    `install - ESM dependencies: ${listFormatter.format(dependenciesNames)}`,
   );
 
   let result;

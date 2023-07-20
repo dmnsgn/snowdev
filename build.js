@@ -6,7 +6,7 @@ import console from "console-ansi";
 
 import ts from "typescript";
 
-import prettier from "prettier";
+import * as prettier from "prettier";
 import sortPackageJson from "sort-package-json";
 
 import { ESLint } from "eslint";

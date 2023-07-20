@@ -12,6 +12,8 @@ import commonjsNamedExports from "rollup-plugin-commonjs-named-exports";
 import noOp from "rollup-plugin-no-op";
 import deepmerge from "deepmerge";
 
+import { secondsFormatter } from "./utils.js";
+
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 let transpiler;
@@ -161,9 +163,13 @@ const bundle = async (options = {}) => {
         watch: options.rollup.watch,
       });
 
-      watcher.on("event", ({ code, result }) => {
-        if (code === "BUNDLE_START") console.time(label);
-        if (code === "BUNDLE_END") console.timeEnd(label);
+      watcher.on("event", ({ code, result, duration }) => {
+        if (code === "BUNDLE_START") console.info(`${label}: bundling...`);
+        if (code === "BUNDLE_END") {
+          console.info(
+            `${label}: bundled in ${secondsFormatter.format(duration / 1000)}.`,
+          );
+        }
         if (result) result.close();
       });
       result = watcher;

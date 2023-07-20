@@ -21,6 +21,14 @@ const { version: VERSION, name: NAME } = JSON.parse(
   await fs.readFile(new URL("./package.json", import.meta.url)),
 );
 
+const listFormatter = new Intl.ListFormat("en");
+
+const secondsFormatter = new Intl.NumberFormat("en", {
+  unit: "second",
+  style: "unit",
+  unitDisplay: "narrow",
+});
+
 const execCommand = async (command, options) => {
   const { stdout, stderr } = await exec(command, options);
   if (stderr) throw new Error(stderr);
@@ -222,6 +230,8 @@ export {
   NAME,
   VERSION,
   RF_OPTIONS,
+  listFormatter,
+  secondsFormatter,
   exec,
   ncp,
   execCommand,
