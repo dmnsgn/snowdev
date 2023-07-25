@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [2.0.0-alpha.14](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.13...v2.0.0-alpha.14) (2023-07-25)
+
+
+### Features
+
+* add eslint-plugin-import ([97f48df](https://github.com/dmnsgn/snowdev/commit/97f48dff82b08732c241b4b65d4a472f9400c89c))
+* add import/no-named-as-default 0 ([d78e62a](https://github.com/dmnsgn/snowdev/commit/d78e62ad11c0005145c105d21cb3eee53ee86203))
+* format rollup log ([0c152ba](https://github.com/dmnsgn/snowdev/commit/0c152ba59d16627016a995563e59edbe02fad788))
+
+
+
 # [2.0.0-alpha.13](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.12...v2.0.0-alpha.13) (2023-07-20)
 
 
