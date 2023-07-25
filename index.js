@@ -65,10 +65,15 @@ export const DEFAULTS_OPTIONS = {
     parser: require.resolve("@babel/eslint-parser"),
     extends: [
       "eslint:recommended",
+      "plugin:import/recommended",
       "plugin:prettier/recommended",
       "plugin:jsdoc/recommended",
     ],
-    plugins: ["eslint-plugin-prettier", "eslint-plugin-jsdoc"],
+    plugins: [
+      "eslint-plugin-import",
+      "eslint-plugin-prettier",
+      "eslint-plugin-jsdoc",
+    ],
     rules: {
       "prettier/prettier": "error",
       "jsdoc/require-jsdoc": 0,
@@ -77,6 +82,7 @@ export const DEFAULTS_OPTIONS = {
       "jsdoc/require-returns-description": 0,
       "jsdoc/tag-lines": 0,
       "jsdoc/no-defaults": 0,
+      "import/no-cycle": 1,
     },
     settings: {
       jsdoc: {
