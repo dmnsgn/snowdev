@@ -39,6 +39,19 @@ const groupExtraPlugins = (plugins) =>
     { pre: [], normal: [], post: [] },
   );
 
+const formatRollupLog = (
+  { name, cause, loc, message, frame },
+  level = "error",
+) => {
+  name = name || cause?.name;
+  name = name ? ` ${name}` : "";
+  console[level](
+    `rollup${name}: ${message}`,
+    loc ? `at ${loc.file}(${loc.line},${loc.column}): ` : "",
+  );
+  if (frame) globalThis.console[level](frame);
+};
+
 const bundle = async (options = {}) => {
   const label = `bundle`;
   console.time(label);
@@ -121,21 +134,18 @@ const bundle = async (options = {}) => {
     /** @type {import("rollup").InputOptions} */
     const inputOptions = {
       // input,
-      onwarn({ code, loc, frame, message }) {
+      onLog(level, log) {
         if (
-          ["THIS_IS_UNDEFINED", "EVAL"].includes(code) ||
-          (code === "CIRCULAR_DEPENDENCY" &&
-            ["polyfill-node", "@babel"].some((lib) => message.includes(lib)))
+          ["THIS_IS_UNDEFINED", "EVAL"].includes(log.code) ||
+          (log.code === "CIRCULAR_DEPENDENCY" &&
+            ["polyfill-node", "@babel"].some((lib) =>
+              log.message.includes(lib),
+            ))
         ) {
           return;
         }
 
-        console.warn(
-          `rollup: ${
-            loc ? `${loc.file}(${loc.line},${loc.column}): ` : ""
-          }${message}`,
-        );
-        if (frame) globalThis.console.warn(frame);
+        formatRollupLog(log, level);
       },
       ...options.rollup.input,
       plugins,
@@ -163,7 +173,8 @@ const bundle = async (options = {}) => {
         watch: options.rollup.watch,
       });
 
-      watcher.on("event", ({ code, result, duration }) => {
+      watcher.on("event", ({ code, error, result, duration }) => {
+        if (code === "ERROR") formatRollupLog(error);
         if (code === "BUNDLE_START") console.info(`${label}: bundling...`);
         if (code === "BUNDLE_END") {
           console.info(
@@ -180,7 +191,7 @@ const bundle = async (options = {}) => {
       await bundle.close();
     }
   } catch (error) {
-    console.error(error);
+    if (options.caller === "cli") console.error(error);
     if (bundle) await bundle.close();
     result = { error };
   }
