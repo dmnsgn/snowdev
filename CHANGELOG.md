@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [2.0.0-alpha.16](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.15...v2.0.0-alpha.16) (2023-07-27)
+
+
+### Bug Fixes
+
+* fully compare dependencies and cachedDependencies ([632652e](https://github.com/dmnsgn/snowdev/commit/632652e26e270c9595224f9ec0b245f3b29a92d3))
+
+
+
 # [2.0.0-alpha.15](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.14...v2.0.0-alpha.15) (2023-07-27)
 
 
