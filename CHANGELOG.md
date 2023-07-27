@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [2.0.0-alpha.15](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.14...v2.0.0-alpha.15) (2023-07-27)
+
+
+### Features
+
+* add jsdoc-export-default-interop ([7960faa](https://github.com/dmnsgn/snowdev/commit/7960faafe730bcbfabcd6111fda750188ee8c568))
+
+
+
 # [2.0.0-alpha.14](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.13...v2.0.0-alpha.14) (2023-07-25)
 
 
