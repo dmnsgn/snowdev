@@ -40,6 +40,12 @@ const getDependencies = async (options, type) => {
       );
 };
 
+const filterLeft = (a, b, compareFn) =>
+  a.filter((valueA) => !b.some((valueB) => compareFn(valueA, valueB)));
+
+const compareDependencies = (a, b, compareFn) =>
+  filterLeft(a, b, compareFn).concat(filterLeft(b, a, compareFn));
+
 const install = async (options) => {
   // Check package.json exists
   try {
@@ -93,10 +99,21 @@ const install = async (options) => {
       } else if (VERSION !== cachedVersion) {
         console.info("install - snowdev version changed.");
       } else if (dependencies.length !== cachedDependencies.length) {
-        console.info("install - dependency list changed.");
+        const changedDependencies = compareDependencies(
+          dependencies,
+          cachedDependencies,
+          ({ name, spec }, { spec: s, name: n }) => spec === s && name === n,
+        );
+        console.info(
+          `install - dependency list changed: ${listFormatter.format(
+            changedDependencies.map((dependency) => dependency.name),
+          )}`,
+        );
       } else if (options.caller !== "cli") {
-        const changedDependencies = dependencies.filter(
-          ({ spec }) => !cachedDependencies.some(({ spec: s }) => spec === s),
+        const changedDependencies = compareDependencies(
+          dependencies,
+          cachedDependencies,
+          ({ spec }, { spec: s }) => spec === s,
         );
 
         if (!changedDependencies.length) {
