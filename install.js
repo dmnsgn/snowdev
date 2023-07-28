@@ -242,7 +242,9 @@ const install = async (options) => {
       importMap = deepmerge(importMap, options.importMap);
       await fs.writeFile(importMapFile, JSON.stringify(importMap, null, 2));
 
-      await fs.writeFile(join(outputDir, ".nojekyll"), "", "utf-8");
+      if (options.caller === "cli") {
+        await fs.writeFile(join(options.cwd, ".nojekyll"), "", "utf-8");
+      }
 
       // Write cache
       await fs.writeFile(
