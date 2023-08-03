@@ -13,6 +13,7 @@ import {
   pathExists,
   VERSION,
   listFormatter,
+  arrayDifference,
 } from "./utils.js";
 
 import bundle from "./bundle.js";
@@ -30,21 +31,18 @@ const DEPENDENCY_SAVE_TYPE_MAP = {
   [DEPENDENCY_TYPES.PROD]: ["prod"],
 };
 
-const getDependencies = async (options, type) => {
+const getDependencies = async (options, type, names = []) => {
   const tree = await new Arborist({ path: options.cwd }).loadActual();
   const dependencies = Array.from(tree.edgesOut.values());
   return type === DEPENDENCY_TYPES.CUSTOM
-    ? dependencies
+    ? dependencies.filter(({ name }) => names.includes(name))
     : dependencies.filter((dependency) =>
         DEPENDENCY_SAVE_TYPE_MAP[type].includes(dependency.type),
       );
 };
 
-const filterLeft = (a, b, compareFn) =>
-  a.filter((valueA) => !b.some((valueB) => compareFn(valueA, valueB)));
-
-const compareDependencies = (a, b, compareFn) =>
-  filterLeft(a, b, compareFn).concat(filterLeft(b, a, compareFn));
+const compareDependencies = ({ name, spec }, { spec: s, name: n }) =>
+  spec === s && name === n;
 
 const install = async (options) => {
   // Check package.json exists
@@ -70,7 +68,12 @@ const install = async (options) => {
   const importMapFile = join(outputDir, "import-map.json");
 
   // Get current dependencies
-  const dependencies = await getDependencies(options, type);
+  const dependencies = await getDependencies(
+    options,
+    type,
+    // TODO: custom path dependency won't be cached unless found by arborist
+    type === DEPENDENCY_TYPES.CUSTOM ? options.dependencies : [],
+  );
 
   if (options.force) {
     console.info("install - force install.");
@@ -98,22 +101,13 @@ const install = async (options) => {
         console.info("install - dependency type changed.");
       } else if (VERSION !== cachedVersion) {
         console.info("install - snowdev version changed.");
-      } else if (dependencies.length !== cachedDependencies.length) {
-        const changedDependencies = compareDependencies(
+      } else if (options.caller === "cli" && options.command === "install") {
+        console.info("install - from cli.");
+      } else {
+        const changedDependencies = arrayDifference(
           dependencies,
           cachedDependencies,
-          ({ name, spec }, { spec: s, name: n }) => spec === s && name === n,
-        );
-        console.info(
-          `install - dependency list changed: ${listFormatter.format(
-            changedDependencies.map((dependency) => dependency.name),
-          )}`,
-        );
-      } else if (options.caller !== "cli") {
-        const changedDependencies = compareDependencies(
-          dependencies,
-          cachedDependencies,
-          ({ spec }, { spec: s }) => spec === s,
+          compareDependencies,
         );
 
         if (!changedDependencies.length) {
