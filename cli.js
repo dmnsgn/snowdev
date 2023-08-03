@@ -3,15 +3,15 @@
 import console from "console-ansi";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-import cosmiconfig from "cosmiconfig";
+import { cosmiconfig } from "cosmiconfig";
 
 import { commands, run } from "./index.js";
 import { NAME, VERSION } from "./utils.js";
 
-export const getConfig = () => {
+export const getConfig = async () => {
   let cosmiconfigOptions = {};
   try {
-    const result = cosmiconfig.cosmiconfigSync(NAME).search() || {};
+    const result = (await cosmiconfig(NAME).search()) || {};
     cosmiconfigOptions = result.config || {};
   } catch (error) {
     console.error(error);
@@ -154,7 +154,7 @@ Object.values(commands).forEach((fn) => {
     () => {},
     async (argv) => {
       console.debug(`v${VERSION}`);
-      await run(fn, { caller: "cli", ...getConfig(), ...argv, argv });
+      await run(fn, { caller: "cli", ...(await getConfig()), ...argv, argv });
     },
   );
 });
