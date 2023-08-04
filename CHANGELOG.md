@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+# [2.0.0-alpha.17](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.16...v2.0.0-alpha.17) (2023-08-04)
+
+
+### Bug Fixes
+
+* always compare dependencies by spec and name ([57bb25a](https://github.com/dmnsgn/snowdev/commit/57bb25a11777edcae60bbad3f2d96a4afc1f7dc7))
+
+
+### Features
+
+* move .nojekyll to cwd ([d7905b0](https://github.com/dmnsgn/snowdev/commit/d7905b081478b396589e1c24dbb63b80c40b1fdd))
+
+
+
 # [2.0.0-alpha.16](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.15...v2.0.0-alpha.16) (2023-07-27)
 
 
