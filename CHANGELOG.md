@@ -1,6 +1,10 @@
 # Changelog
 
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
+
+# [2.0.0-alpha.18](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.17...v2.0.0-alpha.18) (2023-08-07)
+
+
 
 # [2.0.0-alpha.17](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.16...v2.0.0-alpha.17) (2023-08-04)
 
