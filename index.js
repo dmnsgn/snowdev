@@ -42,7 +42,7 @@ export const DEFAULTS_OPTIONS = {
   docsFormat: undefined,
   docsStart: "<!-- api-start -->",
   docsEnd: "<!-- api-end -->",
-  standardVersion: true,
+  commitAndTagVersion: true,
 
   // Server
   /** @type {import("browser-sync").Options} */

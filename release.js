@@ -3,7 +3,7 @@ import { createRequire } from "node:module";
 
 import console from "console-ansi";
 
-import standardVersion from "standard-version";
+import commitAndTagVersion from "commit-and-tag-version";
 
 import build from "./build.js";
 
@@ -17,17 +17,17 @@ const release = async (options) => {
 
     await build(options);
 
-    if (options.standardVersion) {
+    if (options.commitAndTagVersion) {
       const { stdout, stderr } = await exec(`git add -A`, { cwd: options.cwd });
       if (stderr) throw new Error(stderr);
       console.log(stdout);
 
-      await standardVersion({
+      await commitAndTagVersion({
         path: options.cwd,
         preset: require.resolve("conventional-changelog-angular"),
         infile: join(options.cwd, "CHANGELOG.md"),
         commitAll: true,
-        ...(options.standardVersion || {}),
+        ...(options.commitAndTagVersion || {}),
         ...(options.argv || {}),
       });
     }

@@ -118,7 +118,7 @@ parser
       describe: `Default to "md" but "html" if "options.ts".`,
       defaultDescription: `undefined`,
     },
-    standardVersion: {
+    commitAndTagVersion: {
       group: "Commands options:",
       type: "boolean|Object",
       describe: `Bump the version, generate changelog release, create a new commit with git tag on release command.`,
