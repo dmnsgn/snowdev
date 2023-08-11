@@ -4,7 +4,6 @@ import { promisify } from "node:util";
 import { exec as execCb } from "node:child_process";
 
 import console from "console-ansi";
-import ncpCb from "ncp";
 import ts from "typescript";
 import { exports, legacy as legacyExport } from "resolve.exports";
 import picomatch from "picomatch";
@@ -15,7 +14,6 @@ import * as aString from "astring";
 
 const RF_OPTIONS = { recursive: true, force: true };
 const exec = promisify(execCb);
-const ncp = promisify(ncpCb);
 
 const { version: VERSION, name: NAME } = JSON.parse(
   await fs.readFile(new URL("./package.json", import.meta.url)),
@@ -239,7 +237,6 @@ export {
   listFormatter,
   secondsFormatter,
   exec,
-  ncp,
   execCommand,
   checkUncommitedChanges,
   escapeRegExp,

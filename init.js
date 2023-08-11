@@ -1,5 +1,5 @@
 import { promises as fs } from "node:fs";
-import { basename, join } from "node:path";
+import { basename, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import console from "console-ansi";
@@ -7,7 +7,7 @@ import replaceInFile from "replace-in-file";
 import npmUser from "npm-user";
 import camelcase from "camelcase";
 
-import { exec, ncp } from "./utils.js";
+import { exec } from "./utils.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
@@ -53,12 +53,20 @@ const init = async (options = {}) => {
 
   try {
     // Copy template files
-    await ncp(join(__dirname, "template"), options.cwd, {
-      clobber: false,
-      filter(fileName) {
-        return options.ts
-          ? !["index.js"].includes(basename(fileName))
-          : !["tsconfig.json", "src"].includes(basename(fileName));
+    const templatePath = join(__dirname, "template");
+    await fs.cp(templatePath, options.cwd, {
+      force: false,
+      recursive: true,
+      async filter(source) {
+        const copy = options.ts
+          ? !["index.js"].includes(basename(source))
+          : !["tsconfig.json", "src"].includes(basename(source));
+
+        if (copy && !(await fs.lstat(source)).isDirectory()) {
+          console.log("Copying:", relative(templatePath, source));
+        }
+
+        return copy;
       },
     });
 
