@@ -75,6 +75,13 @@ const install = async (options) => {
     type === DEPENDENCY_TYPES.CUSTOM ? options.dependencies : [],
   );
 
+  const dependenciesNames = dependencies.map(({ name }) => name);
+
+  const dependenciesHardcoded =
+    type === DEPENDENCY_TYPES.CUSTOM
+      ? options.dependencies.filter((name) => !dependenciesNames.includes(name))
+      : [];
+
   if (options.force) {
     console.info("install - force install.");
   } else if (!(await pathExists(outputDir))) {
@@ -87,12 +94,14 @@ const install = async (options) => {
       // TODO: handle options.importMap change
       let cachedVersion = "";
       let cachedType = DEPENDENCY_TYPES.CUSTOM;
-      let cachedDependencies = [];
+      let cachedDependencies = {};
+      let cachedDependenciesHardcoded = [];
 
       ({
         version: cachedVersion,
         type: cachedType,
         dependencies: cachedDependencies,
+        dependenciesHardcoded: cachedDependenciesHardcoded,
       } = JSON.parse(await fs.readFile(dependenciesCacheFile, "utf-8")));
 
       // Check type or list of dependencies change
@@ -109,8 +118,15 @@ const install = async (options) => {
           cachedDependencies,
           compareDependencies,
         );
+        const changedDependenciesHardcoded = arrayDifference(
+          dependenciesHardcoded,
+          cachedDependenciesHardcoded,
+        );
 
-        if (!changedDependencies.length) {
+        if (
+          changedDependencies.length + changedDependenciesHardcoded.length ===
+          0
+        ) {
           console.log("install - all dependencies installed.");
 
           return {
@@ -122,7 +138,9 @@ const install = async (options) => {
         } else {
           console.log(
             `install - dependencies changed: ${listFormatter.format(
-              changedDependencies.map((dependency) => dependency.name),
+              changedDependencies
+                .map((dependency) => dependency.name)
+                .concat(changedDependenciesHardcoded),
             )}.`,
           );
         }
@@ -132,12 +150,9 @@ const install = async (options) => {
     }
   }
 
-  const dependenciesNames =
-    type === DEPENDENCY_TYPES.CUSTOM
-      ? options.dependencies
-      : dependencies.map(({ name }) => name);
+  const installTargets = dependenciesNames.concat(dependenciesHardcoded);
 
-  if (dependenciesNames.length === 0) {
+  if (installTargets.length === 0) {
     console.warn(`No ESM dependencies to install. Set "options.dependencies".`);
     return { importMap: options.importMap };
   }
@@ -146,7 +161,7 @@ const install = async (options) => {
   console.time(label);
 
   console.info(
-    `install - ESM dependencies: ${listFormatter.format(dependenciesNames)}`,
+    `install - ESM dependencies: ${listFormatter.format(installTargets)}`,
   );
 
   let result;
@@ -218,6 +233,11 @@ const install = async (options) => {
       }
     }
 
+    for (let id of dependenciesHardcoded) {
+      input[id] = id;
+      importMap.imports[id] = id;
+    }
+
     if (!Object.values(input).length) {
       throw new Error(`No input dependency to install.`);
     }
@@ -243,7 +263,12 @@ const install = async (options) => {
       // Write cache
       await fs.writeFile(
         dependenciesCacheFile,
-        JSON.stringify({ version: VERSION, type, dependencies }),
+        JSON.stringify({
+          version: VERSION,
+          type,
+          dependencies,
+          dependenciesHardcoded,
+        }),
         "utf-8",
       );
 

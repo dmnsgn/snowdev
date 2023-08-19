@@ -227,7 +227,7 @@ const resolveExports = async (options, dependency) => {
 const filterLeft = (a, b, compareFn) =>
   a.filter((valueA) => !b.some((valueB) => compareFn(valueA, valueB)));
 
-const arrayDifference = (a, b, compareFn) =>
+const arrayDifference = (a, b, compareFn = (a, b) => a === b) =>
   filterLeft(a, b, compareFn).concat(filterLeft(b, a, compareFn));
 
 export {
