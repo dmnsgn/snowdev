@@ -235,7 +235,7 @@ const install = async (options) => {
 
     for (let id of dependenciesHardcoded) {
       input[id] = id;
-      importMap.imports[id] = id;
+      importMap.imports[id] = `./${slash(id)}`;
     }
 
     if (!Object.values(input).length) {
