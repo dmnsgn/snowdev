@@ -15,7 +15,7 @@ const init = async (options = {}) => {
   const label = `init`;
   console.time(label);
 
-  const packageName = basename(options.cwd);
+  const packageName = options.name || basename(options.cwd);
 
   // Check for empty directory
   if (

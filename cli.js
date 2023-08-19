@@ -49,6 +49,12 @@ parser
       describe: `Specify an author name for the init command. Default from current npm profile or scraped from profile page.`,
       defaultDescription: `$ npm profile get fullname`,
     },
+    authorName: {
+      group: "Input/meta options:",
+      type: "string",
+      describe: `Specify an package name for the init command. Default to cwd directory name.`,
+      defaultDescription: `basename(options.cwd)`,
+    },
     files: {
       group: "Input/meta options:",
       type: "string",
