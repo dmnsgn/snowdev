@@ -1,5 +1,5 @@
 import { promises as fs } from "node:fs";
-import { extname, isAbsolute, join } from "node:path";
+import { extname, isAbsolute, join, parse, resolve } from "node:path";
 import Arborist from "@npmcli/arborist";
 
 import console from "console-ansi";
@@ -14,6 +14,8 @@ import {
   VERSION,
   listFormatter,
   arrayDifference,
+  dotRelativeToBarePath,
+  bareToDotRelativePath,
 } from "./utils.js";
 
 import bundle from "./bundle.js";
@@ -71,7 +73,6 @@ const install = async (options) => {
   const dependencies = await getDependencies(
     options,
     type,
-    // TODO: custom path dependency won't be cached unless found by arborist
     type === DEPENDENCY_TYPES.CUSTOM ? options.dependencies : [],
   );
 
@@ -90,7 +91,6 @@ const install = async (options) => {
   } else {
     try {
       // Get cached values
-      // TODO: handle snowdev.dependencies options manual change?
       // TODO: handle options.importMap change
       let cachedVersion = "";
       let cachedType = DEPENDENCY_TYPES.CUSTOM;
@@ -168,6 +168,41 @@ const install = async (options) => {
   let input = {};
   let importMap = { imports: {} };
 
+  const filter = createFilter(
+    options.resolve.include,
+    options.resolve.exclude,
+    { resolve: options.cwd },
+  );
+
+  const packageTargets = dependenciesNames;
+
+  // Harcoded dependency can be:
+  // - a relative file path
+  // - a package inside a package to be added as target
+  // - no relative folder support (use "local-dep-name": "file:./path-to-local-dep" in pacakge.json instead)
+  // - no absolute path support (what would the import map be?)
+  await Promise.allSettled(
+    dependenciesHardcoded.map(async (dependency) => {
+      try {
+        if (parse(dependency).ext) {
+          const resolvedExport = resolve(options.cwd, dependency);
+
+          if (!filter(resolvedExport)) {
+            console.info(`Filtered out export: ${resolvedExport}`);
+          } else {
+            const id = dotRelativeToBarePath(dependency);
+            input[id] = dependency;
+            importMap.imports[id] = dependency;
+          }
+        } else {
+          packageTargets.push(dependency);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }),
+  );
+
   try {
     console.log(`install - installing (${options.transpiler})...`);
 
@@ -177,19 +212,13 @@ const install = async (options) => {
     const resolvedExportsMap = deepmerge(
       Object.fromEntries(
         await Promise.all(
-          dependenciesNames.map(async (dependency) => [
+          packageTargets.map(async (dependency) => [
             dependency,
             await resolveExports(options, dependency),
           ]),
         ),
       ),
       options.resolve.overrides,
-    );
-
-    const filter = createFilter(
-      options.resolve.include,
-      options.resolve.exclude,
-      { resolve: options.cwd },
     );
 
     // TODO: copy .css/.wasm/package.json
@@ -224,18 +253,15 @@ const install = async (options) => {
           }
 
           input[id] = resolvedExport;
-          importMap.imports[id] = isMain
-            ? `./${dependency}${extname(entryPoint)}`
-            : `./${slash(depEntryPoint)}`;
+          importMap.imports[id] = bareToDotRelativePath(
+            isMain
+              ? `${dependency}${extname(entryPoint)}`
+              : slash(depEntryPoint),
+          );
         } catch (error) {
           console.error(error);
         }
       }
-    }
-
-    for (let id of dependenciesHardcoded) {
-      input[id] = id;
-      importMap.imports[id] = `./${slash(id)}`;
     }
 
     if (!Object.values(input).length) {
@@ -245,7 +271,7 @@ const install = async (options) => {
     // Bundle
     options.rollup.input.input = input;
     options.rollup.output.entryFileNames = ({ name }) =>
-      dependenciesNames.includes(name) || extname(name) !== ".js"
+      packageTargets.includes(name) || extname(name) !== ".js"
         ? `${name}.js`
         : name;
 

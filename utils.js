@@ -230,6 +230,10 @@ const filterLeft = (a, b, compareFn) =>
 const arrayDifference = (a, b, compareFn = (a, b) => a === b) =>
   filterLeft(a, b, compareFn).concat(filterLeft(b, a, compareFn));
 
+const dotRelativeToBarePath = (p) => p.substring(p.lastIndexOf("./") + 2);
+
+const bareToDotRelativePath = (p) => `./${p}`;
+
 export {
   NAME,
   VERSION,
@@ -246,4 +250,6 @@ export {
   htmlHotInject,
   resolveExports,
   arrayDifference,
+  dotRelativeToBarePath,
+  bareToDotRelativePath,
 };
