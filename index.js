@@ -67,7 +67,6 @@ export const DEFAULTS_OPTIONS = {
       "eslint:recommended",
       "plugin:import/recommended",
       "plugin:prettier/recommended",
-      "plugin:jsdoc/recommended",
     ],
     plugins: [
       "eslint-plugin-import",
@@ -82,7 +81,7 @@ export const DEFAULTS_OPTIONS = {
       "jsdoc/require-returns-description": 0,
       "jsdoc/tag-lines": 0,
       "jsdoc/no-defaults": 0,
-      "import/no-cycle": 1,
+      "import/no-cycle": 0,
       "import/no-named-as-default": 0,
     },
     settings: {
@@ -97,7 +96,7 @@ export const DEFAULTS_OPTIONS = {
       babelOptions: {},
     },
     env: {
-      es2022: true,
+      es2024: true,
       browser: true,
       node: true,
       worker: true,
@@ -117,7 +116,7 @@ export const DEFAULTS_OPTIONS = {
         files: ["test/**/*.js"],
         parser: "esprima",
         env: {
-          es2022: true,
+          es2024: true,
           browser: true,
           jest: true,
           jasmine: true,
@@ -232,6 +231,19 @@ export const run = async (fn, options) => {
     // Set default docs
     options.docs = options.docs ?? (options.ts ? "docs" : "README.md");
     options.docsFormat = options.docsFormat ?? (options.ts ? "html" : "md");
+
+    if (options.ts) {
+      options.eslint.extends.push(
+        "plugin:import/typescript",
+        "plugin:jsdoc/recommended-typescript",
+      );
+      options.eslint.settings["import/resolver"] = {
+        typescript: true,
+        node: true,
+      };
+    } else {
+      options.eslint.extends.push("plugin:jsdoc/recommended-typescript-flavor");
+    }
 
     // console.debug(options);
 
