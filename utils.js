@@ -1,5 +1,5 @@
 import { promises as fs } from "node:fs";
-import { dirname, join, parse } from "node:path";
+import { dirname, join, parse, relative } from "node:path";
 import { promisify } from "node:util";
 import { exec as execCb } from "node:child_process";
 
@@ -7,6 +7,7 @@ import console from "console-ansi";
 import ts from "typescript";
 import { exports, legacy as legacyExport } from "resolve.exports";
 import picomatch from "picomatch";
+import { glob } from "glob";
 import * as cheerio from "cheerio";
 import * as acorn from "acorn";
 import * as acornWalk from "acorn-walk";
@@ -125,22 +126,26 @@ const htmlHotInject = async (options, req) => {
   return $.html();
 };
 
+const globOptions = { nodir: true };
+const picomatchOptions = { capture: true, noglobstar: false };
+
 const getWildcardEntries = async (cwd, key, value) => {
   const directoryName = dirname(value);
   const directoryFullPath = join(cwd, directoryName);
 
   if (!(await pathExists(directoryFullPath))) {
-    throw new Error(`Directory '${directoryFullPath}' not found`);
+    throw new Error(`Directory "${directoryFullPath}" not found`);
   }
 
-  const regex = picomatch.makeRe(value, { capture: true, noglobstar: true });
+  const valueGlobStar = value.replace("*", "**");
+  const files = await glob(valueGlobStar, { cwd, ...globOptions });
+
+  const regex = picomatch.makeRe(valueGlobStar, picomatchOptions);
 
   return Object.fromEntries(
-    (await fs.readdir(directoryFullPath, { withFileTypes: true }))
-      .filter((dirent) => dirent.isFile())
-      .map(({ name }) => {
-        const relativeFilePath = join(directoryName, name);
-        const match = regex.exec(relativeFilePath);
+    files
+      .map((name) => {
+        const match = regex.exec(name);
 
         if (match?.[1]) {
           const [matchingPath, matchGroup] = match;
