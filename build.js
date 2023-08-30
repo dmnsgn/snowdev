@@ -99,24 +99,24 @@ const docs = async (cwd, files, options) => {
     try {
       await fs.rm(join(cwd, docsFolder), RF_OPTIONS);
 
-      const app = new TypeDoc.Application();
-      app.options.addReader(new TypeDoc.TSConfigReader());
-      app.options.addReader(new TypeDoc.TypeDocReader());
-
-      await app.bootstrapWithPlugins({
-        entryPoints: files,
-        exclude: options.ignore,
-        logLevel: "Info",
-        ...(isMarkdown
-          ? {
-              readme: "none",
-              plugin: ["typedoc-plugin-markdown"],
-              hideInPageTOC: true,
-              hideBreadcrumbs: true,
-            }
-          : {}),
-        ...(options.typedoc || {}),
-      });
+      const app = await TypeDoc.Application.bootstrapWithPlugins(
+        {
+          entryPoints: files,
+          exclude: options.ignore,
+          logLevel: "Info",
+          ...(isMarkdown
+            ? {
+                readme: "none",
+                plugin: ["typedoc-plugin-markdown"],
+                hideInPageTOC: true,
+                hideBreadcrumbs: true,
+              }
+            : {}),
+          ...(options.typedoc || {}),
+        },
+        [new TypeDoc.TSConfigReader(), new TypeDoc.TypeDocReader()],
+      );
+      app.logger.info = console.info;
       const configPath = ts.findConfigFile(
         cwd,
         ts.sys.fileExists,
@@ -129,7 +129,7 @@ const docs = async (cwd, files, options) => {
         );
       }
 
-      const project = app.convert();
+      const project = await app.convert();
       if (project) await app.generateDocs(project, docsFolder);
       await fs.writeFile(join(cwd, docsFolder, ".nojekyll"), "", "utf-8");
 
