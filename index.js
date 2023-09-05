@@ -81,8 +81,9 @@ export const DEFAULTS_OPTIONS = {
       "jsdoc/require-returns-description": 0,
       "jsdoc/tag-lines": 0,
       "jsdoc/no-defaults": 0,
-      "import/no-cycle": 0,
-      "import/no-named-as-default": 0,
+      "import/no-cycle": 1,
+      "import/order": [1, { groups: ["builtin", "external", "internal"] }],
+      "import/newline-after-import": 2,
     },
     settings: {
       jsdoc: {
