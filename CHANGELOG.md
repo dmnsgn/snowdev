@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [2.0.0-alpha.19](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.18...v2.0.0-alpha.19) (2023-09-09)
+
+
+### Bug Fixes
+
+* add no-named-as-default to eslint import ([8980641](https://github.com/dmnsgn/snowdev/commit/898064109dcd2eec8047f050d3254675a0646f9d))
+* hardcoded dependency import map value ([fa3b041](https://github.com/dmnsgn/snowdev/commit/fa3b0414cb849add1248e5ab5096e8b85d2cc968))
+* name cli argument ([e8eff7b](https://github.com/dmnsgn/snowdev/commit/e8eff7b3d7488e27c4e5137775a4345590d7a723))
+* treat star as globstar in wildcard entries resolution ([a8d69c7](https://github.com/dmnsgn/snowdev/commit/a8d69c734011c5b2100ab7cb9e02e807fe008828))
+* update eslint extends/settings rules for TypeScript and typescript-flavor ([0cafba9](https://github.com/dmnsgn/snowdev/commit/0cafba9d52d0e4be48398d4c8e1b8f99c571a01c))
+
+
+### Features
+
+* add back support for hardcoded dependencies ([db9804b](https://github.com/dmnsgn/snowdev/commit/db9804b346ecd87165e1a31f6518b31073e97fd6))
+* add options.name for init command package name ([7ff4949](https://github.com/dmnsgn/snowdev/commit/7ff4949436f5f5186ff8014ceb1b4ef2ff883257))
+* allow both filename and subpackage path for hardcoded dependencies ([2e23fb3](https://github.com/dmnsgn/snowdev/commit/2e23fb3e4c33001c1fc5e4e2ecada11abd36617c))
+* **template:** update module type + add .nojekyll to npmignore ([93e021b](https://github.com/dmnsgn/snowdev/commit/93e021b2390980fd69f94093883d89a33096fc95))
+* update import rules ([6c8e4fe](https://github.com/dmnsgn/snowdev/commit/6c8e4fe011396871c13425bbdc56c6ff1ca3b8cd))
+
+
+
 # [2.0.0-alpha.18](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.17...v2.0.0-alpha.18) (2023-08-07)
 
 
