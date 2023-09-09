@@ -83,6 +83,7 @@ export const DEFAULTS_OPTIONS = {
       "jsdoc/no-defaults": 0,
       "import/no-cycle": 1,
       "import/order": [1, { groups: ["builtin", "external", "internal"] }],
+      "import/no-named-as-default": 0,
       "import/newline-after-import": 2,
     },
     settings: {
