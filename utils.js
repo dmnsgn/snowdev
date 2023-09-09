@@ -1,5 +1,5 @@
 import { promises as fs } from "node:fs";
-import { dirname, join, parse, relative } from "node:path";
+import { dirname, join, parse } from "node:path";
 import { promisify } from "node:util";
 import { exec as execCb } from "node:child_process";
 
