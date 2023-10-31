@@ -254,9 +254,7 @@ const install = async (options) => {
 
           input[id] = resolvedExport;
           importMap.imports[id] = bareToDotRelativePath(
-            isMain
-              ? `${dependency}${extname(entryPoint)}`
-              : slash(depEntryPoint),
+            isMain ? `${dependency}.js` : slash(depEntryPoint),
           );
         } catch (error) {
           console.error(error);
