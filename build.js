@@ -98,6 +98,7 @@ const docs = async (cwd, files, options) => {
   if (options.ts) {
     try {
       await fs.rm(join(cwd, docsFolder), RF_OPTIONS);
+      await fs.mkdir(join(cwd, docsFolder), { recursive: true });
 
       const app = await TypeDoc.Application.bootstrapWithPlugins(
         {
