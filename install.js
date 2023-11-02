@@ -174,7 +174,9 @@ const install = async (options) => {
     { resolve: options.cwd },
   );
 
-  const packageTargets = dependenciesNames;
+  const packageTargets = dependenciesNames.filter(
+    (target) => target !== "snowdev",
+  );
 
   // Harcoded dependency can be:
   // - a relative file path
