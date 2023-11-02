@@ -115,7 +115,11 @@ const docs = async (cwd, files, options) => {
             : {}),
           ...(options.typedoc || {}),
         },
-        [new TypeDoc.TSConfigReader(), new TypeDoc.TypeDocReader()],
+        [
+          new TypeDoc.TSConfigReader(),
+          new TypeDoc.PackageJsonReader(),
+          new TypeDoc.TypeDocReader(),
+        ],
       );
       app.logger.info = console.info;
       const configPath = ts.findConfigFile(
@@ -130,7 +134,11 @@ const docs = async (cwd, files, options) => {
         );
       }
 
+      // Ignore errors in dependencies
+      app.options._compilerOptions.skipLibCheck = true;
+
       const project = await app.convert();
+
       if (project) await app.generateDocs(project, docsFolder);
       await fs.writeFile(join(cwd, docsFolder, ".nojekyll"), "", "utf-8");
 
