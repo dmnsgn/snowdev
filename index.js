@@ -176,6 +176,10 @@ export const DEFAULTS_OPTIONS = {
       coreJs: "3.19",
       shippedProposals: true,
     },
+    jsc: {
+      // `env` and `jsc.target` cannot be used together
+      target: null,
+    },
   },
   importMap: {},
   resolve: {
