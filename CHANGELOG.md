@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [2.0.0-alpha.20](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.19...v2.0.0-alpha.20) (2023-11-02)
+
+
+### Bug Fixes
+
+* create doc folder for ts ([a84b482](https://github.com/dmnsgn/snowdev/commit/a84b482d951fb504eed369fb31d2ca4beacee869))
+* exclude snowdev from install ([e189225](https://github.com/dmnsgn/snowdev/commit/e1892252e62321154542f76961abc6dd7cade5ba))
+* handle errors in dependencies for typedoc ([bc57c6d](https://github.com/dmnsgn/snowdev/commit/bc57c6d3b30e5b797cd90733fd2a02b8709a3704))
+* swc Error: `env` and `jsc.target` cannot be used together ([9b16f21](https://github.com/dmnsgn/snowdev/commit/9b16f217cc6cc6913cd4f08e4a06bffaf002d869))
+* use .js for main importMap import path ([98fae28](https://github.com/dmnsgn/snowdev/commit/98fae28610da2fcc39411943c99115a71ada7ac0))
+
+
+
 # [2.0.0-alpha.19](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.18...v2.0.0-alpha.19) (2023-09-09)
 
 
