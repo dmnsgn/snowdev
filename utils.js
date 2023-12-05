@@ -185,7 +185,7 @@ const resolveExports = async (options, dependency) => {
     if (!pkg.exports) {
       let entry = legacyExport(pkg, { fields: options.resolve.mainFields });
       entry ??= (await pathExists(join(src, "index.js"))) && "./index.js";
-      if (![".js", ".mjs", ".cjs", ".node"].includes(extname(entry))) {
+      if (entry && ![".js", ".mjs", ".cjs", ".node"].includes(extname(entry))) {
         try {
           entry = bareToDotRelativePath(
             slash(relative(src, resolveSync(entry, { basedir: src }))),
