@@ -84,12 +84,12 @@ npx snowdev build
 npx snowdev build --ts
 
 # or directly prepare a release
-# (build then run standard-version committing all artefacts eg. docs)
+# (build then run "commit-and-tag-version" committing all artefacts eg. docs)
 npx snowdev release
-# ...optionally passing options to standard-version like prerelease
+# ...optionally passing options to "commit-and-tag-version" like prerelease
 # setting a specific package distribution tag for "npm i package@alpha"
 npx snowdev release --prerelease alpha
-# ...optionally passing options to standard-version like --dry-run
+# ...optionally passing options to "commit-and-tag-version" like --dry-run
 # to test release without committing to git or updating files
 # or --first-release to only generate an initial changelog
 npx snowdev release --first-release --dry-run
