@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [2.0.0-alpha.21](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.20...v2.0.0-alpha.21) (2023-12-05)
+
+
+### Bug Fixes
+
+* handle legacy exports defined as folders or files without extensions ([d0f2bcd](https://github.com/dmnsgn/snowdev/commit/d0f2bcd45f4f3f2d5ede572ed5e323586464e581))
+* hardcode removal of new exports. in jsdoc ([65a6d26](https://github.com/dmnsgn/snowdev/commit/65a6d2689b3afdee7c82351e11d8d95d7b242ec9))
+
+
+### Features
+
+* add typedoc-material-theme ([93bf01d](https://github.com/dmnsgn/snowdev/commit/93bf01da27d69f7ddbbdcba1db569d4d25ff5eba))
+
+
+
 # [2.0.0-alpha.20](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.19...v2.0.0-alpha.20) (2023-11-02)
 
 
