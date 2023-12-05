@@ -112,7 +112,10 @@ const docs = async (cwd, files, options) => {
                 hideInPageTOC: true,
                 hideBreadcrumbs: true,
               }
-            : {}),
+            : {
+                plugin: ["typedoc-material-theme"],
+                showConfig: true,
+              }),
           ...(options.typedoc || {}),
         },
         [
