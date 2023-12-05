@@ -114,7 +114,6 @@ const docs = async (cwd, files, options) => {
               }
             : {
                 plugin: ["typedoc-material-theme"],
-                showConfig: true,
               }),
           ...(options.typedoc || {}),
         },
@@ -157,6 +156,8 @@ const docs = async (cwd, files, options) => {
         files,
         configure: options.jsdoc || join(__dirname, "jsdoc.json"),
       });
+      // TODO: remove if jsdoc ever properly works with ESM and classes
+      inlinedDocs = inlinedDocs.replaceAll("new exports.", "new ");
       if (!isFile) {
         await fs.mkdir(join(cwd, docsFolder), { recursive: true });
         await fs.writeFile(
