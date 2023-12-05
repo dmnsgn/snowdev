@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [2.0.0-alpha.22](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.21...v2.0.0-alpha.22) (2023-12-05)
+
+
+### Bug Fixes
+
+* check null entry for legacy exports defined as folders or files without extensions ([29c1eeb](https://github.com/dmnsgn/snowdev/commit/29c1eeb4fca448044020916540d80a6b3bd7ce43))
+
+
+
 # [2.0.0-alpha.21](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.20...v2.0.0-alpha.21) (2023-12-05)
 
 
