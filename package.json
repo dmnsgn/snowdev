@@ -103,6 +103,7 @@
     "npm-user": "^5.0.1",
     "prettier": "^3.1.0",
     "replace-in-file": "^7.0.2",
+    "resolve": "^2.0.0-next.5",
     "resolve.exports": "^2.0.2",
     "rollup": "^4.6.1",
     "rollup-plugin-commonjs-named-exports": "^1.0.2",

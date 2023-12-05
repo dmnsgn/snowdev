@@ -1,11 +1,13 @@
 import { promises as fs } from "node:fs";
-import { dirname, join, parse } from "node:path";
+import { dirname, extname, join, parse, relative } from "node:path";
 import { promisify } from "node:util";
 import { exec as execCb } from "node:child_process";
 
 import console from "console-ansi";
 import ts from "typescript";
 import { exports, legacy as legacyExport } from "resolve.exports";
+import { sync as resolveSync } from "resolve";
+import slash from "slash";
 import picomatch from "picomatch";
 import { glob } from "glob";
 import * as cheerio from "cheerio";
@@ -183,6 +185,15 @@ const resolveExports = async (options, dependency) => {
     if (!pkg.exports) {
       let entry = legacyExport(pkg, { fields: options.resolve.mainFields });
       entry ??= (await pathExists(join(src, "index.js"))) && "./index.js";
+      if (![".js", ".mjs", ".cjs", ".node"].includes(extname(entry))) {
+        try {
+          entry = bareToDotRelativePath(
+            slash(relative(src, resolveSync(entry, { basedir: src }))),
+          );
+        } catch (error) {
+          console.error(error);
+        }
+      }
       return { ".": entry };
     }
 
