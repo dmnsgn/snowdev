@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [2.0.0-alpha.23](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.22...v2.0.0-alpha.23) (2024-01-30)
+
+
+### Bug Fixes
+
+* empty output directory if no dependency to install ([26c7107](https://github.com/dmnsgn/snowdev/commit/26c710741103715887a5818986fb8dc90a77dca1))
+* ensure no duplicates in dependencies changed log ([f9f822a](https://github.com/dmnsgn/snowdev/commit/f9f822a6ee7e03da2e49f4f07cf97caf32132db3))
+
+
+
 # [2.0.0-alpha.22](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.21...v2.0.0-alpha.22) (2023-12-05)
 
 
