@@ -152,9 +152,29 @@ const install = async (options) => {
     }
   }
 
+  // Remove output to empty it or bundle in it
+  try {
+    await fs.rm(outputDir, RF_OPTIONS);
+    await fs.mkdir(outputDir, { recursive: true });
+  } catch (error) {
+    console.error(`install - error removing output directory\n`, error);
+    return { error };
+  }
+
   const installTargets = dependenciesNames.concat(dependenciesHardcoded);
 
   if (installTargets.length === 0) {
+    await fs.writeFile(
+      dependenciesCacheFile,
+      JSON.stringify({
+        version: VERSION,
+        type,
+        dependencies: {},
+        dependenciesHardcoded: {},
+      }),
+      "utf-8",
+    );
+
     console.warn(`No ESM dependencies to install. Set "options.dependencies".`);
     return { importMap: options.importMap };
   }
@@ -209,9 +229,6 @@ const install = async (options) => {
 
   try {
     console.log(`install - installing (${options.transpiler})...`);
-
-    await fs.rm(outputDir, RF_OPTIONS);
-    await fs.mkdir(outputDir, { recursive: true });
 
     const resolvedExportsMap = deepmerge(
       Object.fromEntries(
