@@ -137,11 +137,13 @@ const install = async (options) => {
           };
         } else {
           console.log(
-            `install - dependencies changed: ${listFormatter.format(
-              changedDependencies
-                .map((dependency) => dependency.name)
-                .concat(changedDependenciesHardcoded),
-            )}.`,
+            `install - dependencies changed: ${listFormatter.format([
+              ...new Set(
+                changedDependencies
+                  .map((dependency) => dependency.name)
+                  .concat(changedDependenciesHardcoded),
+              ),
+            ])}.`,
           );
         }
       }
