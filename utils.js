@@ -30,6 +30,38 @@ const secondsFormatter = new Intl.NumberFormat("en", {
   unitDisplay: "narrow",
 });
 
+const sortPaths = (
+  paths,
+  { separator = "/", prepend = ["index.js"], append = ["types.js"] } = {},
+) =>
+  paths
+    .map((p) => p.split(separator))
+    .sort((a, b) => {
+      for (let i = 0; i < Math.max(a.length, b.length); i++) {
+        if (!(i in a)) return -1;
+        if (!(i in b)) return 1;
+        if (prepend.includes(a[i]) || prepend.includes(b[i])) {
+          const aIndex = prepend.indexOf(a[i]);
+          const bIndex = prepend.indexOf(b[i]);
+          if (aIndex === -1) return 1;
+          if (bIndex === -1) return -1;
+          return Math.sign(aIndex - bIndex);
+        }
+        if (append.includes(a[i]) || append.includes(b[i])) {
+          const aIndex = append.indexOf(a[i]);
+          const bIndex = append.indexOf(b[i]);
+          if (aIndex === -1) return -1;
+          if (bIndex === -1) return 1;
+          return Math.sign(aIndex - bIndex);
+        }
+        if (a[i].toUpperCase() > b[i].toUpperCase()) return 1;
+        if (a[i].toUpperCase() < b[i].toUpperCase()) return -1;
+        if (a.length < b.length) return -1;
+        if (a.length > b.length) return 1;
+      }
+    })
+    .map((p) => p.join(separator));
+
 const execCommand = async (command, options) => {
   const { stdout, stderr } = await exec(command, options);
   if (stderr) throw new Error(stderr);
@@ -256,6 +288,7 @@ export {
   RF_OPTIONS,
   listFormatter,
   secondsFormatter,
+  sortPaths,
   exec,
   execCommand,
   checkUncommitedChanges,

@@ -17,7 +17,7 @@ import TypeDoc from "typedoc";
 import concatMd from "concat-md";
 import { glob } from "glob";
 
-import { RF_OPTIONS, escapeRegExp } from "./utils.js";
+import { RF_OPTIONS, escapeRegExp, sortPaths } from "./utils.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
@@ -317,13 +317,13 @@ types.description = `build: run TypeScript (generate types, watch or compile)`;
 
 const build = async (options) => {
   const cwd = options.cwd;
-  const files = (
+  const files = sortPaths(
     await glob(options.files, {
       cwd,
       ignore: options.ignore,
       absolute: true,
-    })
-  ).sort();
+    }),
+  );
 
   console.log(`build files:\n- ${files.join("\n- ")}`);
 
