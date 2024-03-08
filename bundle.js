@@ -69,7 +69,9 @@ const bundle = async (options = {}) => {
         commonjs: { sourceMap },
         polyfillNode: { include: options.resolve.include }, // Transform all files
         replace: {
-          "process.env.NODE_ENV": JSON.stringify(options.NODE_ENV),
+          [["process", "env", "NODE_ENV"].join(".")]: JSON.stringify(
+            options.NODE_ENV,
+          ),
           preventAssignment: true,
         },
         json: { compact: minify },
