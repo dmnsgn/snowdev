@@ -11,7 +11,8 @@ import { NAME, VERSION } from "./utils.js";
 export const getConfig = async () => {
   let cosmiconfigOptions = {};
   try {
-    const result = (await cosmiconfig(NAME).search()) || {};
+    const result =
+      (await cosmiconfig(NAME, { searchStrategy: "global" }).search()) || {};
     cosmiconfigOptions = result.config || {};
   } catch (error) {
     console.error(error);
