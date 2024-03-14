@@ -94,7 +94,7 @@ const dev = async (options = {}) => {
             }
           },
         },
-        httpModule: options.http2 && "node:http2",
+        httpModule: options.browsersync?.https && options.http2 && "node:http2",
         codeSync: !options.hmr,
         logPrefix: "snowdev:browser-sync",
         ...(options.browsersync || {}),
