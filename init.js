@@ -7,7 +7,7 @@ import replaceInFile from "replace-in-file";
 import npmUser from "npm-user";
 import camelcase from "camelcase";
 
-import { exec } from "./utils.js";
+import { exec, writeJson } from "./utils.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
@@ -100,16 +100,10 @@ const init = async (options = {}) => {
 
     // Change main entry point
     if (options.ts) {
-      const packageJsonFile = join(options.cwd, "package.json");
-      const packageJson = JSON.parse(
-        await fs.readFile(packageJsonFile, "utf-8"),
-      );
-      packageJson.main = "lib/index.js";
-      packageJson.exports = "./lib/index.js";
-      await fs.writeFile(
-        packageJsonFile,
-        JSON.stringify(packageJson, null, 2),
-        "utf-8",
+      await writeJson(
+        join(options.cwd, "package.json"),
+        { main: "lib/index.js", exports: "./lib/index.js" },
+        { merge: true },
       );
     }
   } catch (error) {

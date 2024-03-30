@@ -2,6 +2,7 @@ import { promises as fs } from "node:fs";
 import { dirname, extname, join, parse, relative } from "node:path";
 import { promisify } from "node:util";
 import { exec as execCb } from "node:child_process";
+import deepmerge from "deepmerge";
 
 import console from "console-ansi";
 import ts from "typescript";
@@ -18,8 +19,17 @@ import * as aString from "astring";
 const RF_OPTIONS = { recursive: true, force: true };
 const exec = promisify(execCb);
 
-const { version: VERSION, name: NAME } = JSON.parse(
-  await fs.readFile(new URL("./package.json", import.meta.url)),
+const readJson = async (path) => JSON.parse(await fs.readFile(path, "utf-8"));
+
+const writeJson = async (path, obj, { merge = false } = {}) =>
+  await fs.writeFile(
+    path,
+    JSON.stringify(merge ? deepmerge(await readJson(path), obj) : obj, null, 2),
+    "utf-8",
+  );
+
+const { version: VERSION, name: NAME } = await readJson(
+  new URL("./package.json", import.meta.url),
 );
 
 const listFormatter = new Intl.ListFormat("en");
@@ -288,6 +298,8 @@ export {
   RF_OPTIONS,
   listFormatter,
   secondsFormatter,
+  readJson,
+  writeJson,
   sortPaths,
   exec,
   execCommand,

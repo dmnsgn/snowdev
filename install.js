@@ -16,6 +16,8 @@ import {
   arrayDifference,
   dotRelativeToBarePath,
   bareToDotRelativePath,
+  readJson,
+  writeJson,
 } from "./utils.js";
 
 import bundle from "./bundle.js";
@@ -49,7 +51,7 @@ const compareDependencies = ({ name, spec }, { spec: s, name: n }) =>
 const install = async (options) => {
   // Check package.json exists
   try {
-    JSON.parse(await fs.readFile(join(options.cwd, "package.json")));
+    await readJson(join(options.cwd, "package.json"));
   } catch (error) {
     console.error(`install - error reading package.json\n`, error);
     return { error };
@@ -102,7 +104,7 @@ const install = async (options) => {
         type: cachedType,
         dependencies: cachedDependencies,
         dependenciesHardcoded: cachedDependenciesHardcoded,
-      } = JSON.parse(await fs.readFile(dependenciesCacheFile, "utf-8")));
+      } = await readJson(dependenciesCacheFile));
 
       // Check type or list of dependencies change
       // Calling install from CLI will always force install
@@ -131,7 +133,7 @@ const install = async (options) => {
 
           return {
             importMap: deepmerge(
-              JSON.parse(await fs.readFile(importMapFile, "utf-8")),
+              await readJson(importMapFile),
               options.importMap,
             ),
           };
@@ -164,16 +166,12 @@ const install = async (options) => {
   const installTargets = dependenciesNames.concat(dependenciesHardcoded);
 
   if (installTargets.length === 0) {
-    await fs.writeFile(
-      dependenciesCacheFile,
-      JSON.stringify({
-        version: VERSION,
-        type,
-        dependencies: {},
-        dependenciesHardcoded: {},
-      }),
-      "utf-8",
-    );
+    await writeJson(dependenciesCacheFile, {
+      version: VERSION,
+      type,
+      dependencies: {},
+      dependenciesHardcoded: {},
+    });
 
     console.warn(`No ESM dependencies to install. Set "options.dependencies".`);
     return { importMap: options.importMap };
@@ -299,23 +297,19 @@ const install = async (options) => {
     if (!result.error) {
       // Write import map
       importMap = deepmerge(importMap, options.importMap);
-      await fs.writeFile(importMapFile, JSON.stringify(importMap, null, 2));
+      await writeJson(importMapFile, importMap);
 
       if (options.caller === "cli") {
         await fs.writeFile(join(options.cwd, ".nojekyll"), "", "utf-8");
       }
 
       // Write cache
-      await fs.writeFile(
-        dependenciesCacheFile,
-        JSON.stringify({
-          version: VERSION,
-          type,
-          dependencies,
-          dependenciesHardcoded,
-        }),
-        "utf-8",
-      );
+      await writeJson(dependenciesCacheFile, {
+        version: VERSION,
+        type,
+        dependencies,
+        dependenciesHardcoded,
+      });
 
       console.log("install - complete.");
     }
