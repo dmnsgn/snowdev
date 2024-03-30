@@ -1,9 +1,11 @@
 import { promises as fs, constants } from "node:fs";
 import { join, resolve } from "node:path";
 import { createRequire } from "node:module";
+import { fileURLToPath } from "node:url";
 
 import console from "console-ansi";
 import deepmerge from "deepmerge";
+import semver from "semver";
 import browserslistToEsbuild from "browserslist-to-esbuild";
 
 import init from "./init.js";
@@ -13,9 +15,16 @@ import bundle from "./bundle.js";
 import release from "./release.js";
 import deploy from "./deploy.js";
 import install from "./install.js";
-import { NAME, isTypeScriptProject } from "./utils.js";
+import {
+  NAME,
+  VERSION,
+  isTypeScriptProject,
+  readJson,
+  writeJson,
+} from "./utils.js";
 
 const require = createRequire(import.meta.url);
+const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 console.prefix = `[${NAME}]`;
 
@@ -31,6 +40,7 @@ export const DEFAULTS_OPTIONS = {
   files: "{*.+(j|t|mj|mt|cj|ct)s,src/**/*.+(j|t|mj|mt|cj|ct)s}",
   ignore: ["**/node_modules/**"],
   dependencies: "all",
+  updateVersions: true,
 
   // Process
   ts: undefined,
@@ -251,11 +261,25 @@ export const run = async (fn, options) => {
       options.eslint.extends.push("plugin:jsdoc/recommended-typescript-flavor");
     }
 
+    // Check package.json exists and update versions
+    const packageJsonPath = join(options.cwd, "package.json");
+    let packageJson = await readJson(packageJsonPath);
+    if (options.updateVersions) {
+      const { engines } = await readJson(
+        join(__dirname, "template", "package.json"),
+      );
+      const { prerelease, major, minor } = semver.minVersion(VERSION);
+      engines[NAME] = prerelease.length ? VERSION : `>=${major}.${minor}.x`;
+      packageJson = deepmerge(packageJson, { engines });
+      await writeJson(packageJsonPath, packageJson);
+    }
+
     // console.debug(options);
 
     return await fn(options);
   } catch (error) {
-    console.error(`Can't access cwd.`);
+    console.error(`Error accessing "cwd" or reading "package.json".`);
     console.error(error);
+    return { error };
   }
 };

@@ -110,6 +110,7 @@
     "rollup-plugin-esbuild": "^6.1.1",
     "rollup-plugin-no-op": "^1.0.1",
     "rollup-plugin-polyfill-node": "^0.13.0",
+    "semver": "^7.6.0",
     "slash": "^5.1.0",
     "sort-package-json": "^2.8.0",
     "tslib": "^2.6.2",

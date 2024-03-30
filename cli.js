@@ -75,6 +75,12 @@ parser
       describe: `Install all dependencies from package.json, only devDependencies ("dev"), only dependencies ("prod") or an array of dependency as ES module into web_modules.`,
       defaultDescription: `all`,
     },
+    updateVersions: {
+      group: "Input/meta options:",
+      type: "boolean",
+      describe: `Update package.json engines with current Node.js/npm version from template, and currently used snowdev version.`,
+      defaultDescription: `true`,
+    },
 
     NODE_ENV: {
       group: "Commands options:",
