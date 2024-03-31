@@ -3,6 +3,7 @@ import http2 from "node:http2";
 
 import console from "console-ansi";
 import { create as browserSyncCreate } from "browser-sync";
+import pDebounce from "p-debounce";
 
 import install from "./install.js";
 import { types, lint } from "./build.js";
@@ -36,12 +37,20 @@ const dev = async (options = {}) => {
       });
     }
 
+    const watchOptions = { ignoreInitial: true };
+
+    const onDependencyChange = pDebounce(async () => {
+      await install(options);
+      if (options.hmr) bs.sockets.emit("reload");
+    }, 500);
+
     // Install on package.json change
-    bs.watch("package.json", async (event) => {
-      if (event === "change") {
-        await install(options);
-        if (options.hmr) bs.sockets.emit("reload");
-      }
+    bs.watch("package.json", watchOptions, async (event) => {
+      if (event === "change") await onDependencyChange();
+    });
+    // Install on directory change in node_modules
+    bs.watch("node_modules/!(.*){,/*/}", watchOptions, async (event, path) => {
+      if (["addDir", "unlinkDir"].includes(event)) await onDependencyChange();
     });
 
     // HMR
@@ -59,7 +68,7 @@ const dev = async (options = {}) => {
           "examples/**/*.js",
           "**/*.{html,css}",
         ],
-        { ignoreInitial: true },
+        watchOptions,
         async (event, file) => {
           if (event === "change") {
             if (getFileExtension(file) === ".js") {
