@@ -262,16 +262,18 @@ export const run = async (fn, options) => {
     }
 
     // Check package.json exists and update versions
-    const packageJsonPath = join(options.cwd, "package.json");
-    let packageJson = await readJson(packageJsonPath);
-    if (options.updateVersions) {
-      const { engines } = await readJson(
-        join(__dirname, "template", "package.json"),
-      );
-      const { prerelease, major, minor } = semver.minVersion(VERSION);
-      engines[NAME] = prerelease.length ? VERSION : `>=${major}.${minor}.x`;
-      packageJson = deepmerge(packageJson, { engines });
-      await writeJson(packageJsonPath, packageJson);
+    if (options.command === "dev") {
+      const packageJsonPath = join(options.cwd, "package.json");
+      let packageJson = await readJson(packageJsonPath);
+      if (options.updateVersions) {
+        const { engines } = await readJson(
+          join(__dirname, "template", "package.json"),
+        );
+        const { prerelease, major, minor } = semver.minVersion(VERSION);
+        engines[NAME] = prerelease.length ? VERSION : `>=${major}.${minor}.x`;
+        packageJson = deepmerge(packageJson, { engines });
+        await writeJson(packageJsonPath, packageJson);
+      }
     }
 
     // console.debug(options);
