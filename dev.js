@@ -49,7 +49,7 @@ const dev = async (options = {}) => {
       if (event === "change") await onDependencyChange();
     });
     // Install on directory change in node_modules
-    bs.watch("node_modules/!(.*){,/*/}", watchOptions, async (event, path) => {
+    bs.watch("node_modules/!(.*){,/*/}", watchOptions, async (event) => {
       if (["addDir", "unlinkDir"].includes(event)) await onDependencyChange();
     });
 

@@ -85,7 +85,9 @@ const install = async (options) => {
         `install - invalid dependencies: ${listFormatter.format(invalid.map(({ pkgid }) => pkgid))}`,
       );
     }
-  } catch (error) {}
+  } catch (error) {
+    // This is only a warning. Don't throw if anything unexpected happen.
+  }
 
   // Get install type: an array of custom dependencies or one of DEPENDENCY_TYPES values
   const type = Array.isArray(options.dependencies)
