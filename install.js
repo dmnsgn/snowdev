@@ -75,6 +75,18 @@ const install = async (options) => {
     return { error };
   }
 
+  // Check invalid dependencies
+  try {
+    const invalid = JSON.parse(
+      await npm.run(options.cwd, "query", [`':invalid'`]),
+    );
+    if (invalid.length) {
+      console.warn(
+        `install - invalid dependencies: ${listFormatter.format(invalid.map(({ pkgid }) => pkgid))}`,
+      );
+    }
+  } catch (error) {}
+
   // Get install type: an array of custom dependencies or one of DEPENDENCY_TYPES values
   const type = Array.isArray(options.dependencies)
     ? DEPENDENCY_TYPES.CUSTOM
