@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [2.0.0-alpha.24](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.23...v2.0.0-alpha.24) (2024-04-10)
+
+
+### Bug Fixes
+
+* ensure https is set for browser-sync httpModule ([9f58556](https://github.com/dmnsgn/snowdev/commit/9f5855644246b4e951b117e65fd155ff21d03988))
+* ensure process.env.NODE_ENV key isn't replaced ([b099591](https://github.com/dmnsgn/snowdev/commit/b099591f23e782259cb8bd927765ee9fb3346c83))
+* only update versions for dev command ([c89b397](https://github.com/dmnsgn/snowdev/commit/c89b397c895e8cfb7ba3cdb23a64bb3341132059))
+
+
+### Features
+
+* add npm + support workspaces dependencies ([fdfa1b8](https://github.com/dmnsgn/snowdev/commit/fdfa1b8075dc94540e1a90ce35055f266bfd7968))
+* add path sorting for build command ([5af3733](https://github.com/dmnsgn/snowdev/commit/5af373334a9bc6ac2c5abd6361c9afb9f94108a5))
+* add updateVersions ([1bbd051](https://github.com/dmnsgn/snowdev/commit/1bbd051c325ff130946cd44abd1eb856c25de569))
+* check invalid dependencies ([0aee75d](https://github.com/dmnsgn/snowdev/commit/0aee75d9334ada87de5313d78d3a85a1e038d3a0))
+* handle dependency change when running dev ([d337350](https://github.com/dmnsgn/snowdev/commit/d33735052f0fc552e0d13bb63c872b7780243d90))
+* use global searchStrategy for cosmiconfig ([53ec5b5](https://github.com/dmnsgn/snowdev/commit/53ec5b5389d4ecb7724f0c5c5ac4cae811b9151b))
+
+
+
 # [2.0.0-alpha.23](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.22...v2.0.0-alpha.23) (2024-01-30)
 
 
