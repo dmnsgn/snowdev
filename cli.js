@@ -81,6 +81,12 @@ parser
       describe: `Update package.json engines with current Node.js/npm version from template, and currently used snowdev version.`,
       defaultDescription: `true`,
     },
+    npmPath: {
+      group: "Input/meta options:",
+      type: "string",
+      describe: `Specify a path for the "npm" package. If null, commands will use "npm" from shell.`,
+      defaultDescription: `null`,
+    },
 
     NODE_ENV: {
       group: "Commands options:",

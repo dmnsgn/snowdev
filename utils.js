@@ -218,10 +218,9 @@ const resolveEntryPoint = async (cwd, key, value, out = {}) => {
   return out;
 };
 
-const resolveExports = async (options, dependency) => {
+const resolveExports = async (options, src) => {
   try {
-    const src = join(options.cwd, "node_modules", dependency);
-    const pkg = JSON.parse(await fs.readFile(join(src, "package.json")));
+    const pkg = await readJson(join(src, "package.json"));
 
     // Resolves "module" then "main", defaulting to Node.js behaviour
     if (!pkg.exports) {
@@ -282,6 +281,9 @@ const resolveExports = async (options, dependency) => {
   }
 };
 
+const pick = (obj, keys) =>
+  Object.fromEntries(keys.map((key) => [key, obj[key]]));
+
 const filterLeft = (a, b, compareFn) =>
   a.filter((valueA) => !b.some((valueB) => compareFn(valueA, valueB)));
 
@@ -310,6 +312,7 @@ export {
   getFileExtension,
   htmlHotInject,
   resolveExports,
+  pick,
   arrayDifference,
   dotRelativeToBarePath,
   bareToDotRelativePath,

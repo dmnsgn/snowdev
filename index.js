@@ -15,6 +15,7 @@ import bundle from "./bundle.js";
 import release from "./release.js";
 import deploy from "./deploy.js";
 import install from "./install.js";
+import npm from "./npm.js";
 import {
   NAME,
   VERSION,
@@ -41,6 +42,7 @@ export const DEFAULTS_OPTIONS = {
   ignore: ["**/node_modules/**"],
   dependencies: "all",
   updateVersions: true,
+  npmPath: null,
 
   // Process
   ts: undefined,
@@ -222,6 +224,8 @@ export const DEFAULTS_OPTIONS = {
 
 export const commands = { init, dev, build, bundle, release, deploy, install };
 
+export { npm };
+
 export const run = async (fn, options) => {
   const { [fn.name]: commandOptions, ...globalOptions } = options;
 
@@ -260,6 +264,8 @@ export const run = async (fn, options) => {
     } else {
       options.eslint.extends.push("plugin:jsdoc/recommended-typescript-flavor");
     }
+
+    await npm.load(options.npmPath);
 
     // Check package.json exists and update versions
     if (options.command === "dev") {

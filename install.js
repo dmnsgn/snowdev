@@ -1,6 +1,5 @@
 import { promises as fs } from "node:fs";
 import { extname, isAbsolute, join, parse, resolve } from "node:path";
-import Arborist from "@npmcli/arborist";
 
 import console from "console-ansi";
 import deepmerge from "deepmerge";
@@ -16,10 +15,12 @@ import {
   arrayDifference,
   dotRelativeToBarePath,
   bareToDotRelativePath,
+  pick,
   readJson,
   writeJson,
 } from "./utils.js";
 
+import npm from "./npm.js";
 import bundle from "./bundle.js";
 
 const DEPENDENCY_TYPES = Object.freeze({
@@ -33,20 +34,37 @@ const DEPENDENCY_SAVE_TYPE_MAP = {
   [DEPENDENCY_TYPES.ALL]: ["prod", "dev"],
   [DEPENDENCY_TYPES.DEV]: ["dev"],
   [DEPENDENCY_TYPES.PROD]: ["prod"],
+  [DEPENDENCY_TYPES.CUSTOM]: [],
 };
 
 const getDependencies = async (options, type, names = []) => {
-  const tree = await new Arborist({ path: options.cwd }).loadActual();
-  const dependencies = Array.from(tree.edgesOut.values());
-  return type === DEPENDENCY_TYPES.CUSTOM
-    ? dependencies.filter(({ name }) => names.includes(name))
-    : dependencies.filter((dependency) =>
-        DEPENDENCY_SAVE_TYPE_MAP[type].includes(dependency.type),
-      );
+  const depsSelector =
+    type === DEPENDENCY_TYPES.CUSTOM
+      ? "*"
+      : `*:is(${DEPENDENCY_SAVE_TYPE_MAP[type]
+          .map((selector) => `.${selector}`)
+          .join(",")})`;
+
+  let result = JSON.parse(
+    await npm.run(options.cwd, "query", [
+      `'.workspace :scope > ${depsSelector}'`,
+    ]),
+  );
+  if (!result.length) {
+    result = JSON.parse(
+      await npm.run(options.cwd, "query", [`':root > ${depsSelector}'`]),
+    );
+  }
+
+  return result
+    .map((dependency) =>
+      pick(dependency, ["name", "version", "dev", "realpath"]),
+    )
+    .filter(({ name }) => (names.length ? names.includes(name) : true));
 };
 
-const compareDependencies = ({ name, spec }, { spec: s, name: n }) =>
-  spec === s && name === n;
+const compareDependencies = ({ name, version }, { version: v, name: n }) =>
+  version === v && name === n;
 
 const install = async (options) => {
   // Check package.json exists
@@ -228,12 +246,39 @@ const install = async (options) => {
   try {
     console.log(`install - installing (${options.transpiler})...`);
 
+    const dependenciesPath = Object.fromEntries(
+      packageTargets.map((target) => {
+        let dependencyPath = dependencies.find(
+          ({ name }) => name === target,
+        )?.realpath;
+
+        if (!dependencyPath) {
+          const parent = target
+            .split("/")
+            .slice(0, target.startsWith("@") ? 2 : 1)
+            .join("/");
+          const parentRealPath = dependencies.find(
+            ({ name }) => name === parent,
+          )?.realpath;
+
+          if (parentRealPath) {
+            dependencyPath = join(
+              parentRealPath.slice(0, parentRealPath.lastIndexOf(parent)),
+              target,
+            );
+          }
+        }
+
+        return [target, dependencyPath];
+      }),
+    );
+
     const resolvedExportsMap = deepmerge(
       Object.fromEntries(
         await Promise.all(
           packageTargets.map(async (dependency) => [
             dependency,
-            await resolveExports(options, dependency),
+            await resolveExports(options, dependenciesPath[dependency]),
           ]),
         ),
       ),
@@ -242,6 +287,12 @@ const install = async (options) => {
 
     // TODO: copy .css/.wasm/package.json
     for (let [dependency, entryPoints] of Object.entries(resolvedExportsMap)) {
+      const dependencyPath = dependenciesPath[dependency];
+      if (!(await pathExists(dependencyPath))) {
+        console.error(`Unresolved dependency: is "${dependency}" installed?`);
+        continue;
+      }
+
       for (let [specifier, entryPoint] of Object.entries(entryPoints)) {
         const isMain = specifier === ".";
         const id = isMain ? dependency : slash(join(dependency, specifier));
@@ -254,12 +305,7 @@ const install = async (options) => {
         }
 
         try {
-          const depEntryPoint = join(dependency, entryPoint);
-          const resolvedExport = join(
-            options.cwd,
-            "node_modules",
-            depEntryPoint,
-          );
+          const resolvedExport = join(dependencyPath, entryPoint);
 
           if (!filter(resolvedExport)) {
             console.info(`Filtered out export: ${resolvedExport}`);
@@ -272,15 +318,14 @@ const install = async (options) => {
           }
 
           input[id] = resolvedExport;
-          importMap.imports[id] = bareToDotRelativePath(
-            isMain ? `${dependency}.js` : slash(depEntryPoint),
-          );
+          importMap.imports[id] = bareToDotRelativePath(`${id}.js`);
         } catch (error) {
           console.error(error);
         }
       }
     }
 
+    // Caveats: this will throw if all dependencies are filtered out/have unknown exports
     if (!Object.values(input).length) {
       throw new Error(`No input dependency to install.`);
     }
