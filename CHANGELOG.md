@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [2.0.0-alpha.25](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.24...v2.0.0-alpha.25) (2024-04-11)
+
+
+### Bug Fixes
+
+* use query ":scope" to get dependencies in workspace ([dab3834](https://github.com/dmnsgn/snowdev/commit/dab3834b59df38e1ffd66b494d601359d94f5228))
+
+
+
 # [2.0.0-alpha.24](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.23...v2.0.0-alpha.24) (2024-04-10)
 
 
