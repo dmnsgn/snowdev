@@ -45,18 +45,9 @@ const getDependencies = async (options, type, names = []) => {
           .map((selector) => `.${selector}`)
           .join(",")})`;
 
-  let result = JSON.parse(
-    await npm.run(options.cwd, "query", [
-      `'.workspace :scope > ${depsSelector}'`,
-    ]),
-  );
-  if (!result.length) {
-    result = JSON.parse(
-      await npm.run(options.cwd, "query", [`':root > ${depsSelector}'`]),
-    );
-  }
-
-  return result
+  return JSON.parse(
+    await npm.run(options.cwd, "query", [`':scope > ${depsSelector}'`]),
+  )
     .map((dependency) =>
       pick(dependency, ["name", "version", "dev", "realpath"]),
     )
