@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [2.0.0-alpha.26](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.25...v2.0.0-alpha.26) (2024-04-11)
+
+
+### Bug Fixes
+
+* strip quotes for npm argv ([cc9c19e](https://github.com/dmnsgn/snowdev/commit/cc9c19ed18f2b81efd53d4a7227a5dda9432e4a4))
+
+
+
 # [2.0.0-alpha.25](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.24...v2.0.0-alpha.25) (2024-04-11)
 
 
