@@ -5,6 +5,12 @@ import { execCommand } from "./utils.js";
 const substringAfterChar = (string, char) =>
   string.substring(string.indexOf(char));
 
+const quotes = ['"', "'"];
+const stripQuotes = (s) =>
+  quotes.includes(s.charAt(0)) && quotes.includes(s.charAt(s.length - 1))
+    ? s.substr(1, s.length - 2)
+    : s;
+
 class Npm {
   processEnv = null;
   patch = true;
@@ -16,7 +22,7 @@ class Npm {
     this.processEnv = { ...process.env };
   }
 
-  async run(npmRoot, cmd, argv) {
+  async run(npmRoot, cmd, argv = []) {
     let stdout;
     const json = argv.includes("--json");
 
@@ -52,7 +58,7 @@ class Npm {
       // npm config will use both process.argv and the provided argv ([...process.argv, ...argv])
       npm.config.argv = [
         ...process.argv.slice(0, 2),
-        ...argv,
+        ...argv.map(stripQuotes),
         ...this.defaultArgv,
       ];
 
