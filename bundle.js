@@ -140,8 +140,8 @@ const bundle = async (options = {}) => {
         if (
           ["THIS_IS_UNDEFINED", "EVAL"].includes(log.code) ||
           (log.code === "CIRCULAR_DEPENDENCY" &&
-            ["polyfill-node", "@babel"].some((lib) =>
-              log.message.includes(lib),
+            ["node_modules", "polyfill-node", "@babel"].some((filter) =>
+              log.message.includes(filter),
             ))
         ) {
           return;
