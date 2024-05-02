@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [2.0.0-alpha.27](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.26...v2.0.0-alpha.27) (2024-05-02)
+
+
+### Features
+
+* exclude node_modules from rollup CIRCULAR_DEPENDENCY warnings ([b6cb2ca](https://github.com/dmnsgn/snowdev/commit/b6cb2caefe4b32c314e545c777cae35359b8b032))
+
+
+
 # [2.0.0-alpha.26](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.25...v2.0.0-alpha.26) (2024-04-11)
 
 
