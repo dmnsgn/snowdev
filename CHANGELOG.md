@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [2.0.0-alpha.28](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.27...v2.0.0-alpha.28) (2024-05-15)
+
+
+### Bug Fixes
+
+* add EOF in writeJson ([6b74c2e](https://github.com/dmnsgn/snowdev/commit/6b74c2e0a51bed6b05e5226260102d5bedf6c318))
+* handle empty array of dependencies in for custom dependency type ([87e0c05](https://github.com/dmnsgn/snowdev/commit/87e0c05bc3e6a65d8a4e5a9617c078fd13ae12d3))
+
+
+
 # [2.0.0-alpha.27](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.26...v2.0.0-alpha.27) (2024-05-02)
 
 
