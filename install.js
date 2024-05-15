@@ -95,11 +95,14 @@ const install = async (options) => {
   const importMapFile = join(outputDir, "import-map.json");
 
   // Get current dependencies
-  const dependencies = await getDependencies(
-    options,
-    type,
-    type === DEPENDENCY_TYPES.CUSTOM ? options.dependencies : [],
-  );
+  const dependencies =
+    type === DEPENDENCY_TYPES.CUSTOM && !options.dependencies.length
+      ? []
+      : await getDependencies(
+          options,
+          type,
+          type === DEPENDENCY_TYPES.CUSTOM ? options.dependencies : [],
+        );
 
   const dependenciesNames = dependencies.map(({ name }) => name);
 
