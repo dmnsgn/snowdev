@@ -109,7 +109,6 @@ const docs = async (cwd, files, options) => {
             ? {
                 readme: "none",
                 plugin: ["typedoc-plugin-markdown"],
-                hideInPageTOC: true,
                 hideBreadcrumbs: true,
               }
             : {
