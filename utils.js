@@ -24,7 +24,11 @@ const readJson = async (path) => JSON.parse(await fs.readFile(path, "utf-8"));
 const writeJson = async (path, obj, { merge = false } = {}) =>
   await fs.writeFile(
     path,
-    JSON.stringify(merge ? deepmerge(await readJson(path), obj) : obj, null, 2),
+    JSON.stringify(
+      merge ? deepmerge(await readJson(path), obj) : obj,
+      null,
+      2,
+    ).trim() + "\n",
     "utf-8",
   );
 
