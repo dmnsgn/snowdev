@@ -7,6 +7,12 @@ import console from "console-ansi";
 import deepmerge from "deepmerge";
 import semver from "semver";
 import browserslistToEsbuild from "browserslist-to-esbuild";
+import eslintJs from "@eslint/js";
+import globals from "globals";
+import babelParser from "@babel/eslint-parser";
+import tseslint from "typescript-eslint";
+import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
+import eslintPluginJsdoc from "eslint-plugin-jsdoc";
 
 import init from "./init.js";
 import dev from "./dev.js";
@@ -28,6 +34,12 @@ const require = createRequire(import.meta.url);
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 console.prefix = `[${NAME}]`;
+
+const FILES_GLOB = {
+  javascript: ["**.js", "**.mjs"],
+  typescript: ["**.ts", "**.mts"],
+  commonjs: ["**.cjs", "**.cts"],
+};
 
 // Options
 const TARGETS = `defaults and supports es6-module`;
@@ -72,73 +84,73 @@ export const DEFAULTS_OPTIONS = {
   // TODO: lint and format config in code editor? Do I need config in package.json instead?
   /** @type {import("prettier").RequiredOptions} */
   prettier: null,
-  /** @type {import("eslint").Linter.Config} */
-  eslint: {
-    parser: require.resolve("@babel/eslint-parser"),
-    extends: [
-      "eslint:recommended",
-      "plugin:import/recommended",
-      "plugin:prettier/recommended",
-    ],
-    plugins: [
-      "eslint-plugin-import",
-      "eslint-plugin-prettier",
-      "eslint-plugin-jsdoc",
-    ],
-    rules: {
-      "prettier/prettier": "error",
-      "jsdoc/require-jsdoc": 0,
-      "jsdoc/require-param-description": 0,
-      "jsdoc/require-property-description": 0,
-      "jsdoc/require-returns-description": 0,
-      "jsdoc/tag-lines": 0,
-      "jsdoc/no-defaults": 0,
-      "import/no-cycle": 1,
-      "import/order": [1, { groups: ["builtin", "external", "internal"] }],
-      "import/no-named-as-default": 0,
-      "import/newline-after-import": 2,
-    },
-    settings: {
-      jsdoc: {
-        ignorePrivate: true,
-      },
-    },
-    parserOptions: {
-      ecmaVersion: "latest",
-      sourceType: "module",
-      requireConfigFile: false,
-      babelOptions: {},
-    },
-    env: {
-      es2024: true,
-      browser: true,
-      node: true,
-      worker: true,
-    },
-    overrides: [
-      {
-        files: ["**/*.ts"],
-        parser: require.resolve("@typescript-eslint/parser"),
-        extends: [
-          "eslint:recommended",
-          "plugin:@typescript-eslint/recommended",
-          "plugin:prettier/recommended",
-        ],
-        plugins: ["@typescript-eslint"],
-      },
-      {
-        files: ["test/**/*.js"],
-        parser: "esprima",
-        env: {
-          es2024: true,
-          browser: true,
-          jest: true,
-          jasmine: true,
-          node: true,
+  /** @type {import("eslint").Linter.FlatConfig} */
+  eslint: [
+    eslintJs.configs.recommended,
+    ...tseslint.configs.recommended,
+    {
+      files: FILES_GLOB.javascript,
+      languageOptions: {
+        parser: babelParser,
+        parserOptions: {
+          ecmaVersion: "latest",
+          sourceType: "module",
+          requireConfigFile: false,
+          babelOptions: {}, // Overwritten with options.babel on lint
+        },
+        globals: {
+          ...globals.browser,
+          ...globals.node,
+          ...globals.worker,
         },
       },
-    ],
-  },
+    },
+    {
+      files: FILES_GLOB.javascript,
+      ...eslintPluginJsdoc.configs["flat/recommended-typescript-flavor"],
+    },
+    {
+      files: FILES_GLOB.typescript,
+      ...eslintPluginJsdoc.configs["flat/recommended-typescript"],
+    },
+    {
+      files: FILES_GLOB.javascript,
+      plugins: { jsdoc: eslintPluginJsdoc },
+      rules: {
+        "jsdoc/require-jsdoc": 0,
+        "jsdoc/require-param-description": 0,
+        "jsdoc/require-property-description": 0,
+        "jsdoc/require-returns-description": 0,
+        "jsdoc/tag-lines": 0,
+        "jsdoc/no-defaults": 0,
+      },
+      settings: { ignorePrivate: true },
+    },
+    {
+      files: ["test/**/*.js"],
+      languageOptions: {
+        // parser: "esprima",
+        globals: {
+          ...globals.browser,
+          ...globals.node,
+          ...globals.jest,
+          ...globals.jasmine,
+        },
+      },
+    },
+    eslintPluginPrettierRecommended,
+    // TODO: https://github.com/import-js/eslint-plugin-import/pull/2996
+    // {
+    //   extends: ["plugin:import/recommended"],
+    //   plugins: ["eslint-plugin-import"],
+    //   rules: {
+    //     "import/no-cycle": 1,
+    //     "import/order": [1, { groups: ["builtin", "external", "internal"] }],
+    //     "import/no-named-as-default": 0,
+    //     "import/newline-after-import": 2,
+    //   },
+    // },
+  ],
   /** @type {import("typescript").TranspileOptions} */
   tsconfig: {
     compilerOptions: {
@@ -196,7 +208,13 @@ export const DEFAULTS_OPTIONS = {
   importMap: {},
   resolve: {
     // include: [/\.((j|t|mj|mt|cj|ct)sx?)$/],
-    include: ["**.js", "**.ts", "**.mjs", "**.mts", "**.cjs", "**.cts"],
+    include: [
+      ...FILES_GLOB.javascript,
+      ...FILES_GLOB.typescript,
+      ...FILES_GLOB.commonjs,
+      // "**.wasm",
+      // "**.css",
+    ],
     exclude: ["**.d.ts"],
     conditions: ["module", "import", "default"],
     mainFields: ["module", "jsnext:main", "jsnext", "main"],
@@ -229,11 +247,10 @@ export { npm };
 export const run = async (fn, options) => {
   const { [fn.name]: commandOptions, ...globalOptions } = options;
 
-  options = deepmerge.all([
-    DEFAULTS_OPTIONS,
-    globalOptions || {},
-    commandOptions || {},
-  ]);
+  options = deepmerge.all(
+    [DEFAULTS_OPTIONS, globalOptions || {}, commandOptions || {}],
+    { clone: false },
+  );
 
   try {
     options.command = fn.name;
@@ -252,18 +269,15 @@ export const run = async (fn, options) => {
     options.docs = options.docs ?? (options.ts ? "docs" : "README.md");
     options.docsFormat = options.docsFormat ?? (options.ts ? "html" : "md");
 
-    if (options.ts) {
-      options.eslint.extends.push(
-        "plugin:import/typescript",
-        "plugin:jsdoc/recommended-typescript",
-      );
-      options.eslint.settings["import/resolver"] = {
-        typescript: true,
-        node: true,
-      };
-    } else {
-      options.eslint.extends.push("plugin:jsdoc/recommended-typescript-flavor");
-    }
+    // if (options.ts) {
+    //   options.eslint.extends.push(
+    //     "plugin:import/typescript",
+    //   );
+    //   options.eslint.settings["import/resolver"] = {
+    //     typescript: true,
+    //     node: true,
+    //   };
+    // }
 
     await npm.load(options.npmPath);
 

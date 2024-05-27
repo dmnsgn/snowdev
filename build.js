@@ -25,19 +25,26 @@ const lint = async (cwd, files, options) => {
   console.time(lint.description);
 
   try {
-    options.eslint.parserOptions.babelOptions = {
-      cwd,
-      ...(options.babel || {}),
-      ...(options.eslint.parserOptions.babelOptions || {}),
-    };
+    const babelEslint = options.eslint.find(
+      ({ languageOptions }) =>
+        languageOptions?.parser?.meta?.name === "@babel/eslint-parser",
+    );
 
-    // https://github.com/eslint/eslintrc/issues/75
-    delete options.eslint.parserOptions.babelOptions.exclude;
+    if (babelEslint) {
+      babelEslint.languageOptions.parserOptions.babelOptions = {
+        cwd,
+        ...(options.babel || {}),
+        ...(babelEslint.languageOptions.parserOptions.babelOptions || {}),
+      };
+
+      // https://github.com/eslint/eslintrc/issues/75
+      delete babelEslint.languageOptions.parserOptions.babelOptions.exclude;
+    }
 
     const eslint = new ESLint({
       cwd,
       baseConfig: options.eslint,
-      resolvePluginsRelativeTo: __dirname,
+      overrideConfigFile: true,
     });
     const lintResults = await eslint.lintFiles(files);
     const results = (await eslint.loadFormatter("stylish")).format(lintResults);
