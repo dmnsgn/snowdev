@@ -66,15 +66,19 @@ const install = async (options) => {
     return { error };
   }
 
-  // Check invalid dependencies
+  // Check dependencies
   try {
-    const invalid = JSON.parse(
-      await npm.run(options.cwd, "query", [`':invalid'`]),
-    );
-    if (invalid.length) {
-      console.warn(
-        `install - invalid dependencies: ${listFormatter.format(invalid.map(({ pkgid }) => pkgid))}`,
+    const selectors = ["missing", "invalid", "extraneous"];
+
+    for (let selector of selectors) {
+      const results = JSON.parse(
+        await npm.run(options.cwd, "query", [`':${selector}'`]),
       );
+      if (results.length) {
+        console.warn(
+          `install - ${selector} dependencies: ${listFormatter.format(results.map(({ pkgid }) => pkgid))}`,
+        );
+      }
     }
   } catch (error) {
     // This is only a warning. Don't throw if anything unexpected happen.
@@ -324,6 +328,12 @@ const install = async (options) => {
             console.error(`Unknown export: ${resolvedExport}`);
             continue;
           }
+
+          // TODO:
+          // if (isToCopy) {
+          //   await copy()
+          //   continue;
+          // }
 
           input[id] = resolvedExport;
           importMap.imports[id] = bareToDotRelativePath(`${id}.js`);
