@@ -124,7 +124,11 @@
     "yargs": "^17.7.2"
   },
   "engines": {
-    "node": ">=20.0.0",
-    "npm": ">=9.6.4"
+    "node": ">=22.0.0",
+    "npm": ">=10.5.1",
+    "snowdev": "2.0.0-alpha.28"
+  },
+  "snowdev": {
+    "dependencies": []
   }
 }

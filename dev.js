@@ -10,12 +10,12 @@ import { types, lint } from "./build.js";
 import { getFileExtension, htmlHotInject } from "./utils.js";
 
 const dev = async (options = {}) => {
+  if (options.lint) await lint(options.cwd, options.files, options);
+
   if (options.serve) {
     const bs = browserSyncCreate();
 
     if (options.lint || options.ts) {
-      if (options.lint) await lint(options.cwd, options.files, options);
-
       bs.use({
         plugin() {},
         hooks: {
