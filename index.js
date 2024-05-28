@@ -36,9 +36,9 @@ const __dirname = fileURLToPath(new URL(".", import.meta.url));
 console.prefix = `[${NAME}]`;
 
 const FILES_GLOB = {
-  javascript: ["**.js", "**.mjs"],
-  typescript: ["**.ts", "**.mts"],
-  commonjs: ["**.cjs", "**.cts"],
+  javascript: ["**/*.js", "**/*.mjs"],
+  typescript: ["**/*.ts", "**/*.mts"],
+  commonjs: ["**/*.cjs", "**.cts"],
 };
 
 // Options
