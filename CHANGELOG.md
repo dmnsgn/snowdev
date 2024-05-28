@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [2.0.0-alpha.29](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.28...v2.0.0-alpha.29) (2024-05-28)
+
+
+### Bug Fixes
+
+* handle subfolder in file globs ([6ad40c1](https://github.com/dmnsgn/snowdev/commit/6ad40c15cc8655f0e365f1223559b32f6ee22bcf))
+
+
+### Features
+
+* check missing and extraneous dependencies ([e5147ce](https://github.com/dmnsgn/snowdev/commit/e5147ce62cff5fbc7829f6a737c27fc4ef8a8a93))
+* move lint outside of serve in dev command ([732b648](https://github.com/dmnsgn/snowdev/commit/732b64866d69d1ad02bda63097a872a2ba945a22))
+* move npm from programmatic use to child_process fork ([1e7f385](https://github.com/dmnsgn/snowdev/commit/1e7f385481473022f682d5717aac8719fb1154d8))
+
+
+
 # [2.0.0-alpha.28](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.27...v2.0.0-alpha.28) (2024-05-15)
 
 
