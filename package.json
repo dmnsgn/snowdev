@@ -98,7 +98,7 @@
     "jsdoc-plugin-intersection": "^1.0.4",
     "jsdoc-to-markdown": "^8.0.1",
     "jsdoc-tsimport-plugin": "^1.0.5",
-    "npm": "^10.5.2",
+    "npm": "^10.8.0",
     "npm-user": "^6.1.1",
     "p-debounce": "^4.0.0",
     "picomatch": "^4.0.2",

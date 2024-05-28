@@ -1,4 +1,6 @@
-import { join } from "node:path";
+import { fork } from "node:child_process";
+
+import console from "console-ansi";
 
 import { execCommand } from "./utils.js";
 
@@ -12,6 +14,7 @@ const stripQuotes = (s) =>
     : s;
 
 class Npm {
+  process = null;
   processEnv = null;
   patch = true;
   defaultArgv = ["--progress=false"];
@@ -27,80 +30,22 @@ class Npm {
     const json = argv.includes("--json");
 
     if (this.npmPath) {
-      // cli-entry.js
-      const { default: Npm } = await import(
-        join(this.npmPath, "lib", "npm.js")
+      const child = fork(
+        this.npmPath,
+        [cmd, ...argv.map(stripQuotes), ...this.defaultArgv],
+        { env: this.processEnv, stdio: [null, null, null, "ipc"] },
       );
 
-      if (this.patch) {
-        // Patch init exec as it doesn't return data nor support --json
-        // execWorkspaces
-        const { default: Init } = await import(
-          join(this.npmPath, "lib", "commands", "init.js")
-        );
-        Init.prototype.exec = async function (args) {
-          // npm exec style
-          if (args.length) {
-            return await this.execCreate(args);
-          }
+      stdout = "";
+      let stderr = "";
 
-          const data = await this.template();
+      for await (const chunk of child.stdout) stdout += chunk;
+      for await (const chunk of child.stderr) stderr += chunk;
 
-          if (json) {
-            this.npm.outputBuffer(data);
-          }
-        };
-      }
+      const exitCode = await new Promise((r) => child.on("close", r));
+      if (exitCode !== 0) console.warn(`npm exitCode ${exitCode}`);
 
-      const npm = new Npm({ npmRoot });
-
-      // Override the config argv
-      // npm config will use both process.argv and the provided argv ([...process.argv, ...argv])
-      npm.config.argv = [
-        ...process.argv.slice(0, 2),
-        ...argv.map(stripQuotes),
-        ...this.defaultArgv,
-      ];
-
-      // Override the config env as npm.config.load() will set "npm_config_" on it but we're running in the same process/env
-      npm.config.env = { ...this.processEnv };
-
-      // - npm.load()
-      // - npm.config.load()
-      // - npm.config.loadCLI()
-      // - npm.config set parsedArgv
-      // - npm.load set npm.argv
-      // - npm exec uses npm.argv
-      await npm.load();
-
-      stdout = [];
-      let stderr = [];
-
-      Npm.prototype.output = function (...msg) {
-        stdout.push(...msg);
-      };
-      Npm.prototype.outputError = function (...msg) {
-        stderr.push(...msg);
-      };
-
-      // exit-handler.js
-      const exitHandler = () => {
-        npm.flushOutput();
-        npm.unload();
-      };
-
-      // Rethrow error to ensure cleanup (progress bar, logs, ...) before throwing
-      try {
-        await npm.exec(cmd);
-      } catch (error) {
-        exitHandler();
-        throw error;
-      }
-      exitHandler();
-
-      if (stderr.length) throw new Error(stderr.join(""));
-
-      stdout = stdout.join("");
+      if (stderr) throw new Error(stderr);
     } else {
       stdout = await execCommand(
         `npm ${cmd} ${[...argv, ...this.defaultArgv].join(" ")}`.trimEnd(),

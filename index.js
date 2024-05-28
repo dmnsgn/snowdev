@@ -54,7 +54,7 @@ export const DEFAULTS_OPTIONS = {
   ignore: ["**/node_modules/**"],
   dependencies: "all",
   updateVersions: true,
-  npmPath: null,
+  npmPath: null, // dirname(require.resolve("npm")),
 
   // Process
   ts: undefined,
@@ -253,6 +253,13 @@ export const run = async (fn, options) => {
   );
 
   try {
+    await npm.load(options.npmPath);
+
+    console.debug(`v${VERSION}`);
+    console.debug(
+      `Using npm@${await npm.run(options.cwd, "--version")} (${options.npmPath || "global"})`,
+    );
+
     options.command = fn.name;
     options.cwd = resolve(options.cwd);
     options.cacheFolder = join(options.cwd, "node_modules", ".cache", NAME);
@@ -279,8 +286,6 @@ export const run = async (fn, options) => {
     //   };
     // }
 
-    await npm.load(options.npmPath);
-
     // Check package.json exists and update versions
     if (options.command === "dev") {
       const packageJsonPath = join(options.cwd, "package.json");
@@ -300,7 +305,9 @@ export const run = async (fn, options) => {
 
     return await fn(options);
   } catch (error) {
-    console.error(`Error accessing "cwd" or reading "package.json".`);
+    console.error(
+      `Error accessing "cwd", loading "npm" or reading "package.json".`,
+    );
     console.error(error);
     return { error };
   }
