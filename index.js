@@ -38,8 +38,10 @@ console.prefix = `[${NAME}]`;
 const FILES_GLOB = {
   javascript: ["**/*.js", "**/*.mjs"],
   typescript: ["**/*.ts", "**/*.mts"],
+  react: ["**/*.jsx", "**/*.tsx"],
   commonjs: ["**/*.cjs", "**.cts"],
 };
+FILES_GLOB.typescriptAll = [...FILES_GLOB.typescript, "**/*.tsx", "**.cts"];
 
 // Options
 const TARGETS = `defaults and supports es6-module`;
@@ -87,7 +89,10 @@ export const DEFAULTS_OPTIONS = {
   /** @type {import("eslint").Linter.FlatConfig} */
   eslint: [
     eslintJs.configs.recommended,
-    ...tseslint.configs.recommended,
+    ...tseslint.configs.recommended.map((config) => ({
+      ...config,
+      files: FILES_GLOB.typescriptAll,
+    })),
     {
       files: FILES_GLOB.javascript,
       languageOptions: {
@@ -212,6 +217,7 @@ export const DEFAULTS_OPTIONS = {
       ...FILES_GLOB.javascript,
       ...FILES_GLOB.typescript,
       ...FILES_GLOB.commonjs,
+      ...FILES_GLOB.react,
       // "**.wasm",
       // "**.css",
     ],
