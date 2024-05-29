@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [2.0.0-alpha.30](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.29...v2.0.0-alpha.30) (2024-05-29)
+
+
+### Bug Fixes
+
+* only use tseslint for ts files ([161c7ee](https://github.com/dmnsgn/snowdev/commit/161c7ee156d7b0182b5608e7c023ee72b14a4cf8))
+
+
+
 # [2.0.0-alpha.29](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.28...v2.0.0-alpha.29) (2024-05-28)
 
 
