@@ -261,10 +261,12 @@ export const run = async (fn, options) => {
   try {
     await npm.load(options.npmPath);
 
-    console.debug(`v${VERSION}`);
-    console.debug(
-      `Using npm@${await npm.run(options.cwd, "--version")} (${options.npmPath || "global"})`,
-    );
+    if (options.caller === "cli") {
+      console.debug(`v${VERSION}`);
+      console.debug(
+        `Using npm@${(await npm.run(options.cwd, "--version")).trim()} (${options.npmPath || "global"})`,
+      );
+    }
 
     options.command = fn.name;
     options.cwd = resolve(options.cwd);
