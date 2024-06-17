@@ -129,7 +129,7 @@ export const DEFAULTS_OPTIONS = {
         "jsdoc/tag-lines": 0,
         "jsdoc/no-defaults": 0,
       },
-      settings: { ignorePrivate: true },
+      settings: { jsdoc: { ignorePrivate: true } },
     },
     {
       files: ["test/**/*.js"],
