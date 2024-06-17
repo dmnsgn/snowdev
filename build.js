@@ -25,7 +25,7 @@ const lint = async (cwd, files, options) => {
   console.time(lint.description);
 
   try {
-    const babelEslint = options.eslint.find(
+    const babelEslint = options.eslint?.find(
       ({ languageOptions }) =>
         languageOptions?.parser?.meta?.name === "@babel/eslint-parser",
     );
@@ -36,9 +36,6 @@ const lint = async (cwd, files, options) => {
         ...(options.babel || {}),
         ...(babelEslint.languageOptions.parserOptions.babelOptions || {}),
       };
-
-      // https://github.com/eslint/eslintrc/issues/75
-      delete babelEslint.languageOptions.parserOptions.babelOptions.exclude;
     }
 
     const eslint = new ESLint({
