@@ -40,6 +40,7 @@ const FILES_GLOB = {
   typescript: ["**/*.ts", "**/*.mts"],
   react: ["**/*.jsx", "**/*.tsx"],
   commonjs: ["**/*.cjs", "**/*.cts"],
+  assets: ["**/*.json", "**/*.css", "**/*.wasm"],
 };
 FILES_GLOB.typescriptAll = [...FILES_GLOB.typescript, "**/*.tsx", "**/*.cts"];
 
@@ -212,16 +213,15 @@ export const DEFAULTS_OPTIONS = {
   },
   importMap: {},
   resolve: {
-    // include: [/\.((j|t|mj|mt|cj|ct)sx?)$/],
     include: [
       ...FILES_GLOB.javascript,
       ...FILES_GLOB.typescript,
       ...FILES_GLOB.commonjs,
       ...FILES_GLOB.react,
-      // "**.wasm",
-      // "**.css",
+      ...FILES_GLOB.assets,
     ],
     exclude: ["**.d.ts"],
+    copy: FILES_GLOB.assets,
     conditions: ["module", "import", "default"],
     mainFields: ["module", "jsnext:main", "jsnext", "main"],
     browserField: true,

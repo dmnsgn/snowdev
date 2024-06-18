@@ -1,5 +1,5 @@
 import { promises as fs } from "node:fs";
-import { extname, isAbsolute, join, parse, resolve } from "node:path";
+import { dirname, extname, isAbsolute, join, parse, resolve } from "node:path";
 
 import console from "console-ansi";
 import deepmerge from "deepmerge";
@@ -223,6 +223,11 @@ const install = async (options) => {
     options.resolve.exclude,
     { resolve: options.cwd },
   );
+  const copyFilter = createFilter(
+    options.resolve.copy,
+    options.resolve.exclude,
+    { resolve: options.cwd },
+  );
 
   const packageTargets = dependenciesNames.filter(
     (target) => target !== "snowdev",
@@ -297,7 +302,6 @@ const install = async (options) => {
       options.resolve.overrides,
     );
 
-    // TODO: copy .css/.wasm/package.json
     for (let [dependency, entryPoints] of Object.entries(resolvedExportsMap)) {
       const dependencyPath = dependenciesPath[dependency];
       if (!(await pathExists(dependencyPath))) {
@@ -329,14 +333,18 @@ const install = async (options) => {
             continue;
           }
 
-          // TODO:
-          // if (isToCopy) {
-          //   await copy()
-          //   continue;
-          // }
+          const isCopiedExport = copyFilter(resolvedExport);
 
-          input[id] = resolvedExport;
-          importMap.imports[id] = bareToDotRelativePath(`${id}.js`);
+          if (isCopiedExport) {
+            const copyDestination = join(outputDir, id);
+            await fs.mkdir(dirname(copyDestination), { recursive: true });
+            await fs.copyFile(resolvedExport, copyDestination);
+          } else {
+            input[id] = resolvedExport;
+          }
+          importMap.imports[id] = bareToDotRelativePath(
+            isCopiedExport ? id : `${id}.js`,
+          );
         } catch (error) {
           console.error(error);
         }
