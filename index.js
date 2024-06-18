@@ -39,9 +39,9 @@ const FILES_GLOB = {
   javascript: ["**/*.js", "**/*.mjs"],
   typescript: ["**/*.ts", "**/*.mts"],
   react: ["**/*.jsx", "**/*.tsx"],
-  commonjs: ["**/*.cjs", "**.cts"],
+  commonjs: ["**/*.cjs", "**/*.cts"],
 };
-FILES_GLOB.typescriptAll = [...FILES_GLOB.typescript, "**/*.tsx", "**.cts"];
+FILES_GLOB.typescriptAll = [...FILES_GLOB.typescript, "**/*.tsx", "**/*.cts"];
 
 // Options
 const TARGETS = `defaults and supports es6-module`;
@@ -248,7 +248,7 @@ export const DEFAULTS_OPTIONS = {
 
 export const commands = { init, dev, build, bundle, release, deploy, install };
 
-export { npm };
+export { npm, FILES_GLOB };
 
 export const run = async (fn, options) => {
   const { [fn.name]: commandOptions, ...globalOptions } = options;
