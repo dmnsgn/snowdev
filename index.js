@@ -202,7 +202,7 @@ export const DEFAULTS_OPTIONS = {
     env: {
       targets: TARGETS,
       mode: "entry", // "usage" is not working properly
-      coreJs: "3.19",
+      coreJs: "3.37",
       shippedProposals: true,
     },
     jsc: {
