@@ -121,7 +121,6 @@
     "typedoc-plugin-markdown": "^4.0.3",
     "typescript": "^5.4.5",
     "typescript-eslint": "^8.0.0-alpha.16",
-    "validate-npm-package-name": "^5.0.1",
     "yargs": "^17.7.2"
   },
   "engines": {
