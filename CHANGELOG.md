@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [2.0.0-alpha.31](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.30...v2.0.0-alpha.31) (2024-06-19)
+
+
+### Bug Fixes
+
+* correct commonjs globs ([83fe74c](https://github.com/dmnsgn/snowdev/commit/83fe74c250f6b75aa1a98163eff79440162b9698))
+* correct jsdoc ignorePrivate eslint setting in flat config ([8ba2f9b](https://github.com/dmnsgn/snowdev/commit/8ba2f9b8732004d5e8762112396127b740f480e2))
+* only log versions for cli caller ([e625da6](https://github.com/dmnsgn/snowdev/commit/e625da6225437b8e0ae7dd5c0aa74ffa6c201a05))
+* prevent options mutation on install ([956386f](https://github.com/dmnsgn/snowdev/commit/956386faa50df5bfcf38b9e8954489f39cf08a66))
+* swc corejs version ([cbab80c](https://github.com/dmnsgn/snowdev/commit/cbab80c2c877e22c5be8ea166b8998459b7d87f9))
+
+
+### Features
+
+* add support for copying json/css/wasm on install ([38a22b3](https://github.com/dmnsgn/snowdev/commit/38a22b3db4672df004ee47cfb0aaae9cd628d10a))
+* silence rollup MODULE_LEVEL_DIRECTIVE warnings ([2efe89b](https://github.com/dmnsgn/snowdev/commit/2efe89b58e6bc8207fdb08fe95630bea5552b625))
+
+
+
 # [2.0.0-alpha.30](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.29...v2.0.0-alpha.30) (2024-05-29)
 
 
