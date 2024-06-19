@@ -357,13 +357,17 @@ const install = async (options) => {
     }
 
     // Bundle
-    options.rollup.input.input = input;
-    options.rollup.output.entryFileNames = ({ name }) =>
-      packageTargets.includes(name) || extname(name) !== ".js"
-        ? `${name}.js`
-        : name;
+    const bundleOptions = { ...options };
+    bundleOptions.rollup.input = { ...bundleOptions.rollup.input, input };
+    bundleOptions.rollup.output = {
+      ...bundleOptions.rollup.output,
+      entryFileNames: ({ name }) =>
+        packageTargets.includes(name) || extname(name) !== ".js"
+          ? `${name}.js`
+          : name,
+    };
 
-    result = await bundle(options);
+    result = await bundle(bundleOptions);
 
     if (!result.error) {
       // Write import map
