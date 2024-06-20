@@ -25,7 +25,12 @@
   "author": "authorName (https://github.com/gitHubUsername)",
   "sideEffects": false,
   "type": "module",
-  "exports": "./index.js",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "default": "./index.js"
+    }
+  },
   "main": "index.js",
   "types": "types/index.d.ts",
   "engines": {
