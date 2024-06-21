@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [2.0.0](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.31...v2.0.0) (2024-06-21)
+
+
+### Features
+
+* **template:** update exports field with types to support Typescript 4.7+ ([92263b5](https://github.com/dmnsgn/snowdev/commit/92263b591f25bb8db5a3e2e68738a5f6883605c1))
+
+
+
 # [2.0.0-alpha.31](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.30...v2.0.0-alpha.31) (2024-06-19)
 
 
