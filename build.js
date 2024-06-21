@@ -6,7 +6,7 @@ import console from "console-ansi";
 
 import ts from "typescript";
 
-import prettier from "prettier";
+import * as prettier from "prettier";
 import sortPackageJson from "sort-package-json";
 
 import { ESLint } from "eslint";
@@ -17,7 +17,7 @@ import TypeDoc from "typedoc";
 import concatMd from "concat-md";
 import { glob } from "glob";
 
-import { RF_OPTIONS, escapeRegExp } from "./utils.js";
+import { RF_OPTIONS, escapeRegExp, sortPaths } from "./utils.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
@@ -25,19 +25,23 @@ const lint = async (cwd, files, options) => {
   console.time(lint.description);
 
   try {
-    options.eslint.parserOptions.babelOptions = {
-      cwd,
-      ...(options.babel || {}),
-      ...(options.eslint.parserOptions.babelOptions || {}),
-    };
+    const babelEslint = options.eslint?.find(
+      ({ languageOptions }) =>
+        languageOptions?.parser?.meta?.name === "@babel/eslint-parser",
+    );
 
-    // https://github.com/eslint/eslintrc/issues/75
-    delete options.eslint.parserOptions.babelOptions.exclude;
+    if (babelEslint) {
+      babelEslint.languageOptions.parserOptions.babelOptions = {
+        cwd,
+        ...(options.babel || {}),
+        ...(babelEslint.languageOptions.parserOptions.babelOptions || {}),
+      };
+    }
 
     const eslint = new ESLint({
       cwd,
       baseConfig: options.eslint,
-      resolvePluginsRelativeTo: __dirname,
+      overrideConfigFile: true,
     });
     const lintResults = await eslint.lintFiles(files);
     const results = (await eslint.loadFormatter("stylish")).format(lintResults);
@@ -59,12 +63,12 @@ const format = async (cwd, files, options) => {
     try {
       await fs.writeFile(
         file,
-        prettier.format(await fs.readFile(file, "utf-8"), {
+        await prettier.format(await fs.readFile(file, "utf-8"), {
           parser: options.ts ? "typescript" : "babel",
           ...((await prettier.resolveConfig(file)) || {}),
           ...(options.prettier || {}),
         }),
-        "utf-8"
+        "utf-8",
       );
     } catch (error) {
       console.error(error);
@@ -76,7 +80,7 @@ const format = async (cwd, files, options) => {
     await fs.writeFile(
       packageJsonFile,
       sortPackageJson(await fs.readFile(packageJsonFile, "utf-8")),
-      "utf-8"
+      "utf-8",
     );
   } catch (error) {
     console.error(error);
@@ -98,38 +102,48 @@ const docs = async (cwd, files, options) => {
   if (options.ts) {
     try {
       await fs.rm(join(cwd, docsFolder), RF_OPTIONS);
+      await fs.mkdir(join(cwd, docsFolder), { recursive: true });
 
-      const app = new TypeDoc.Application();
-      app.options.addReader(new TypeDoc.TSConfigReader());
-      app.options.addReader(new TypeDoc.TypeDocReader());
-
-      await app.bootstrapWithPlugins({
-        entryPoints: files,
-        exclude: options.ignore,
-        logLevel: "Info",
-        ...(isMarkdown
-          ? {
-              readme: "none",
-              plugin: ["typedoc-plugin-markdown"],
-              hideInPageTOC: true,
-              hideBreadcrumbs: true,
-            }
-          : {}),
-        ...(options.typedoc || {}),
-      });
+      const app = await TypeDoc.Application.bootstrapWithPlugins(
+        {
+          entryPoints: files,
+          exclude: options.ignore,
+          logLevel: "Info",
+          ...(isMarkdown
+            ? {
+                readme: "none",
+                plugin: ["typedoc-plugin-markdown"],
+                hideBreadcrumbs: true,
+              }
+            : {
+                plugin: ["typedoc-material-theme"],
+              }),
+          ...(options.typedoc || {}),
+        },
+        [
+          new TypeDoc.TSConfigReader(),
+          new TypeDoc.PackageJsonReader(),
+          new TypeDoc.TypeDocReader(),
+        ],
+      );
+      app.logger.info = console.info;
       const configPath = ts.findConfigFile(
         cwd,
         ts.sys.fileExists,
-        "tsconfig.json"
+        "tsconfig.json",
       );
       if (!configPath) {
         app.options.setCompilerOptions(
           files.flat(),
-          options.tsconfig.compilerOptions
+          options.tsconfig.compilerOptions,
         );
       }
 
-      const project = app.convert();
+      // Ignore errors in dependencies
+      app.options._compilerOptions.skipLibCheck = true;
+
+      const project = await app.convert();
+
       if (project) await app.generateDocs(project, docsFolder);
       await fs.writeFile(join(cwd, docsFolder, ".nojekyll"), "", "utf-8");
 
@@ -145,12 +159,14 @@ const docs = async (cwd, files, options) => {
         files,
         configure: options.jsdoc || join(__dirname, "jsdoc.json"),
       });
+      // TODO: remove if jsdoc ever properly works with ESM and classes
+      inlinedDocs = inlinedDocs.replaceAll("new exports.", "new ");
       if (!isFile) {
         await fs.mkdir(join(cwd, docsFolder), { recursive: true });
         await fs.writeFile(
           join(cwd, docsFolder, "README.md"),
           inlinedDocs,
-          "utf-8"
+          "utf-8",
         );
         return;
       }
@@ -167,11 +183,12 @@ const docs = async (cwd, files, options) => {
     await fs.rm(join(cwd, docsFolder), RF_OPTIONS);
 
     const filePath = join(cwd, options.docs);
-    const formattedDocs = prettier
-      .format(inlinedDocs, {
+    const formattedDocs = (
+      await prettier.format(inlinedDocs, {
         parser: isMarkdown ? "markdown" : "html",
         ...((await prettier.resolveConfig(filePath)) || {}),
       })
+    )
       .split("\n")
       .map((line) => line.trimEnd())
       .join("\n");
@@ -179,17 +196,15 @@ const docs = async (cwd, files, options) => {
     if (options.docsStart && options.docsEnd) {
       await fs.writeFile(
         filePath,
-        (
-          await fs.readFile(filePath, "utf-8")
-        ).replace(
+        (await fs.readFile(filePath, "utf-8")).replace(
           new RegExp(
             `${escapeRegExp(options.docsStart)}([\\s\\S]*?)${escapeRegExp(
-              options.docsEnd
-            )}`
+              options.docsEnd,
+            )}`,
           ),
-          `${options.docsStart}\n\n${formattedDocs}\n${options.docsEnd}`
+          `${options.docsStart}\n\n${formattedDocs}\n${options.docsEnd}`,
         ),
-        "utf-8"
+        "utf-8",
       );
     } else {
       await fs.writeFile(filePath, formattedDocs, "utf-8");
@@ -207,7 +222,7 @@ const types = async (cwd, files, options, watch) => {
     const configPath = ts.findConfigFile(
       cwd,
       ts.sys.fileExists,
-      "tsconfig.json"
+      "tsconfig.json",
     );
 
     const formatHost = {
@@ -230,7 +245,7 @@ const types = async (cwd, files, options, watch) => {
               diagnostic.code
             } : ${ts.flattenDiagnosticMessageText(
               diagnostic.messageText,
-              formatHost.getNewLine()
+              formatHost.getNewLine(),
             )}`;
             console.error(results);
             if (typeof watch === "function") {
@@ -239,8 +254,8 @@ const types = async (cwd, files, options, watch) => {
           },
           function (diagnostic) {
             console.info(ts.formatDiagnostic(diagnostic, formatHost));
-          }
-        )
+          },
+        ),
       );
     } else {
       const config = configPath
@@ -252,7 +267,7 @@ const types = async (cwd, files, options, watch) => {
       if (config.compilerOptions.declarationDir) {
         await fs.rm(
           join(cwd, config.compilerOptions.declarationDir),
-          RF_OPTIONS
+          RF_OPTIONS,
         );
       }
       if (config.compilerOptions.outDir) {
@@ -262,7 +277,7 @@ const types = async (cwd, files, options, watch) => {
       const parsedCommandLine = ts.parseJsonConfigFileContent(
         config,
         ts.sys,
-        cwd
+        cwd,
       );
       const program = ts.createProgram({
         options: parsedCommandLine.options,
@@ -290,7 +305,7 @@ const types = async (cwd, files, options, watch) => {
         console[diagnosticToConsoleMethod[diagnostic.category] || "log"](
           `TypeScript\n${diagnostic.file?.fileName} (${line + 1}, ${
             character + 1
-          }): ${ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")}`
+          }): ${ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")}`,
         );
       });
 
@@ -305,13 +320,13 @@ types.description = `build: run TypeScript (generate types, watch or compile)`;
 
 const build = async (options) => {
   const cwd = options.cwd;
-  const files = (
+  const files = sortPaths(
     await glob(options.files, {
       cwd,
       ignore: options.ignore,
       absolute: true,
-    })
-  ).sort();
+    }),
+  );
 
   console.log(`build files:\n- ${files.join("\n- ")}`);
 
@@ -320,7 +335,7 @@ const build = async (options) => {
     [
       options.types ? types(cwd, files, options) : 0,
       options.docs ? docs(cwd, files, options) : 0,
-    ].filter(Boolean)
+    ].filter(Boolean),
   );
   if (options.lint) await lint(cwd, files, options);
 };

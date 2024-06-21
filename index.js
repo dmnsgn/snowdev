@@ -1,41 +1,63 @@
-#!/usr/bin/env node
-
 import { promises as fs, constants } from "node:fs";
 import { join, resolve } from "node:path";
 import { createRequire } from "node:module";
+import { fileURLToPath } from "node:url";
 
 import console from "console-ansi";
-import yargs from "yargs";
-import { hideBin } from "yargs/helpers";
-import cosmiconfig from "cosmiconfig";
+import deepmerge from "deepmerge";
+import semver from "semver";
+import browserslistToEsbuild from "browserslist-to-esbuild";
+import eslintJs from "@eslint/js";
+import globals from "globals";
+import babelParser from "@babel/eslint-parser";
+import tseslint from "typescript-eslint";
+import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
+import eslintPluginJsdoc from "eslint-plugin-jsdoc";
 
 import init from "./init.js";
 import dev from "./dev.js";
 import build from "./build.js";
+import bundle from "./bundle.js";
 import release from "./release.js";
 import deploy from "./deploy.js";
 import install from "./install.js";
-import { isTypeScriptProject } from "./utils.js";
-
-const { version, name: NAME } = JSON.parse(
-  await fs.readFile(new URL("./package.json", import.meta.url))
-);
-console.prefix = `[${NAME}]`;
+import npm from "./npm.js";
+import {
+  NAME,
+  VERSION,
+  isTypeScriptProject,
+  readJson,
+  writeJson,
+} from "./utils.js";
 
 const require = createRequire(import.meta.url);
+const __dirname = fileURLToPath(new URL(".", import.meta.url));
+
+console.prefix = `[${NAME}]`;
+
+const FILES_GLOB = {
+  javascript: ["**/*.js", "**/*.mjs"],
+  typescript: ["**/*.ts", "**/*.mts"],
+  react: ["**/*.jsx", "**/*.tsx"],
+  commonjs: ["**/*.cjs", "**/*.cts"],
+  assets: ["**/*.json", "**/*.css", "**/*.wasm"],
+};
+FILES_GLOB.typescriptAll = [...FILES_GLOB.typescript, "**/*.tsx", "**/*.cts"];
 
 // Options
 const TARGETS = `defaults and supports es6-module`;
-const DEFAULTS_OPTIONS = {
+export const DEFAULTS_OPTIONS = {
   // Inputs/meta
   cwd: process.cwd(),
-  dist: "web_modules",
+  NODE_ENV: process.env.NODE_ENV || "development",
   username: null,
   gitHubUsername: null,
   authorName: null,
   files: "{*.+(j|t|mj|mt|cj|ct)s,src/**/*.+(j|t|mj|mt|cj|ct)s}",
   ignore: ["**/node_modules/**"],
   dependencies: "all",
+  updateVersions: true,
+  npmPath: null, // dirname(require.resolve("npm")),
 
   // Process
   ts: undefined,
@@ -47,7 +69,7 @@ const DEFAULTS_OPTIONS = {
   docsFormat: undefined,
   docsStart: "<!-- api-start -->",
   docsEnd: "<!-- api-end -->",
-  standardVersion: true,
+  commitAndTagVersion: true,
 
   // Server
   /** @type {import("browser-sync").Options} */
@@ -65,64 +87,76 @@ const DEFAULTS_OPTIONS = {
   // TODO: lint and format config in code editor? Do I need config in package.json instead?
   /** @type {import("prettier").RequiredOptions} */
   prettier: null,
-  /** @type {import("eslint").Linter.Config} */
-  eslint: {
-    parser: require.resolve("@babel/eslint-parser"),
-    extends: [
-      "eslint:recommended",
-      "plugin:prettier/recommended",
-      "plugin:jsdoc/recommended",
-    ],
-    plugins: ["eslint-plugin-prettier", "eslint-plugin-jsdoc"],
-    rules: {
-      "prettier/prettier": "error",
-      "jsdoc/require-jsdoc": 0,
-      "jsdoc/require-param-description": 0,
-      "jsdoc/require-property-description": 0,
-      "jsdoc/require-returns-description": 0,
-      "jsdoc/tag-lines": 0,
-    },
-    settings: {
-      jsdoc: {
-        ignorePrivate: true,
-      },
-    },
-    parserOptions: {
-      ecmaVersion: "latest",
-      sourceType: "module",
-      requireConfigFile: false,
-      babelOptions: {},
-    },
-    env: {
-      es2022: true,
-      browser: true,
-      node: true,
-      worker: true,
-    },
-    overrides: [
-      {
-        files: ["**/*.ts"],
-        parser: require.resolve("@typescript-eslint/parser"),
-        extends: [
-          "eslint:recommended",
-          "plugin:@typescript-eslint/recommended",
-          "plugin:prettier/recommended",
-        ],
-        plugins: ["@typescript-eslint"],
-      },
-      {
-        files: ["test/**/*.js"],
-        parser: "esprima",
-        env: {
-          es2022: true,
-          browser: true,
-          jest: true,
-          jasmine: true,
-          node: true,
+  /** @type {import("eslint").Linter.FlatConfig} */
+  eslint: [
+    eslintJs.configs.recommended,
+    ...tseslint.configs.recommended.map((config) => ({
+      ...config,
+      files: FILES_GLOB.typescriptAll,
+    })),
+    {
+      files: FILES_GLOB.javascript,
+      languageOptions: {
+        parser: babelParser,
+        parserOptions: {
+          ecmaVersion: "latest",
+          sourceType: "module",
+          requireConfigFile: false,
+          babelOptions: {}, // Overwritten with options.babel on lint
+        },
+        globals: {
+          ...globals.browser,
+          ...globals.node,
+          ...globals.worker,
         },
       },
-    ],
-  },
+    },
+    {
+      files: FILES_GLOB.javascript,
+      ...eslintPluginJsdoc.configs["flat/recommended-typescript-flavor"],
+    },
+    {
+      files: FILES_GLOB.typescript,
+      ...eslintPluginJsdoc.configs["flat/recommended-typescript"],
+    },
+    {
+      files: FILES_GLOB.javascript,
+      plugins: { jsdoc: eslintPluginJsdoc },
+      rules: {
+        "jsdoc/require-jsdoc": 0,
+        "jsdoc/require-param-description": 0,
+        "jsdoc/require-property-description": 0,
+        "jsdoc/require-returns-description": 0,
+        "jsdoc/tag-lines": 0,
+        "jsdoc/no-defaults": 0,
+      },
+      settings: { jsdoc: { ignorePrivate: true } },
+    },
+    {
+      files: ["test/**/*.js"],
+      languageOptions: {
+        // parser: "esprima",
+        globals: {
+          ...globals.browser,
+          ...globals.node,
+          ...globals.jest,
+          ...globals.jasmine,
+        },
+      },
+    },
+    eslintPluginPrettierRecommended,
+    // TODO: https://github.com/import-js/eslint-plugin-import/pull/2996
+    // {
+    //   extends: ["plugin:import/recommended"],
+    //   plugins: ["eslint-plugin-import"],
+    //   rules: {
+    //     "import/no-cycle": 1,
+    //     "import/order": [1, { groups: ["builtin", "external", "internal"] }],
+    //     "import/no-named-as-default": 0,
+    //     "import/newline-after-import": 2,
+    //   },
+    // },
+  ],
   /** @type {import("typescript").TranspileOptions} */
   tsconfig: {
     compilerOptions: {
@@ -131,8 +165,12 @@ const DEFAULTS_OPTIONS = {
       declarationDir: "types",
       emitDeclarationOnly: true,
       lib: ["ESNext", "DOM"],
+      module: "esnext",
     },
   },
+
+  // Transpile
+  transpiler: "swc",
   /** @type {import("@rollup/plugin-babel").RollupBabelInputPluginOptions} */
   babel: {
     exclude: /node_modules\/(assert|core-js|@babel\/runtime)/,
@@ -155,186 +193,130 @@ const DEFAULTS_OPTIONS = {
       ],
     ],
   },
-  rollup: null,
+  /** @type {import("esbuild").BuildOptions} */
+  esbuild: {
+    exclude: [""],
+    target: browserslistToEsbuild(TARGETS),
+  },
+  /** @type {import("@swc/core").Options} */
+  swc: {
+    env: {
+      targets: TARGETS,
+      mode: "entry", // "usage" is not working properly
+      coreJs: "3.37",
+      shippedProposals: true,
+    },
+    jsc: {
+      // `env` and `jsc.target` cannot be used together
+      target: null,
+    },
+  },
+  importMap: {},
+  resolve: {
+    include: [
+      ...FILES_GLOB.javascript,
+      ...FILES_GLOB.typescript,
+      ...FILES_GLOB.commonjs,
+      ...FILES_GLOB.react,
+      ...FILES_GLOB.assets,
+    ],
+    exclude: ["**.d.ts"],
+    copy: FILES_GLOB.assets,
+    conditions: ["module", "import", "default"],
+    mainFields: ["module", "jsnext:main", "jsnext", "main"],
+    browserField: true,
+    overrides: {},
+  },
+  rollup: {
+    /** @type {import("rollup").InputOptions} */
+    input: {},
+    /** @type {import("rollup").OutputOptions} */
+    output: {
+      dir: "web_modules",
+    },
+    /** @type {import("rollup").InputPluginOption} */
+    extraPlugins: [],
+    pluginsOptions: {},
+    watch: false,
+    sourceMap: false,
+  },
+
   // Docs
   typedoc: null,
   jsdoc: null,
 };
 
-let cosmiconfigOptions = {};
-try {
-  const result = cosmiconfig.cosmiconfigSync(NAME).search() || {};
-  cosmiconfigOptions = result.config || {};
-} catch (error) {
-  console.error(error);
-  process.exit(0);
-}
+export const commands = { init, dev, build, bundle, release, deploy, install };
 
-// CLI
-const parser = yargs(hideBin(process.argv));
-parser
-  .demandCommand(1)
-  .options({
-    cwd: {
-      group: "Input/meta options:",
-      type: "string",
-      describe: `Specify the current working directory for all commands.`,
-      defaultDescription: `process.cwd()`,
-    },
-    username: {
-      group: "Input/meta options:",
-      type: "string",
-      describe: `Specify a user name for the init command.`,
-      defaultDescription: `$ npm profile get name`,
-    },
-    gitHubUsername: {
-      group: "Input/meta options:",
-      type: "string",
-      describe: `Specify a GitHub user name for the init command. Default from current npm profile or scraped from profile page.`,
-      defaultDescription: `options.username`,
-    },
-    authorName: {
-      group: "Input/meta options:",
-      type: "string",
-      describe: `Specify an author name for the init command. Default from current npm profile or scraped from profile page.`,
-      defaultDescription: `$ npm profile get fullname`,
-    },
-    files: {
-      group: "Input/meta options:",
-      type: "string",
-      describe: `A glob pattern for files to be processed by build command. All JS and TS files in root or "src/" folder.`,
-      defaultDescription: `"{*.+(t|j||mj)s,src/**/*.+(t|j||mj)s}"`,
-    },
-    ignore: {
-      group: "Input/meta options:",
-      type: "array",
-      describe: `Files to be ignored by build command.`,
-      defaultDescription: `["**/node_modules/**", "**/web_modules/**"]`,
-    },
-    dependencies: {
-      group: "Input/meta options:",
-      type: "string",
-      choices: ["all", "dev", "prod"],
-      describe: `Install all dependencies from package.json, only devDependencies ("dev"), only dependencies ("prod") or an array of dependency as ES module into web_modules.`,
-      defaultDescription: `all`,
-    },
+export { npm, FILES_GLOB };
 
-    ts: {
-      group: "Commands options:",
-      type: "boolean",
-      describe: `Use TypeScript for init, dev and build commands (create index.ts, watch files or build files). Auto-detected if a "tsconfig.json" is detected with a "compilerOptions.outDir" set.`,
-      defaultDescription: `undefined`,
-    },
-    serve: {
-      group: "Commands options:",
-      type: "boolean",
-      describe: `Start Browsersync on dev command.`,
-      defaultDescription: `true`,
-    },
-    lint: {
-      group: "Commands options:",
-      type: "boolean",
-      describe: `Lint on build command.`,
-      defaultDescription: `true`,
-    },
-    format: {
-      group: "Commands options:",
-      type: "boolean",
-      describe: `Format on build command.`,
-      defaultDescription: `true`,
-    },
-    types: {
-      group: "Commands options:",
-      type: "boolean",
-      describe: `Run TypeScript (generate types or compile) on build command or watch on dev command.`,
-      defaultDescription: `true`,
-    },
-    docs: {
-      group: "Commands options:",
-      type: "string",
-      describe: `Generate documentation (using "JSDoc" or "typedoc") in file (between "options.docsStart" and "options.docsEnd") or directory. Default to "README.md" but "docs" if "options.ts".`,
-      defaultDescription: `undefined`,
-    },
-    docsFormat: {
-      group: "Commands options:",
-      type: "string",
-      choices: ["md", "html"],
-      describe: `Default to "md" but "html" if "options.ts".`,
-      defaultDescription: `undefined`,
-    },
-    standardVersion: {
-      group: "Commands options:",
-      type: "boolean|Object",
-      describe: `Bump the version, generate changelog release, create a new commit with git tag on release command.`,
-      defaultDescription: `true`,
-    },
-    crossOriginIsolation: {
-      group: "Commands options:",
-      type: "boolean",
-      describe: `Add Cross-Origin-Opener-Policy (COOP) and Cross-Origin-Embedder-Policy (COEP) headers to browsersync. Required for the use of SharedArrayBuffer.`,
-      defaultDescription: `false`,
-    },
-    http2: {
-      group: "Commands options:",
-      type: "boolean",
-      describe: `Serve with "node:http2".`,
-      defaultDescription: `true`,
-    },
-    hmr: {
-      group: "Commands options:",
-      type: "boolean",
-      describe: `Add Hot Module Replacement to browsersync. Requires "es-module-shims" with "shimMode".`,
-      defaultDescription: `true`,
-    },
-  })
-  .wrap(parser.terminalWidth())
-  .version(version)
-  .help();
+export const run = async (fn, options) => {
+  const { [fn.name]: commandOptions, ...globalOptions } = options;
 
-const commands = [init, dev, build, release, deploy, install];
-commands.forEach((fn) => {
-  parser.command(
-    fn.name === "dev" ? [fn.name, "$0"] : fn.name,
-    fn.description,
-    () => {},
-    async (argv) => {
-      const {
-        [fn.name]: cosmiconfigCommandOptions,
-        ...cosmiconfigGlobalOptions
-      } = cosmiconfigOptions || {};
+  options = deepmerge.all(
+    [DEFAULTS_OPTIONS, globalOptions || {}, commandOptions || {}],
+    { clone: false },
+  );
 
-      const options = {
-        ...DEFAULTS_OPTIONS,
-        ...(cosmiconfigGlobalOptions || {}),
-        ...(cosmiconfigCommandOptions || {}),
-        ...argv,
-        command: fn.name,
-        argv,
-      };
+  try {
+    await npm.load(options.npmPath);
 
-      try {
-        options.cwd = resolve(options.cwd);
-        options.cacheFolder = join(options.cwd, "node_modules", ".cache", NAME);
-        console.info(`${fn.name} in '${options.cwd}'`);
+    if (options.caller === "cli") {
+      console.debug(`v${VERSION}`);
+      console.debug(
+        `Using npm@${(await npm.run(options.cwd, "--version")).trim()} (${options.npmPath || "global"})`,
+      );
+    }
 
-        await fs.access(options.cwd, constants.R_OK | constants.W_OK);
+    options.command = fn.name;
+    options.cwd = resolve(options.cwd);
+    options.cacheFolder = join(options.cwd, "node_modules", ".cache", NAME);
+    console.info(`${fn.name} in '${options.cwd}'`);
 
-        options.ignore.push(`**/${options.dist}/**`);
+    await fs.access(options.cwd, constants.R_OK | constants.W_OK);
 
-        // Auto-detect TypeScript project
-        options.ts ??= isTypeScriptProject(options.cwd);
+    options.ignore.push(`**/${options.rollup.output.dir}/**`);
 
-        // Set default docs
-        options.docs = options.docs ?? (options.ts ? "docs" : "README.md");
-        options.docsFormat = options.docsFormat ?? (options.ts ? "html" : "md");
+    // Auto-detect TypeScript project
+    options.ts ??= isTypeScriptProject(options.cwd);
 
-        fn(options);
-      } catch (error) {
-        console.error(`Can't access cwd.`);
-        console.error(error);
+    // Set default docs
+    options.docs = options.docs ?? (options.ts ? "docs" : "README.md");
+    options.docsFormat = options.docsFormat ?? (options.ts ? "html" : "md");
+
+    // if (options.ts) {
+    //   options.eslint.extends.push(
+    //     "plugin:import/typescript",
+    //   );
+    //   options.eslint.settings["import/resolver"] = {
+    //     typescript: true,
+    //     node: true,
+    //   };
+    // }
+
+    // Check package.json exists and update versions
+    if (options.command === "dev") {
+      const packageJsonPath = join(options.cwd, "package.json");
+      let packageJson = await readJson(packageJsonPath);
+      if (options.updateVersions) {
+        const { engines } = await readJson(
+          join(__dirname, "template", "package.json"),
+        );
+        const { prerelease, major, minor } = semver.minVersion(VERSION);
+        engines[NAME] = prerelease.length ? VERSION : `>=${major}.${minor}.x`;
+        packageJson = deepmerge(packageJson, { engines });
+        await writeJson(packageJsonPath, packageJson);
       }
     }
-  );
-});
 
-parser.parse();
+    // console.debug(options);
+
+    return await fn(options);
+  } catch (error) {
+    console.error(
+      `Error accessing "cwd", loading "npm" or reading "package.json".`,
+    );
+    console.error(error);
+    return { error };
+  }
+};

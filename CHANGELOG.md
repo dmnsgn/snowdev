@@ -1,6 +1,386 @@
 # Changelog
 
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
+
+# [2.0.0-alpha.31](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.30...v2.0.0-alpha.31) (2024-06-19)
+
+
+### Bug Fixes
+
+* correct commonjs globs ([83fe74c](https://github.com/dmnsgn/snowdev/commit/83fe74c250f6b75aa1a98163eff79440162b9698))
+* correct jsdoc ignorePrivate eslint setting in flat config ([8ba2f9b](https://github.com/dmnsgn/snowdev/commit/8ba2f9b8732004d5e8762112396127b740f480e2))
+* only log versions for cli caller ([e625da6](https://github.com/dmnsgn/snowdev/commit/e625da6225437b8e0ae7dd5c0aa74ffa6c201a05))
+* prevent options mutation on install ([956386f](https://github.com/dmnsgn/snowdev/commit/956386faa50df5bfcf38b9e8954489f39cf08a66))
+* swc corejs version ([cbab80c](https://github.com/dmnsgn/snowdev/commit/cbab80c2c877e22c5be8ea166b8998459b7d87f9))
+
+
+### Features
+
+* add support for copying json/css/wasm on install ([38a22b3](https://github.com/dmnsgn/snowdev/commit/38a22b3db4672df004ee47cfb0aaae9cd628d10a))
+* silence rollup MODULE_LEVEL_DIRECTIVE warnings ([2efe89b](https://github.com/dmnsgn/snowdev/commit/2efe89b58e6bc8207fdb08fe95630bea5552b625))
+
+
+
+# [2.0.0-alpha.30](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.29...v2.0.0-alpha.30) (2024-05-29)
+
+
+### Bug Fixes
+
+* only use tseslint for ts files ([161c7ee](https://github.com/dmnsgn/snowdev/commit/161c7ee156d7b0182b5608e7c023ee72b14a4cf8))
+
+
+
+# [2.0.0-alpha.29](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.28...v2.0.0-alpha.29) (2024-05-28)
+
+
+### Bug Fixes
+
+* handle subfolder in file globs ([6ad40c1](https://github.com/dmnsgn/snowdev/commit/6ad40c15cc8655f0e365f1223559b32f6ee22bcf))
+
+
+### Features
+
+* check missing and extraneous dependencies ([e5147ce](https://github.com/dmnsgn/snowdev/commit/e5147ce62cff5fbc7829f6a737c27fc4ef8a8a93))
+* move lint outside of serve in dev command ([732b648](https://github.com/dmnsgn/snowdev/commit/732b64866d69d1ad02bda63097a872a2ba945a22))
+* move npm from programmatic use to child_process fork ([1e7f385](https://github.com/dmnsgn/snowdev/commit/1e7f385481473022f682d5717aac8719fb1154d8))
+
+
+
+# [2.0.0-alpha.28](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.27...v2.0.0-alpha.28) (2024-05-15)
+
+
+### Bug Fixes
+
+* add EOF in writeJson ([6b74c2e](https://github.com/dmnsgn/snowdev/commit/6b74c2e0a51bed6b05e5226260102d5bedf6c318))
+* handle empty array of dependencies in for custom dependency type ([87e0c05](https://github.com/dmnsgn/snowdev/commit/87e0c05bc3e6a65d8a4e5a9617c078fd13ae12d3))
+
+
+
+# [2.0.0-alpha.27](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.26...v2.0.0-alpha.27) (2024-05-02)
+
+
+### Features
+
+* exclude node_modules from rollup CIRCULAR_DEPENDENCY warnings ([b6cb2ca](https://github.com/dmnsgn/snowdev/commit/b6cb2caefe4b32c314e545c777cae35359b8b032))
+
+
+
+# [2.0.0-alpha.26](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.25...v2.0.0-alpha.26) (2024-04-11)
+
+
+### Bug Fixes
+
+* strip quotes for npm argv ([cc9c19e](https://github.com/dmnsgn/snowdev/commit/cc9c19ed18f2b81efd53d4a7227a5dda9432e4a4))
+
+
+
+# [2.0.0-alpha.25](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.24...v2.0.0-alpha.25) (2024-04-11)
+
+
+### Bug Fixes
+
+* use query ":scope" to get dependencies in workspace ([dab3834](https://github.com/dmnsgn/snowdev/commit/dab3834b59df38e1ffd66b494d601359d94f5228))
+
+
+
+# [2.0.0-alpha.24](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.23...v2.0.0-alpha.24) (2024-04-10)
+
+
+### Bug Fixes
+
+* ensure https is set for browser-sync httpModule ([9f58556](https://github.com/dmnsgn/snowdev/commit/9f5855644246b4e951b117e65fd155ff21d03988))
+* ensure process.env.NODE_ENV key isn't replaced ([b099591](https://github.com/dmnsgn/snowdev/commit/b099591f23e782259cb8bd927765ee9fb3346c83))
+* only update versions for dev command ([c89b397](https://github.com/dmnsgn/snowdev/commit/c89b397c895e8cfb7ba3cdb23a64bb3341132059))
+
+
+### Features
+
+* add npm + support workspaces dependencies ([fdfa1b8](https://github.com/dmnsgn/snowdev/commit/fdfa1b8075dc94540e1a90ce35055f266bfd7968))
+* add path sorting for build command ([5af3733](https://github.com/dmnsgn/snowdev/commit/5af373334a9bc6ac2c5abd6361c9afb9f94108a5))
+* add updateVersions ([1bbd051](https://github.com/dmnsgn/snowdev/commit/1bbd051c325ff130946cd44abd1eb856c25de569))
+* check invalid dependencies ([0aee75d](https://github.com/dmnsgn/snowdev/commit/0aee75d9334ada87de5313d78d3a85a1e038d3a0))
+* handle dependency change when running dev ([d337350](https://github.com/dmnsgn/snowdev/commit/d33735052f0fc552e0d13bb63c872b7780243d90))
+* use global searchStrategy for cosmiconfig ([53ec5b5](https://github.com/dmnsgn/snowdev/commit/53ec5b5389d4ecb7724f0c5c5ac4cae811b9151b))
+
+
+
+# [2.0.0-alpha.23](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.22...v2.0.0-alpha.23) (2024-01-30)
+
+
+### Bug Fixes
+
+* empty output directory if no dependency to install ([26c7107](https://github.com/dmnsgn/snowdev/commit/26c710741103715887a5818986fb8dc90a77dca1))
+* ensure no duplicates in dependencies changed log ([f9f822a](https://github.com/dmnsgn/snowdev/commit/f9f822a6ee7e03da2e49f4f07cf97caf32132db3))
+
+
+
+# [2.0.0-alpha.22](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.21...v2.0.0-alpha.22) (2023-12-05)
+
+
+### Bug Fixes
+
+* check null entry for legacy exports defined as folders or files without extensions ([29c1eeb](https://github.com/dmnsgn/snowdev/commit/29c1eeb4fca448044020916540d80a6b3bd7ce43))
+
+
+
+# [2.0.0-alpha.21](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.20...v2.0.0-alpha.21) (2023-12-05)
+
+
+### Bug Fixes
+
+* handle legacy exports defined as folders or files without extensions ([d0f2bcd](https://github.com/dmnsgn/snowdev/commit/d0f2bcd45f4f3f2d5ede572ed5e323586464e581))
+* hardcode removal of new exports. in jsdoc ([65a6d26](https://github.com/dmnsgn/snowdev/commit/65a6d2689b3afdee7c82351e11d8d95d7b242ec9))
+
+
+### Features
+
+* add typedoc-material-theme ([93bf01d](https://github.com/dmnsgn/snowdev/commit/93bf01da27d69f7ddbbdcba1db569d4d25ff5eba))
+
+
+
+# [2.0.0-alpha.20](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.19...v2.0.0-alpha.20) (2023-11-02)
+
+
+### Bug Fixes
+
+* create doc folder for ts ([a84b482](https://github.com/dmnsgn/snowdev/commit/a84b482d951fb504eed369fb31d2ca4beacee869))
+* exclude snowdev from install ([e189225](https://github.com/dmnsgn/snowdev/commit/e1892252e62321154542f76961abc6dd7cade5ba))
+* handle errors in dependencies for typedoc ([bc57c6d](https://github.com/dmnsgn/snowdev/commit/bc57c6d3b30e5b797cd90733fd2a02b8709a3704))
+* swc Error: `env` and `jsc.target` cannot be used together ([9b16f21](https://github.com/dmnsgn/snowdev/commit/9b16f217cc6cc6913cd4f08e4a06bffaf002d869))
+* use .js for main importMap import path ([98fae28](https://github.com/dmnsgn/snowdev/commit/98fae28610da2fcc39411943c99115a71ada7ac0))
+
+
+
+# [2.0.0-alpha.19](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.18...v2.0.0-alpha.19) (2023-09-09)
+
+
+### Bug Fixes
+
+* add no-named-as-default to eslint import ([8980641](https://github.com/dmnsgn/snowdev/commit/898064109dcd2eec8047f050d3254675a0646f9d))
+* hardcoded dependency import map value ([fa3b041](https://github.com/dmnsgn/snowdev/commit/fa3b0414cb849add1248e5ab5096e8b85d2cc968))
+* name cli argument ([e8eff7b](https://github.com/dmnsgn/snowdev/commit/e8eff7b3d7488e27c4e5137775a4345590d7a723))
+* treat star as globstar in wildcard entries resolution ([a8d69c7](https://github.com/dmnsgn/snowdev/commit/a8d69c734011c5b2100ab7cb9e02e807fe008828))
+* update eslint extends/settings rules for TypeScript and typescript-flavor ([0cafba9](https://github.com/dmnsgn/snowdev/commit/0cafba9d52d0e4be48398d4c8e1b8f99c571a01c))
+
+
+### Features
+
+* add back support for hardcoded dependencies ([db9804b](https://github.com/dmnsgn/snowdev/commit/db9804b346ecd87165e1a31f6518b31073e97fd6))
+* add options.name for init command package name ([7ff4949](https://github.com/dmnsgn/snowdev/commit/7ff4949436f5f5186ff8014ceb1b4ef2ff883257))
+* allow both filename and subpackage path for hardcoded dependencies ([2e23fb3](https://github.com/dmnsgn/snowdev/commit/2e23fb3e4c33001c1fc5e4e2ecada11abd36617c))
+* **template:** update module type + add .nojekyll to npmignore ([93e021b](https://github.com/dmnsgn/snowdev/commit/93e021b2390980fd69f94093883d89a33096fc95))
+* update import rules ([6c8e4fe](https://github.com/dmnsgn/snowdev/commit/6c8e4fe011396871c13425bbdc56c6ff1ca3b8cd))
+
+
+
+# [2.0.0-alpha.18](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.17...v2.0.0-alpha.18) (2023-08-07)
+
+
+
+# [2.0.0-alpha.17](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.16...v2.0.0-alpha.17) (2023-08-04)
+
+
+### Bug Fixes
+
+* always compare dependencies by spec and name ([57bb25a](https://github.com/dmnsgn/snowdev/commit/57bb25a11777edcae60bbad3f2d96a4afc1f7dc7))
+
+
+### Features
+
+* move .nojekyll to cwd ([d7905b0](https://github.com/dmnsgn/snowdev/commit/d7905b081478b396589e1c24dbb63b80c40b1fdd))
+
+
+
+# [2.0.0-alpha.16](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.15...v2.0.0-alpha.16) (2023-07-27)
+
+
+### Bug Fixes
+
+* fully compare dependencies and cachedDependencies ([632652e](https://github.com/dmnsgn/snowdev/commit/632652e26e270c9595224f9ec0b245f3b29a92d3))
+
+
+
+# [2.0.0-alpha.15](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.14...v2.0.0-alpha.15) (2023-07-27)
+
+
+### Features
+
+* add jsdoc-export-default-interop ([7960faa](https://github.com/dmnsgn/snowdev/commit/7960faafe730bcbfabcd6111fda750188ee8c568))
+
+
+
+# [2.0.0-alpha.14](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.13...v2.0.0-alpha.14) (2023-07-25)
+
+
+### Features
+
+* add eslint-plugin-import ([97f48df](https://github.com/dmnsgn/snowdev/commit/97f48dff82b08732c241b4b65d4a472f9400c89c))
+* add import/no-named-as-default 0 ([d78e62a](https://github.com/dmnsgn/snowdev/commit/d78e62ad11c0005145c105d21cb3eee53ee86203))
+* format rollup log ([0c152ba](https://github.com/dmnsgn/snowdev/commit/0c152ba59d16627016a995563e59edbe02fad788))
+
+
+
+# [2.0.0-alpha.13](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.12...v2.0.0-alpha.13) (2023-07-20)
+
+
+
+# [2.0.0-alpha.12](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.11...v2.0.0-alpha.12) (2023-07-19)
+
+
+### Bug Fixes
+
+* add max-old-space-size to cli ([cb2a91c](https://github.com/dmnsgn/snowdev/commit/cb2a91cfc30ecb7dcfe7af654eb9b7064061e937))
+* sourceMap declaration ([645d730](https://github.com/dmnsgn/snowdev/commit/645d730a1a0e56e6fc098e1b2f3ed8de6e766f48))
+* upgrade prettier.format to new syntax ([4241b46](https://github.com/dmnsgn/snowdev/commit/4241b46ae35cc8359a78e1a228a27c24c4a24266))
+
+
+### Features
+
+* add jsdoc eslint no-defaults ([e146c43](https://github.com/dmnsgn/snowdev/commit/e146c43f66a8679cee9d6afc317755da0dc7cdd0))
+* add watch and sourceMap to bundle ([261ee73](https://github.com/dmnsgn/snowdev/commit/261ee73674e0ae7d43accc4becd77cf789f0fe36))
+
+
+
+# [2.0.0-alpha.11](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.10...v2.0.0-alpha.11) (2023-06-28)
+
+
+
+# [2.0.0-alpha.10](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.9...v2.0.0-alpha.10) (2023-06-27)
+
+
+### Bug Fixes
+
+* force .js extension for all entries ([616fb05](https://github.com/dmnsgn/snowdev/commit/616fb052c248604f11054f2cc8372189c6054416))
+
+
+
+# [2.0.0-alpha.9](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.8...v2.0.0-alpha.9) (2023-06-27)
+
+
+### Bug Fixes
+
+* double deepmerged options ([4ce4209](https://github.com/dmnsgn/snowdev/commit/4ce4209c8dd4098b99fcd3b8b9108035f4ff43d8))
+
+
+
+# [2.0.0-alpha.8](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.7...v2.0.0-alpha.8) (2023-06-27)
+
+
+### Bug Fixes
+
+* deepmerge all options ([c1510e1](https://github.com/dmnsgn/snowdev/commit/c1510e1ef494615ccad2be5624b47203b906013e))
+* handle bundle result error in install ([e4bff55](https://github.com/dmnsgn/snowdev/commit/e4bff55f0902d7906e081780a6e7781c7d523687))
+
+
+### Features
+
+* add force install + use tree dependency names + check cache only if output folder exists ([554432c](https://github.com/dmnsgn/snowdev/commit/554432cc093f5ca1824c08fe971ea26a753152c5))
+* always return values for install command ([4e076b5](https://github.com/dmnsgn/snowdev/commit/4e076b55329e9ae965c2dc45ef8feb0151cdbd00))
+
+
+
+# [2.0.0-alpha.7](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.6...v2.0.0-alpha.7) (2023-06-26)
+
+
+### Features
+
+* add extra plugins enforce property to sort them similarly to Vite and webpack ([407de00](https://github.com/dmnsgn/snowdev/commit/407de00932fad97e9bbb02ef2eb5da8ef41df944))
+
+
+
+# [2.0.0-alpha.6](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.5...v2.0.0-alpha.6) (2023-06-23)
+
+
+### Features
+
+* use rollup.extraPlugins for additional plugins and rollup.input.plugins for overrides + add rollup.pluginsOptions ([deb95d3](https://github.com/dmnsgn/snowdev/commit/deb95d396acc803a8c8d326af1dc35d58e3ec322))
+
+
+
+# [2.0.0-alpha.5](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.4...v2.0.0-alpha.5) (2023-06-21)
+
+
+### Bug Fixes
+
+* order of plugin override ([02643a7](https://github.com/dmnsgn/snowdev/commit/02643a73bcfc7c261bacc3e3ee52e932c5b98bde))
+
+
+
+# [2.0.0-alpha.4](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.3...v2.0.0-alpha.4) (2023-06-19)
+
+
+### Features
+
+* add caller option ([032e72d](https://github.com/dmnsgn/snowdev/commit/032e72dc1b61b058702b94942590d641c5694aaf))
+* make rollup plugins configurable ([11c5d0f](https://github.com/dmnsgn/snowdev/commit/11c5d0f8b01be0eb679ea5527063f4886386c74e))
+
+
+
+# [2.0.0-alpha.3](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.2...v2.0.0-alpha.3) (2023-06-16)
+
+
+### Features
+
+* add module to default tsconfig.compilerOptions ([cbee12a](https://github.com/dmnsgn/snowdev/commit/cbee12a0c7643f085ed3f08f7d2c53cdd468b653))
+* set entryFileNames only for install command ([fc282b1](https://github.com/dmnsgn/snowdev/commit/fc282b1133e8532cf2b0a6abf6cfb62944281020))
+
+
+
+# [2.0.0-alpha.2](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.1...v2.0.0-alpha.2) (2023-06-15)
+
+
+### Features
+
+* remove options.dist in favour of options.rollup.output.dir ([f004e29](https://github.com/dmnsgn/snowdev/commit/f004e29af1523f754504082c179b1b09fa62b0a0))
+* return and await command result in run ([b4f9690](https://github.com/dmnsgn/snowdev/commit/b4f9690e7d3c0c913a49af7c38628e70d5b268c6))
+
+
+
+# [2.0.0-alpha.1](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.0...v2.0.0-alpha.1) (2023-06-15)
+
+
+### Features
+
+* log current version ([3f2d5a4](https://github.com/dmnsgn/snowdev/commit/3f2d5a407d199e8fd6fc2860c482fc0ee1aea68f))
+
+
+
+# [2.0.0-alpha.0](https://github.com/dmnsgn/snowdev/compare/v1.15.2...v2.0.0-alpha.0) (2023-06-15)
+
+
+### Bug Fixes
+
+* add --porcelain to git push command ([d880725](https://github.com/dmnsgn/snowdev/commit/d88072564237a3fbc2356715cf6d8219f60ed22c))
+* add missing mts cjs and cts extensions to file regex ([8fe427b](https://github.com/dmnsgn/snowdev/commit/8fe427b7e901176de292b35327489970857b5dd6))
+* glob sort files ([4e39f21](https://github.com/dmnsgn/snowdev/commit/4e39f218ed3333ed5c2611058f53b73146615b73))
+* handle esm init options on window ([49ebf2a](https://github.com/dmnsgn/snowdev/commit/49ebf2ac63c297fc6caff3f46252031d9e9100d5))
+* update babel corejs options ([d01e75a](https://github.com/dmnsgn/snowdev/commit/d01e75a87a56dcca712a2de2cc73557a69b8fc99))
+
+
+### Features
+
+* add eslint-plugin-jsdoc ([68f744d](https://github.com/dmnsgn/snowdev/commit/68f744daea61cc7b39828eafd938f13be9fecb1a))
+* add HMR (Hot Module Replacement) support ([12185a6](https://github.com/dmnsgn/snowdev/commit/12185a63c118a066dcdfdbf9a4824a97777f93c8))
+* add http2 support ([e3e2348](https://github.com/dmnsgn/snowdev/commit/e3e234806a19d2596017cb1131a0bb864f535333))
+* add node and worker to eslint env + use latest parser version ([6f846f5](https://github.com/dmnsgn/snowdev/commit/6f846f5fddd5b8f79d3911393be1a2f10c21d7bc))
+* add options.dist for cold built dependencies ([f2f1b74](https://github.com/dmnsgn/snowdev/commit/f2f1b7477213c666e3738c18eb3d568c9bd61d23))
+* add programmatic API + add bundle command using rollup ([a79cace](https://github.com/dmnsgn/snowdev/commit/a79cacece2fff8531b5fd78e764f71e64cd56568))
+* add snowdev version to cache ([e84bc1d](https://github.com/dmnsgn/snowdev/commit/e84bc1db7c1cd4f96d45db20331f47f3f10cf697))
+* **template:** update tsconfig ([3cabf9b](https://github.com/dmnsgn/snowdev/commit/3cabf9bc37d9011f912f84a561a3a8a4b44d441c))
+* use dev as default command ([d3cca92](https://github.com/dmnsgn/snowdev/commit/d3cca92e5a5efa801e3e0ae1709f6584a2010f57))
+* wrap yargs to terminal width ([0e2b22b](https://github.com/dmnsgn/snowdev/commit/0e2b22bc294fcb7b26a1bf9ea52d6a9d60476bb3))
+
+
+### Reverts
+
+* remove yargs strict ([9fc7528](https://github.com/dmnsgn/snowdev/commit/9fc752812e0f7659259bdf4e954915cf30a5615c))
+
+
+### BREAKING CHANGES
+
+* use swc via rollup
+
+
 
 ## [1.15.2](https://github.com/dmnsgn/snowdev/compare/v1.15.1...v1.15.2) (2023-02-19)
 

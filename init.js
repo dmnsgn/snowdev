@@ -1,5 +1,5 @@
 import { promises as fs } from "node:fs";
-import { basename, join } from "node:path";
+import { basename, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import console from "console-ansi";
@@ -7,7 +7,7 @@ import replaceInFile from "replace-in-file";
 import npmUser from "npm-user";
 import camelcase from "camelcase";
 
-import { exec, ncp } from "./utils.js";
+import { exec, writeJson } from "./utils.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
@@ -15,12 +15,12 @@ const init = async (options = {}) => {
   const label = `init`;
   console.time(label);
 
-  const packageName = basename(options.cwd);
+  const packageName = options.name || basename(options.cwd);
 
   // Check for empty directory
   if (
     (await fs.readdir(options.cwd)).filter(
-      (file) => ![".DS_Store"].includes(file)
+      (file) => ![".DS_Store"].includes(file),
     ).length > 0
   ) {
     console.warn(`Directory not empty. Files will not be overwritten.`);
@@ -48,24 +48,32 @@ const init = async (options = {}) => {
   }
 
   console.info(
-    `user: ${user.authorName} (npm: "${user.username}", github: "${user.gitHubUsername}")`
+    `user: ${user.authorName} (npm: "${user.username}", github: "${user.gitHubUsername}")`,
   );
 
   try {
     // Copy template files
-    await ncp(join(__dirname, "template"), options.cwd, {
-      clobber: false,
-      filter(fileName) {
-        return options.ts
-          ? !["index.js"].includes(basename(fileName))
-          : !["tsconfig.json", "src"].includes(basename(fileName));
+    const templatePath = join(__dirname, "template");
+    await fs.cp(templatePath, options.cwd, {
+      force: false,
+      recursive: true,
+      async filter(source) {
+        const copy = options.ts
+          ? !["index.js"].includes(basename(source))
+          : !["tsconfig.json", "src"].includes(basename(source));
+
+        if (copy && !(await fs.lstat(source)).isDirectory()) {
+          console.log("Copying:", relative(templatePath, source));
+        }
+
+        return copy;
       },
     });
 
     // Rename gitignore otherwise ignored on npm publish
     await fs.rename(
       join(options.cwd, "gitignore"),
-      join(options.cwd, ".gitignore")
+      join(options.cwd, ".gitignore"),
     );
 
     // Rewrite package name to folder name
@@ -92,16 +100,10 @@ const init = async (options = {}) => {
 
     // Change main entry point
     if (options.ts) {
-      const packageJsonFile = join(options.cwd, "package.json");
-      const packageJson = JSON.parse(
-        await fs.readFile(packageJsonFile, "utf-8")
-      );
-      packageJson.main = "lib/index.js";
-      packageJson.exports = "./lib/index.js";
-      await fs.writeFile(
-        packageJsonFile,
-        JSON.stringify(packageJson, null, 2),
-        "utf-8"
+      await writeJson(
+        join(options.cwd, "package.json"),
+        { main: "lib/index.js", exports: "./lib/index.js" },
+        { merge: true },
       );
     }
   } catch (error) {

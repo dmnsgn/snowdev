@@ -3,18 +3,19 @@ import http2 from "node:http2";
 
 import console from "console-ansi";
 import { create as browserSyncCreate } from "browser-sync";
+import pDebounce from "p-debounce";
 
 import install from "./install.js";
 import { types, lint } from "./build.js";
 import { getFileExtension, htmlHotInject } from "./utils.js";
 
 const dev = async (options = {}) => {
+  if (options.lint) await lint(options.cwd, options.files, options);
+
   if (options.serve) {
     const bs = browserSyncCreate();
 
     if (options.lint || options.ts) {
-      if (options.lint) await lint(options.cwd, options.files, options);
-
       bs.use({
         plugin() {},
         hooks: {
@@ -27,7 +28,7 @@ const dev = async (options = {}) => {
           const results = await lint(
             options.cwd,
             [join(options.cwd, file)],
-            options
+            options,
           );
           if (results) {
             bs.sockets.emit("console:log", `[snowdev] ESLint Error:${results}`);
@@ -36,12 +37,20 @@ const dev = async (options = {}) => {
       });
     }
 
+    const watchOptions = { ignoreInitial: true };
+
+    const onDependencyChange = pDebounce(async () => {
+      await install(options);
+      if (options.hmr) bs.sockets.emit("reload");
+    }, 500);
+
     // Install on package.json change
-    bs.watch("package.json", async (event) => {
-      if (event === "change") {
-        await install(options);
-        if (options.hmr) bs.sockets.emit("reload");
-      }
+    bs.watch("package.json", watchOptions, async (event) => {
+      if (event === "change") await onDependencyChange();
+    });
+    // Install on directory change in node_modules
+    bs.watch("node_modules/!(.*){,/*/}", watchOptions, async (event) => {
+      if (["addDir", "unlinkDir"].includes(event)) await onDependencyChange();
     });
 
     // HMR
@@ -55,11 +64,11 @@ const dev = async (options = {}) => {
       bs.watch(
         [
           options.files,
-          `${options.dist}/**/*.js`,
+          `${options.rollup.output.dir}/**/*.js`,
           "examples/**/*.js",
           "**/*.{html,css}",
         ],
-        { ignoreInitial: true },
+        watchOptions,
         async (event, file) => {
           if (event === "change") {
             if (getFileExtension(file) === ".js") {
@@ -70,7 +79,7 @@ const dev = async (options = {}) => {
               bs.sockets.emit("reload");
             }
           }
-        }
+        },
       );
     }
 
@@ -94,7 +103,7 @@ const dev = async (options = {}) => {
             }
           },
         },
-        httpModule: options.http2 && "node:http2",
+        httpModule: options.browsersync?.https && options.http2 && "node:http2",
         codeSync: !options.hmr,
         logPrefix: "snowdev:browser-sync",
         ...(options.browsersync || {}),
@@ -109,7 +118,7 @@ const dev = async (options = {}) => {
               if (results) {
                 bs.sockets.emit(
                   "console:log",
-                  `[snowdev] TypeScript Error:\n${results}`
+                  `[snowdev] TypeScript Error:\n${results}`,
                 );
               }
             });
@@ -117,7 +126,7 @@ const dev = async (options = {}) => {
         } catch (error) {
           console.error(error);
         }
-      }
+      },
     );
   } else if (options.ts) {
     await types(options.cwd, null, options, true);
