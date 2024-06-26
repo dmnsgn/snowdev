@@ -5,6 +5,7 @@ import console from "console-ansi";
 
 import commitAndTagVersion from "commit-and-tag-version";
 
+import npm from "./npm.js";
 import build from "./build.js";
 
 import { checkUncommitedChanges, exec } from "./utils.js";
@@ -14,6 +15,8 @@ const require = createRequire(import.meta.url);
 const release = async (options) => {
   try {
     await checkUncommitedChanges(options);
+
+    if (options.pkgFix) await npm.run(options.cwd, "pkg", ["fix"]);
 
     await build(options);
 

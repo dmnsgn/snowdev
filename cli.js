@@ -143,6 +143,12 @@ parser
       describe: `Bump the version, generate changelog release, create a new commit with git tag on release command.`,
       defaultDescription: `true`,
     },
+    pkgFix: {
+      group: "Commands options:",
+      type: "boolean",
+      describe: `Run "npm pkg fix" on release command.`,
+      defaultDescription: `true`,
+    },
     crossOriginIsolation: {
       group: "Commands options:",
       type: "boolean",

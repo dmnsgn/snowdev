@@ -10,7 +10,10 @@
   ],
   "homepage": "https://github.com/gitHubUsername/packageName",
   "bugs": "https://github.com/gitHubUsername/packageName/issues",
-  "repository": "gitHubUsername/packageName",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gitHubUsername/packageName.git"
+  },
   "funding": [
     {
       "type": "individual",
