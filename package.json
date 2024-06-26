@@ -1,6 +1,6 @@
 {
   "name": "snowdev",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Zero configuration, unbundled, opinionated, development and prototyping server for simple ES modules development: types generation, format and linting, dev server and TypeScript support.",
   "keywords": [
     "esm",
@@ -28,7 +28,10 @@
   ],
   "homepage": "https://github.com/dmnsgn/snowdev",
   "bugs": "https://github.com/dmnsgn/snowdev/issues",
-  "repository": "dmnsgn/snowdev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dmnsgn/snowdev.git"
+  },
   "funding": [
     {
       "type": "individual",

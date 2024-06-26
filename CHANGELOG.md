@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [2.1.0](https://github.com/dmnsgn/snowdev/compare/v2.0.0...v2.1.0) (2024-06-26)
+
+
+### Features
+
+* add options.pkgFix ([862f0ec](https://github.com/dmnsgn/snowdev/commit/862f0ec354d892a8e68b4653833fb117a03c4c14))
+
+
+
 # [2.0.0](https://github.com/dmnsgn/snowdev/compare/v2.0.0-alpha.31...v2.0.0) (2024-06-21)
 
 
