@@ -217,6 +217,7 @@ const install = async (options) => {
   let result;
   let input = {};
   let importMap = { imports: {} };
+  let copies = {};
 
   const filter = createFilter(
     options.resolve.include,
@@ -336,9 +337,7 @@ const install = async (options) => {
           const isCopiedExport = copyFilter(resolvedExport);
 
           if (isCopiedExport) {
-            const copyDestination = join(outputDir, id);
-            await fs.mkdir(dirname(copyDestination), { recursive: true });
-            await fs.copyFile(resolvedExport, copyDestination);
+            copies[resolvedExport] = join(outputDir, id);
           } else {
             input[id] = resolvedExport;
           }
@@ -368,6 +367,17 @@ const install = async (options) => {
     };
 
     result = await bundle(bundleOptions);
+
+    await Promise.allSettled(
+      Object.entries(copies).map(async ([resolvedExport, copyDestination]) => {
+        try {
+          await fs.mkdir(dirname(copyDestination), { recursive: true });
+          await fs.copyFile(resolvedExport, copyDestination);
+        } catch (error) {
+          console.error(error);
+        }
+      }),
+    );
 
     if (!result.error) {
       // Write import map
