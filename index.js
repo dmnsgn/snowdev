@@ -23,6 +23,7 @@ import deploy from "./deploy.js";
 import install from "./install.js";
 import npm from "./npm.js";
 import {
+  FILES_GLOB,
   NAME,
   VERSION,
   isTypeScriptProject,
@@ -34,15 +35,6 @@ const require = createRequire(import.meta.url);
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 console.prefix = `[${NAME}]`;
-
-const FILES_GLOB = {
-  javascript: ["**/*.js", "**/*.mjs"],
-  typescript: ["**/*.ts", "**/*.mts"],
-  react: ["**/*.jsx", "**/*.tsx"],
-  commonjs: ["**/*.cjs", "**/*.cts"],
-  assets: ["**/*.json", "**/*.css", "**/*.wasm"],
-};
-FILES_GLOB.typescriptAll = [...FILES_GLOB.typescript, "**/*.tsx", "**/*.cts"];
 
 // Options
 const TARGETS = `defaults and supports es6-module`;

@@ -16,6 +16,15 @@ import * as acorn from "acorn";
 import * as acornWalk from "acorn-walk";
 import * as aString from "astring";
 
+const FILES_GLOB = {
+  javascript: ["**/*.js", "**/*.mjs"],
+  typescript: ["**/*.ts", "**/*.mts"],
+  react: ["**/*.jsx", "**/*.tsx"],
+  commonjs: ["**/*.cjs", "**/*.cts"],
+  assets: ["**/*.json", "**/*.css", "**/*.wasm"],
+};
+FILES_GLOB.typescriptAll = [...FILES_GLOB.typescript, "**/*.tsx", "**/*.cts"];
+
 const RF_OPTIONS = { recursive: true, force: true };
 const exec = promisify(execCb);
 
@@ -299,6 +308,7 @@ const dotRelativeToBarePath = (p) => p.substring(p.lastIndexOf("./") + 2);
 const bareToDotRelativePath = (p) => `./${p}`;
 
 export {
+  FILES_GLOB,
   NAME,
   VERSION,
   RF_OPTIONS,
