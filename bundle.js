@@ -12,7 +12,7 @@ import commonjsNamedExports from "rollup-plugin-commonjs-named-exports";
 import noOp from "rollup-plugin-no-op";
 import deepmerge from "deepmerge";
 
-import { secondsFormatter } from "./utils.js";
+import { FILES_GLOB, secondsFormatter } from "./utils.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
@@ -67,7 +67,9 @@ const bundle = async (options = {}) => {
       {
         nodeResolve: { modulePaths: [join(__dirname, "node_modules")] },
         commonjs: { sourceMap },
-        polyfillNode: { include: options.resolve.include }, // Transform all files
+        polyfillNode: {
+          include: [...FILES_GLOB.javascript, ...FILES_GLOB.commonjs],
+        },
         replace: {
           [["process", "env", "NODE_ENV"].join(".")]: JSON.stringify(
             options.NODE_ENV,
