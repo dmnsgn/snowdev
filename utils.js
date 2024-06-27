@@ -303,7 +303,8 @@ const filterLeft = (a, b, compareFn) =>
 const arrayDifference = (a, b, compareFn = (a, b) => a === b) =>
   filterLeft(a, b, compareFn).concat(filterLeft(b, a, compareFn));
 
-const dotRelativeToBarePath = (p) => p.substring(p.lastIndexOf("./") + 2);
+const dotRelativeToBarePath = (p) =>
+  p.lastIndexOf("./") !== -1 ? p.substring(p.lastIndexOf("./") + 2) : p;
 
 const bareToDotRelativePath = (p) => `./${p}`;
 

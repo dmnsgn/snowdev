@@ -1,4 +1,5 @@
 import { promises as fs } from "node:fs";
+import { createRequire } from "node:module";
 import { dirname, extname, isAbsolute, join, parse, resolve } from "node:path";
 
 import console from "console-ansi";
@@ -22,6 +23,8 @@ import {
 
 import npm from "./npm.js";
 import bundle from "./bundle.js";
+
+const require = createRequire(import.meta.url);
 
 const DEPENDENCY_TYPES = Object.freeze({
   ALL: "all",
@@ -235,22 +238,41 @@ const install = async (options) => {
   );
 
   // Harcoded dependency can be:
+  // - a package listed in package.json
   // - a relative file path
   // - a package inside a package to be added as target
+  // - a file inside a package to be added as target
   // - no relative folder support (use "local-dep-name": "file:./path-to-local-dep" in pacakge.json instead)
   // - no absolute path support (what would the import map be?)
   await Promise.allSettled(
     dependenciesHardcoded.map(async (dependency) => {
       try {
         if (parse(dependency).ext) {
-          const resolvedExport = resolve(options.cwd, dependency);
+          const isRelative = dependency.startsWith(".");
+
+          const resolvedExport = isRelative
+            ? resolve(options.cwd, dependency)
+            : require.resolve(dependency, { paths: [options.cwd] });
 
           if (!filter(resolvedExport)) {
             console.info(`Filtered out export: ${resolvedExport}`);
           } else {
-            const id = dotRelativeToBarePath(dependency);
-            input[id] = dependency;
-            importMap.imports[id] = dependency;
+            const id = isRelative
+              ? dotRelativeToBarePath(dependency)
+              : dependency;
+
+            const isCopiedExport = copyFilter(resolvedExport);
+
+            if (isCopiedExport) {
+              copies[resolvedExport] = join(outputDir, id);
+            } else {
+              // TODO: why not resolvedExport?
+              input[id] = dependency;
+            }
+
+            importMap.imports[id] = isRelative
+              ? dependency
+              : bareToDotRelativePath(dependency);
           }
         } else {
           packageTargets.push(dependency);
@@ -303,6 +325,7 @@ const install = async (options) => {
       options.resolve.overrides,
     );
 
+    // TODO: parallelize
     for (let [dependency, entryPoints] of Object.entries(resolvedExportsMap)) {
       const dependencyPath = dependenciesPath[dependency];
       if (!(await pathExists(dependencyPath))) {
