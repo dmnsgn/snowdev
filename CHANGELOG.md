@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [2.2.0](https://github.com/dmnsgn/snowdev/compare/v2.1.0...v2.2.0) (2024-07-06)
+
+
+### Bug Fixes
+
+* only inclde javascript and commonjs files in polyfill node plugin ([fac6eba](https://github.com/dmnsgn/snowdev/commit/fac6eba519b83b81d3748c7d29a13b6539d05b5d))
+
+
+### Features
+
+* handle assets copy in dependency hardcoded + allow back bare path dependencies to be require.resolved ([6535c8d](https://github.com/dmnsgn/snowdev/commit/6535c8d234cdb0f75eb8b58b176280f218381fd1))
+
+
+
 # [2.1.0](https://github.com/dmnsgn/snowdev/compare/v2.0.0...v2.1.0) (2024-06-26)
 
 
