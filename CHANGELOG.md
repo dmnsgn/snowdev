@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.2.1](https://github.com/dmnsgn/snowdev/compare/v2.2.0...v2.2.1) (2024-07-07)
+
+
+### Bug Fixes
+
+* handle exports ending with .js on install ([235b681](https://github.com/dmnsgn/snowdev/commit/235b681b66446276a6eb71d53a7e3aef8b77f8cc))
+
+
+
 # [2.2.0](https://github.com/dmnsgn/snowdev/compare/v2.1.0...v2.2.0) (2024-07-06)
 
 
