@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.2.3](https://github.com/dmnsgn/snowdev/compare/v2.2.2...v2.2.3) (2024-07-08)
+
+
+### Bug Fixes
+
+* apply snowdev eslint rules to typesvript files ([0827fa5](https://github.com/dmnsgn/snowdev/commit/0827fa5986124b772ad96170ac73b3122f0fff20))
+
+
+
 ## [2.2.2](https://github.com/dmnsgn/snowdev/compare/v2.2.1...v2.2.2) (2024-07-08)
 
 
