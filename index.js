@@ -113,7 +113,7 @@ export const DEFAULTS_OPTIONS = {
       ...eslintPluginJsdoc.configs["flat/recommended-typescript"],
     },
     {
-      files: FILES_GLOB.javascript,
+      files: [...FILES_GLOB.javascript, ...FILES_GLOB.typescript],
       plugins: { jsdoc: eslintPluginJsdoc },
       rules: {
         "jsdoc/require-jsdoc": 0,
