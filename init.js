@@ -102,7 +102,15 @@ const init = async (options = {}) => {
     if (options.ts) {
       await writeJson(
         join(options.cwd, "package.json"),
-        { main: "lib/index.js", exports: "./lib/index.js" },
+        {
+          main: "lib/index.js",
+          exports: {
+            ".": {
+              types: "./types/index.d.ts",
+              default: "./lib/index.js",
+            },
+          },
+        },
         { merge: true },
       );
     }
