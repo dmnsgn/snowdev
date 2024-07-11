@@ -158,6 +158,7 @@ const docs = async (cwd, files, options) => {
       inlinedDocs = await jsdoc2md.render({
         files,
         configure: options.jsdoc || join(__dirname, "jsdoc.json"),
+        ...options.jsdoc2md,
       });
       // TODO: remove if jsdoc ever properly works with ESM and classes
       inlinedDocs = inlinedDocs.replaceAll("new exports.", "new ");

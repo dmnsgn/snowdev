@@ -237,6 +237,7 @@ export const DEFAULTS_OPTIONS = {
   // Docs
   typedoc: null,
   jsdoc: null,
+  jsdoc2md: null,
 };
 
 export const commands = { init, dev, build, bundle, release, deploy, install };
