@@ -365,7 +365,11 @@ const install = async (options) => {
             input[id] = resolvedExport;
           }
           importMap.imports[id] = bareToDotRelativePath(
-            isCopiedExport ? id : id.endsWith(".js") ? id : `${id}.js`,
+            isCopiedExport
+              ? id
+              : packageTargets.includes(id) || extname(id) !== ".js"
+                ? `${id}.js`
+                : id,
           );
         } catch (error) {
           console.error(error);
