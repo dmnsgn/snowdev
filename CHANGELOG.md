@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [2.3.0](https://github.com/dmnsgn/snowdev/compare/v2.2.3...v2.3.0) (2024-10-24)
+
+
+### Bug Fixes
+
+* handle package targets with .js in the name ([e1d36d0](https://github.com/dmnsgn/snowdev/commit/e1d36d0e70e81cb584372b0b62e74f8e9965a193))
+
+
+### Features
+
+* allow passing options.jsdoc2md ([7b97d2a](https://github.com/dmnsgn/snowdev/commit/7b97d2a5f6be386993ed9b0e4ec973e666549003))
+
+
+
 ## [2.2.3](https://github.com/dmnsgn/snowdev/compare/v2.2.2...v2.2.3) (2024-07-08)
 
 
