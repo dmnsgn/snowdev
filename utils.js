@@ -86,13 +86,14 @@ const sortPaths = (
     .map((p) => p.join(separator));
 
 const execCommand = async (command, options) => {
-  const { stdout, stderr } = await exec(command, options);
-  if (stderr) throw new Error(stderr);
-  return stdout.trim();
+  return await exec(command, options);
+  // const { stdout, stderr } = await exec(command, options);
+  // if (stderr) throw new Error(stderr);
+  // return stdout.trim();
 };
 
 const checkUncommitedChanges = async (options) => {
-  if (await execCommand(`git status --porcelain`, options)) {
+  if ((await execCommand(`git status --porcelain`, options)).stdout) {
     throw new Error("Commit your changes first");
   }
 };

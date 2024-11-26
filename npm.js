@@ -27,6 +27,7 @@ class Npm {
 
   async run(npmRoot, cmd, argv = []) {
     let stdout;
+    let stderr;
     const json = argv.includes("--json");
 
     if (this.npmPath) {
@@ -37,27 +38,31 @@ class Npm {
       );
 
       stdout = "";
-      let stderr = "";
+      stderr = "";
 
       for await (const chunk of child.stdout) stdout += chunk;
       for await (const chunk of child.stderr) stderr += chunk;
 
       const exitCode = await new Promise((r) => child.on("close", r));
+      // TODO: should this throw?
       if (exitCode !== 0) console.warn(`npm exitCode ${exitCode}`);
 
-      if (stderr) throw new Error(stderr);
+      // if (stderr) throw new Error(stderr);
     } else {
-      stdout = await execCommand(
+      ({ stdout, stderr } = await execCommand(
         `npm ${cmd} ${[...argv, ...this.defaultArgv].join(" ")}`.trimEnd(),
         { cwd: npmRoot, env: this.processEnv },
-      );
+      ));
     }
 
-    // Patch init and query stdout as they contains a string before json
+    // Patch init and query stdout as they contain a string before json
     if (this.patch) {
       if (json && cmd === "init") stdout = substringAfterChar(stdout, "{");
       if (cmd === "query") stdout = substringAfterChar(stdout, "[");
     }
+
+    if (stderr) console.warn(stderr);
+    if (stdout) stdout = stdout.trim();
 
     return json ? JSON.parse(stdout) : stdout;
   }

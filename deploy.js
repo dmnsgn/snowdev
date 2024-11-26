@@ -13,7 +13,7 @@ const deploy = async (options = {}) => {
     await checkUncommitedChanges(options);
 
     // Keep track of current branch
-    const currentBranch = await execCommand(
+    const { stdout: currentBranch } = await execCommand(
       `git rev-parse --abbrev-ref HEAD`,
       options,
     );
@@ -38,7 +38,7 @@ const deploy = async (options = {}) => {
       `git checkout --quiet ${ghPagesBranchExist ? "" : "-b"} gh-pages`,
       options,
     );
-    const ghBranch = await execCommand(
+    const { stdout: ghBranch } = await execCommand(
       `git rev-parse --abbrev-ref HEAD`,
       options,
     );
