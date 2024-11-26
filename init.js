@@ -3,7 +3,7 @@ import { basename, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import console from "console-ansi";
-import replaceInFile from "replace-in-file";
+import { replaceInFile } from "replace-in-file";
 import npmUser from "npm-user";
 import camelcase from "camelcase";
 

@@ -66,7 +66,7 @@ const bundle = async (options = {}) => {
     const pluginsOptions = deepmerge(
       {
         nodeResolve: { modulePaths: [join(__dirname, "node_modules")] },
-        commonjs: { sourceMap },
+        commonjs: { sourceMap, strictRequires: "auto" },
         polyfillNode: {
           include: [...FILES_GLOB.javascript, ...FILES_GLOB.commonjs],
         },

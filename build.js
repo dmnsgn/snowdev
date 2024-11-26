@@ -172,7 +172,7 @@ const docs = async (cwd, files, options) => {
         return;
       }
     } else {
-      jsdoc.renderSync({ files, destination: join(cwd, docsFolder) });
+      await jsdoc.render({ files, destination: join(cwd, docsFolder) });
       if (isFile) {
         console.error("Output html to a file not supported.");
         return;
