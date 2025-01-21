@@ -13,7 +13,7 @@ import { ESLint } from "eslint";
 
 import jsdoc from "jsdoc-api";
 import jsdoc2md from "jsdoc-to-markdown";
-import TypeDoc from "typedoc";
+import * as TypeDoc from "typedoc";
 import concatMd from "concat-md";
 import { glob } from "glob";
 
