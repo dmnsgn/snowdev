@@ -140,9 +140,12 @@ const bundle = async (options = {}) => {
       // input,
       onLog(level, log) {
         if (
-          ["THIS_IS_UNDEFINED", "EVAL", "MODULE_LEVEL_DIRECTIVE"].includes(
-            log.code,
-          ) ||
+          [
+            "THIS_IS_UNDEFINED",
+            "EVAL",
+            "MODULE_LEVEL_DIRECTIVE",
+            "INVALID_ANNOTATION",
+          ].includes(log.code) ||
           (log.code === "CIRCULAR_DEPENDENCY" &&
             ["node_modules", "polyfill-node", "@babel"].some((filter) =>
               log.message.includes(filter),
