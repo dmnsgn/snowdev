@@ -10,6 +10,7 @@ import json from "@rollup/plugin-json";
 import replace from "@rollup/plugin-replace";
 import commonjsNamedExports from "rollup-plugin-commonjs-named-exports";
 import noOp from "rollup-plugin-no-op";
+import browserslistToEsbuild from "browserslist-to-esbuild";
 import deepmerge from "deepmerge";
 
 import { FILES_GLOB, secondsFormatter } from "./utils.js";
@@ -83,10 +84,21 @@ const bundle = async (options = {}) => {
     );
 
     if (options.transpiler === "esbuild") {
+      options.esbuild ||= {};
+      if (options.targets) {
+        options.esbuild.target = browserslistToEsbuild(options.targets);
+      }
+
       transpiler = await (
         await import("rollup-plugin-esbuild")
       ).default({ minify, sourceMap, ...options.esbuild });
     } else if (options.transpiler === "swc") {
+      options.swc ||= {};
+      if (options.targets) {
+        options.swc.env ||= {};
+        options.swc.env.targets = options.targets;
+      }
+
       transpiler = await (
         await import("@rollup/plugin-swc")
       ).default({
@@ -98,6 +110,17 @@ const bundle = async (options = {}) => {
         },
       });
     } else {
+      options.babel ||= {};
+      if (options.targets) {
+        options.babel.presets ||= [];
+        const presetEnv = options.babel.presets.find(([path]) =>
+          path.includes("@babel/preset-env"),
+        );
+        presetEnv[1] ||= {};
+        presetEnv[1].targets ||= [];
+        presetEnv[1].targets.push(options.targets);
+      }
+
       transpiler = await (
         await import("@rollup/plugin-babel")
       ).babel({ cwd: options.cwd, babelHelpers: "runtime", ...options.babel });
