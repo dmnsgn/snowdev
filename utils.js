@@ -187,7 +187,7 @@ const globOptions = { nodir: true };
 const picomatchOptions = { capture: true, noglobstar: false };
 
 const getWildcardEntries = async (cwd, key, value) => {
-  const directoryName = dirname(value);
+  const directoryName = dirname(value.split("*")[0]);
   const directoryFullPath = join(cwd, directoryName);
 
   if (!(await pathExists(directoryFullPath))) {
