@@ -99,14 +99,18 @@ const bundle = async (options = {}) => {
         options.swc.env.targets = options.targets;
       }
 
+      const { exclude, include, ...swc } = options.swc;
+
       transpiler = await (
         await import("@rollup/plugin-swc")
       ).default({
+        include,
+        exclude,
         swc: {
           cwd: options.cwd,
           minify,
           sourceMaps: sourceMap,
-          ...options.swc,
+          ...swc,
         },
       });
     } else {
