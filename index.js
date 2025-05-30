@@ -193,10 +193,12 @@ export const DEFAULTS_OPTIONS = {
   },
   /** @type {import("@swc/core").Options} */
   swc: {
+    /** @type {import("@rollup/pluginutils").FilterPattern} */
+    exclude: /node_modules\/(assert|core-js|@babel\/runtime|es-module-shims)/,
     env: {
       targets: TARGETS,
-      mode: "entry", // "usage" is not working properly
       coreJs: "3.37",
+      mode: "usage", // "usage" is not working properly
       shippedProposals: true,
     },
     jsc: {
