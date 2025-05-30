@@ -5,6 +5,7 @@ import { exec as execCb } from "node:child_process";
 import deepmerge from "deepmerge";
 
 import console from "console-ansi";
+import semver from "semver";
 import ts from "typescript";
 import { exports, legacy as legacyExport } from "resolve.exports";
 import { sync as resolveSync } from "resolve";
@@ -41,9 +42,13 @@ const writeJson = async (path, obj, { merge = false } = {}) =>
     "utf-8",
   );
 
-const { version: VERSION, name: NAME } = await readJson(
-  new URL("./package.json", import.meta.url),
-);
+const {
+  version: VERSION,
+  name: NAME,
+  dependencies,
+} = await readJson(new URL("./package.json", import.meta.url));
+
+const CORE_JS_SEMVER = semver.minVersion(dependencies["core-js"]);
 
 const listFormatter = new Intl.ListFormat("en");
 
@@ -312,6 +317,7 @@ export {
   FILES_GLOB,
   NAME,
   VERSION,
+  CORE_JS_SEMVER,
   RF_OPTIONS,
   listFormatter,
   secondsFormatter,

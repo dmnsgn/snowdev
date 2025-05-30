@@ -26,6 +26,7 @@ import {
   FILES_GLOB,
   NAME,
   VERSION,
+  CORE_JS_SEMVER,
   isTypeScriptProject,
   readJson,
   writeJson,
@@ -38,6 +39,8 @@ console.prefix = `[${NAME}]`;
 
 // Options
 const TARGETS = `defaults and supports es6-module`;
+const coreJsVersion = `${CORE_JS_SEMVER.major}.${CORE_JS_SEMVER.minor}`;
+
 export const DEFAULTS_OPTIONS = {
   // Inputs/meta
   cwd: process.cwd(),
@@ -175,14 +178,14 @@ export const DEFAULTS_OPTIONS = {
           bugfixes: true,
           debug: false,
           useBuiltIns: "usage",
-          corejs: { version: "3.30", proposals: true },
+          corejs: { version: coreJsVersion, proposals: true },
         },
       ],
     ],
     plugins: [
       [
         require.resolve("@babel/plugin-transform-runtime"),
-        { corejs: { version: 3, proposals: true } },
+        { corejs: { version: CORE_JS_SEMVER.major, proposals: true } },
       ],
     ],
   },
@@ -197,9 +200,10 @@ export const DEFAULTS_OPTIONS = {
     exclude: /node_modules\/(assert|core-js|@babel\/runtime|es-module-shims)/,
     env: {
       targets: TARGETS,
-      coreJs: "3.37",
-      mode: "usage", // "usage" is not working properly
+      mode: "usage",
+      coreJs: coreJsVersion,
       shippedProposals: true,
+      // debug: true,
     },
     jsc: {
       // `env` and `jsc.target` cannot be used together
