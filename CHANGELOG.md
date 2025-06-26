@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [2.4.0](https://github.com/dmnsgn/snowdev/compare/v2.3.0...v2.4.0) (2025-06-26)
+
+
+### Bug Fixes
+
+* revert swc env mode usage ([12eb586](https://github.com/dmnsgn/snowdev/commit/12eb586edc31957621e8967190b6bb71ef216174))
+* split wildcard to check directory name ([2aef031](https://github.com/dmnsgn/snowdev/commit/2aef03148695901e4aeedcafac63d838024530c6))
+
+
+### Features
+
+* add browserlist "targets" option ([9f0c49b](https://github.com/dmnsgn/snowdev/commit/9f0c49bb6ee2bf6f70f0d2589cdeefcca21ceee9))
+* add INVALID_ANNOTATION to ignored logs ([10f386e](https://github.com/dmnsgn/snowdev/commit/10f386ea4e1eeb84cacb8b0627ea97ccfa754633))
+* bring back swc env mode usage ([edc1d9f](https://github.com/dmnsgn/snowdev/commit/edc1d9f043389717a75da756e5ff366fe3b703b6))
+* compute core-js version automatically from package.json ([125a830](https://github.com/dmnsgn/snowdev/commit/125a8306c09b19bc686222032e4ea65a06260b04))
+* extract swc include and exclude properties for the rollup swc plugin ([1ba6e72](https://github.com/dmnsgn/snowdev/commit/1ba6e72d0802654fd72df31a7ecf67c624ab919f))
+
+
+
 # [2.3.0](https://github.com/dmnsgn/snowdev/compare/v2.2.3...v2.3.0) (2024-10-24)
 
 
