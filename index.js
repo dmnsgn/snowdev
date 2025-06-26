@@ -200,14 +200,18 @@ export const DEFAULTS_OPTIONS = {
     exclude: /node_modules\/(assert|core-js|@babel\/runtime|es-module-shims)/,
     env: {
       targets: TARGETS,
-      mode: "usage",
+      mode: "entry",
       coreJs: coreJsVersion,
       shippedProposals: true,
+      // path: cwd?
       // debug: true,
     },
     jsc: {
       // `env` and `jsc.target` cannot be used together
       target: null,
+      parser: {
+        importAttributes: true,
+      },
     },
   },
   importMap: {},
