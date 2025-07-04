@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [2.5.0](https://github.com/dmnsgn/snowdev/compare/v2.4.0...v2.5.0) (2025-07-04)
+
+
+### Features
+
+* update hot reload for new es-module-shims api ([40b974c](https://github.com/dmnsgn/snowdev/commit/40b974c120d36c698bef71dae87a91888a697808))
+* use dynamic import with import attributes type to read json ([3f8c21a](https://github.com/dmnsgn/snowdev/commit/3f8c21a25a74e9542d45ea5f00ef15a793140a00))
+
+
+
 # [2.4.0](https://github.com/dmnsgn/snowdev/compare/v2.3.0...v2.4.0) (2025-06-26)
 
 
