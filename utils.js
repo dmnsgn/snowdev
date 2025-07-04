@@ -17,6 +17,8 @@ import * as acorn from "acorn";
 import * as acornWalk from "acorn-walk";
 import * as aString from "astring";
 
+import packageJson from "./package.json" with { type: "json" };
+
 const FILES_GLOB = {
   javascript: ["**/*.js", "**/*.mjs"],
   typescript: ["**/*.ts", "**/*.mts"],
@@ -43,11 +45,7 @@ const writeJson = async (path, obj, { merge = false } = {}) =>
     "utf-8",
   );
 
-const {
-  version: VERSION,
-  name: NAME,
-  dependencies,
-} = await readJson(new URL("./package.json", import.meta.url));
+const { version: VERSION, name: NAME, dependencies } = packageJson;
 
 const CORE_JS_SEMVER = semver.minVersion(dependencies["core-js"]);
 
