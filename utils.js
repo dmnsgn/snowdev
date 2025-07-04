@@ -121,17 +121,31 @@ const pathExists = (path) =>
 
 const getFileExtension = (file) => parse(file).ext;
 
-const HMR_HOOK = await fs.readFile(
-  new URL("./utils/hot.js", import.meta.url),
-  "utf-8",
-);
-
 const htmlHotInject = async (options, req) => {
   const html = await fs.readFile(join(options.cwd, req.url), "utf8");
   const $ = cheerio.load(html);
 
-  // Append the hot script
-  $("head").append(`<script type="module">${HMR_HOOK}</script>`);
+  // Append the hot reload script
+  $("head").append(/* html */ `<script type="module">
+const baseURI = document.baseURI;
+let intervalId = setInterval(() => {
+  if (window.___browserSync___?.socket) {
+    clearInterval(intervalId);
+
+    console.info("[snowdev] Hot Reload Connected");
+
+    window.___browserSync___.socket.on("hmr", (evt) => {
+      const { data } = evt;
+      if (data === "Connected") {
+        console.info("Hot Reload " + data);
+      } else {
+        const url = new URL(data, baseURI).href;
+        importShim.hotReload(url);
+      }
+    });
+  }
+}, 0);
+</script>`);
 
   try {
     // Set shimMode by parsing json or window.esmsOptions options
@@ -140,7 +154,9 @@ const htmlHotInject = async (options, req) => {
     if (esmsOptionsJSON.length) {
       $("script[type='esms-options']").text(
         JSON.stringify(
-          Object.assign(JSON.parse(esmsOptionsJSON.text()), { shimMode: true }),
+          Object.assign(JSON.parse(esmsOptionsJSON.text()), {
+            hotReload: true,
+          }),
         ),
       );
       hasOptions = true;
@@ -165,7 +181,7 @@ const htmlHotInject = async (options, req) => {
                 method: false,
                 shorthand: false,
                 computed: false,
-                key: { type: "Identifier", name: "shimMode" },
+                key: { type: "Identifier", name: "hotReload" },
                 value: { type: "Literal", value: "true", raw: '"true"' },
                 kind: "init",
               });
@@ -178,7 +194,7 @@ const htmlHotInject = async (options, req) => {
     }
     if (!hasOptions) {
       $("head").append(
-        `<script type="esms-options">{ "shimMode": true }</script>`,
+        `<script type="esms-options">{ "hotReload": true }</script>`,
       );
     }
   } catch (error) {
