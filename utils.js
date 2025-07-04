@@ -29,7 +29,8 @@ FILES_GLOB.typescriptAll = [...FILES_GLOB.typescript, "**/*.tsx", "**/*.cts"];
 const RF_OPTIONS = { recursive: true, force: true };
 const exec = promisify(execCb);
 
-const readJson = async (path) => JSON.parse(await fs.readFile(path, "utf-8"));
+const readJson = async (path) =>
+  (await import(path, { with: { type: "json" } })).default;
 
 const writeJson = async (path, obj, { merge = false } = {}) =>
   await fs.writeFile(
