@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.5.1](https://github.com/dmnsgn/snowdev/compare/v2.5.0...v2.5.1) (2025-07-04)
+
+
+### Bug Fixes
+
+* make package.json import static for versions and name retrieval ([c5dae00](https://github.com/dmnsgn/snowdev/commit/c5dae006c0b4f364067c42cdbbc71d24a5ddff20))
+
+
+
 # [2.5.0](https://github.com/dmnsgn/snowdev/compare/v2.4.0...v2.5.0) (2025-07-04)
 
 
