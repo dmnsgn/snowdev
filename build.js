@@ -40,6 +40,7 @@ const lint = async (cwd, files, options) => {
 
     const eslint = new ESLint({
       cwd,
+      ignorePatterns: options.ignore,
       baseConfig: options.eslint,
       overrideConfigFile: true,
     });
