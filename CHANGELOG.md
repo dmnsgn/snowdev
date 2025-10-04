@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [2.6.0](https://github.com/dmnsgn/snowdev/compare/v2.5.1...v2.6.0) (2025-10-04)
+
+
+### Features
+
+* add ignorePatterns to lint ([59ed008](https://github.com/dmnsgn/snowdev/commit/59ed0084df20a94e0c0c9fb068a26d9adf368c0c))
+* handle browser field ignores ([46b5abc](https://github.com/dmnsgn/snowdev/commit/46b5abc39d6870abd169ef02effb0ea42f0ec716))
+
+
+
 ## [2.5.1](https://github.com/dmnsgn/snowdev/compare/v2.5.0...v2.5.1) (2025-07-04)
 
 
