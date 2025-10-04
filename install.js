@@ -10,6 +10,7 @@ import { createFilter } from "@rollup/pluginutils";
 import {
   RF_OPTIONS,
   resolveExports,
+  resolveBrowserIgnores,
   pathExists,
   VERSION,
   listFormatter,
@@ -377,6 +378,38 @@ const install = async (options) => {
       }
     }
 
+    let noOpIds = [];
+    if (options.resolve.browserField) {
+      const resolvedBrowserIgnores = Object.fromEntries(
+        await Promise.all(
+          packageTargets.map(async (dependency) => [
+            dependency,
+            await resolveBrowserIgnores(options, dependenciesPath[dependency]),
+          ]),
+        ),
+      );
+
+      for (let [dependency, entryPoints] of Object.entries(
+        resolvedBrowserIgnores,
+      )) {
+        const dependencyPath = dependenciesPath[dependency];
+        for (let specifier of Object.keys(entryPoints)) {
+          try {
+            const resolvedIgnore = slash(join(dependencyPath, specifier));
+
+            if (!(await pathExists(resolvedIgnore))) {
+              console.warn(`Unresolved browser ignore: "${resolvedIgnore}"`);
+              continue;
+            }
+
+            noOpIds.push(resolvedIgnore);
+          } catch (error) {
+            console.error(error);
+          }
+        }
+      }
+    }
+
     // Caveats: this will throw if all dependencies are filtered out/have unknown exports
     if (!Object.values(input).length) {
       throw new Error(`No input dependency to install.`);
@@ -392,6 +425,12 @@ const install = async (options) => {
           ? `${name}.js`
           : name,
     };
+
+    if (noOpIds.length) {
+      bundleOptions.rollup = deepmerge(bundleOptions.rollup, {
+        pluginsOptions: { noOp: { ids: noOpIds } },
+      });
+    }
 
     result = await bundle(bundleOptions);
 

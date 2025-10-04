@@ -43,6 +43,7 @@ const lint = async (cwd, files, options) => {
       ignorePatterns: options.ignore,
       baseConfig: options.eslint,
       overrideConfigFile: true,
+      // concurrency: "auto",
     });
     const lintResults = await eslint.lintFiles(files);
     const results = (await eslint.loadFormatter("stylish")).format(lintResults);

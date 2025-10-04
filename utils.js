@@ -314,6 +314,28 @@ const resolveExports = async (options, src) => {
   }
 };
 
+const isObject = (value) =>
+  Object.prototype.toString.call(value) === "[object Object]";
+
+// https://github.com/defunctzombie/package-browser-field-spec#ignore-a-module
+const resolveBrowserIgnores = async (options, src) => {
+  try {
+    const pkg = await readJson(join(src, "package.json"));
+
+    if (pkg.browser && isObject(pkg.browser)) {
+      return Object.fromEntries(
+        Object.entries(legacyExport(pkg, { browser: true })).filter(
+          // TODO: handle ignoring absolute reference
+          ([key, value]) => key.startsWith(".") && value === false,
+        ),
+      );
+    }
+  } catch (error) {
+    console.error(error);
+  }
+  return {};
+};
+
 const pick = (obj, keys) =>
   Object.fromEntries(keys.map((key) => [key, obj[key]]));
 
@@ -348,6 +370,7 @@ export {
   getFileExtension,
   htmlHotInject,
   resolveExports,
+  resolveBrowserIgnores,
   pick,
   arrayDifference,
   dotRelativeToBarePath,
