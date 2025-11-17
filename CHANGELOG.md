@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [2.7.0](https://github.com/dmnsgn/snowdev/compare/v2.6.0...v2.7.0) (2025-11-17)
+
+
+### Features
+
+* pass down mainFields and browser options.resolve to node-resolve ([15d709d](https://github.com/dmnsgn/snowdev/commit/15d709da04078c21813563b116e3a17879845395))
+
+
+
 # [2.6.0](https://github.com/dmnsgn/snowdev/compare/v2.5.1...v2.6.0) (2025-10-04)
 
 
