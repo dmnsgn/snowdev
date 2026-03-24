@@ -221,6 +221,29 @@ const types = async (cwd, files, options, watch) => {
   console.time(types.description);
 
   try {
+    const diagnosticToConsoleMethod = {
+      [ts.DiagnosticCategory["Message"]]: "log",
+      [ts.DiagnosticCategory["Suggestion"]]: "info",
+      [ts.DiagnosticCategory["Warning"]]: "warn",
+      [ts.DiagnosticCategory["Error"]]: "error",
+    };
+
+    const logDiagnostic = (diagnostic) => {
+      const { line, character } = diagnostic.file
+        ? ts.getLineAndCharacterOfPosition(diagnostic.file, diagnostic.start)
+        : { line: 0, character: 0 };
+
+      console[diagnosticToConsoleMethod[diagnostic.category] || "log"](
+        `TypeScript\n${diagnostic.file?.fileName} (${line + 1}, ${
+          character + 1
+        }): ${ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")}`,
+      );
+
+      if (typeof watch === "function") {
+        watch(`${diagnostic.file.path}\n${results}`);
+      }
+    };
+
     const configPath = ts.findConfigFile(
       cwd,
       ts.sys.fileExists,
@@ -241,19 +264,7 @@ const types = async (cwd, files, options, watch) => {
           // config.compilerOptions,
           ts.sys,
           ts.createEmitAndSemanticDiagnosticsBuilderProgram,
-          function (diagnostic) {
-            console.info(diagnostic.file.path);
-            const results = `Error ${
-              diagnostic.code
-            } : ${ts.flattenDiagnosticMessageText(
-              diagnostic.messageText,
-              formatHost.getNewLine(),
-            )}`;
-            console.error(results);
-            if (typeof watch === "function") {
-              watch(`${diagnostic.file.path}\n${results}`);
-            }
-          },
+          logDiagnostic,
           function (diagnostic) {
             console.info(ts.formatDiagnostic(diagnostic, formatHost));
           },
@@ -292,24 +303,7 @@ const types = async (cwd, files, options, watch) => {
         .getPreEmitDiagnostics(program)
         .concat(diagnostics, parsedCommandLine.errors);
 
-      const diagnosticToConsoleMethod = {
-        [ts.DiagnosticCategory["Message"]]: "log",
-        [ts.DiagnosticCategory["Suggestion"]]: "info",
-        [ts.DiagnosticCategory["Warning"]]: "warn",
-        [ts.DiagnosticCategory["Error"]]: "error",
-      };
-
-      allDiagnostics.forEach((diagnostic) => {
-        const { line, character } = diagnostic.file
-          ? ts.getLineAndCharacterOfPosition(diagnostic.file, diagnostic.start)
-          : { line: 0, character: 0 };
-
-        console[diagnosticToConsoleMethod[diagnostic.category] || "log"](
-          `TypeScript\n${diagnostic.file?.fileName} (${line + 1}, ${
-            character + 1
-          }): ${ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")}`,
-        );
-      });
+      allDiagnostics.forEach(logDiagnostic);
 
       if (emitSkipped) console.error("Emit skipped.");
     }
