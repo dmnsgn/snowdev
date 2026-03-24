@@ -15,7 +15,6 @@ import jsdoc from "jsdoc-api";
 import jsdoc2md from "jsdoc-to-markdown";
 import * as TypeDoc from "typedoc";
 import concatMd from "concat-md";
-import { glob } from "glob";
 
 import { RF_OPTIONS, escapeRegExp, sortPaths } from "./utils.js";
 
@@ -324,11 +323,11 @@ types.description = `build: run TypeScript (generate types, watch or compile)`;
 const build = async (options) => {
   const cwd = options.cwd;
   const files = sortPaths(
-    await glob(options.files, {
-      cwd,
-      ignore: options.ignore,
-      absolute: true,
-    }),
+    (
+      await Array.fromAsync(
+        fs.glob(options.files, { cwd, exclude: options.ignore }),
+      )
+    ).map((file) => join(cwd, file)),
   );
 
   console.log(`build files:\n- ${files.join("\n- ")}`);

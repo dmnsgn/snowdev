@@ -11,7 +11,6 @@ import { exports, legacy as legacyExport } from "resolve.exports";
 import { sync as resolveSync } from "resolve";
 import slash from "slash";
 import picomatch from "picomatch";
-import { glob } from "glob";
 import * as cheerio from "cheerio";
 import * as acorn from "acorn";
 import * as acornWalk from "acorn-walk";
@@ -203,7 +202,6 @@ let intervalId = setInterval(() => {
   return $.html();
 };
 
-const globOptions = { nodir: true };
 const picomatchOptions = { capture: true, noglobstar: false };
 
 const getWildcardEntries = async (cwd, key, value) => {
@@ -215,7 +213,11 @@ const getWildcardEntries = async (cwd, key, value) => {
   }
 
   const valueGlobStar = value.replace("*", "**");
-  const files = await glob(valueGlobStar, { cwd, ...globOptions });
+  const files = (
+    await Array.fromAsync(fs.glob(valueGlobStar, { cwd, withFileTypes: true }))
+  )
+    .filter((dirent) => !dirent.isDirectory())
+    .map(({ name }) => join(cwd, name));
 
   const regex = picomatch.makeRe(valueGlobStar, picomatchOptions);
 
