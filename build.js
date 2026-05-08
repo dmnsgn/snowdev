@@ -232,12 +232,14 @@ const types = async (cwd, files, options, watch) => {
       const { line, character } = diagnostic.file
         ? ts.getLineAndCharacterOfPosition(diagnostic.file, diagnostic.start)
         : { line: 0, character: 0 };
+      const results = `TypeScript\n${diagnostic.file?.fileName} (${line + 1}, ${
+        character + 1
+      }): ${ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")}`;
 
-      console[diagnosticToConsoleMethod[diagnostic.category] || "log"](
-        `TypeScript\n${diagnostic.file?.fileName} (${line + 1}, ${
-          character + 1
-        }): ${ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")}`,
-      );
+      const consoleMethod =
+        diagnosticToConsoleMethod[diagnostic.category] || "log";
+
+      console[consoleMethod](results);
 
       if (typeof watch === "function") {
         watch(`${diagnostic.file.path}\n${results}`);
