@@ -285,7 +285,9 @@ const install = async (options) => {
   );
 
   try {
-    console.log(`install - installing (${options.transpiler})...`);
+    console.log(
+      `install - installing (${options.bundler === "rolldown" ? "oxc" : options.transpiler})...`,
+    );
 
     const dependenciesPath = Object.fromEntries(
       packageTargets.map((target) => {

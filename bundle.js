@@ -2,7 +2,6 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import console from "console-ansi";
-import { rollup, watch } from "rollup";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import polyfillNode from "rollup-plugin-polyfill-node";
@@ -16,6 +15,10 @@ import deepmerge from "deepmerge";
 import { FILES_GLOB, secondsFormatter } from "./utils.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
+
+let bundler;
+let bundlerOptions;
+let watch;
 
 let transpiler;
 let minifier;
@@ -54,11 +57,19 @@ const formatRollupLog = (
 };
 
 const bundle = async (options = {}) => {
-  const label = `bundle`;
+  const label = `bundle (${options.bundler})`;
   console.time(label);
 
-  const sourceMap = options.rollup.sourceMap;
-  let plugins = options.rollup.input?.plugins;
+  if (options.bundler === "rolldown") {
+    ({ rolldown: bundler, watch } = await import("rolldown"));
+    bundlerOptions = deepmerge(options.rollup, options.rolldown);
+  } else {
+    ({ rollup: bundler, watch } = await import("rollup"));
+    bundlerOptions = options.rollup;
+  }
+
+  const sourceMap = bundlerOptions.sourceMap;
+  let plugins = bundlerOptions.input?.plugins;
 
   if (!plugins) {
     let minify = options.minify;
@@ -72,8 +83,10 @@ const bundle = async (options = {}) => {
           browser: options.resolve.browserField,
         },
         commonjs: { sourceMap, strictRequires: "auto" },
+        /** @type {import("rollup-plugin-polyfill-node").NodePolyfillsOptions} */
         polyfillNode: {
           include: [...FILES_GLOB.javascript, ...FILES_GLOB.commonjs],
+          exclude: options.transpileExclude,
         },
         replace: {
           [["process", "env", "NODE_ENV"].join(".")]: JSON.stringify(
@@ -84,80 +97,87 @@ const bundle = async (options = {}) => {
         json: { compact: minify },
         noOp: { ids: ["inspector"] },
       },
-      options.rollup.pluginsOptions,
+      bundlerOptions.pluginsOptions,
     );
 
-    if (options.transpiler === "esbuild") {
-      options.esbuild ||= {};
-      if (options.targets) {
-        options.esbuild.target = browserslistToEsbuild(options.targets);
-      }
-
-      transpiler = await (
-        await import("rollup-plugin-esbuild")
-      ).default({ minify, sourceMap, ...options.esbuild });
-    } else if (options.transpiler === "swc") {
-      options.swc ||= {};
-      if (options.targets) {
-        options.swc.env ||= {};
-        options.swc.env.targets = options.targets;
-      }
-
-      const { exclude, include, ...swc } = options.swc;
-
-      transpiler = await (
-        await import("@rollup/plugin-swc")
-      ).default({
-        include,
-        exclude,
-        swc: {
-          cwd: options.cwd,
-          minify,
-          sourceMaps: sourceMap,
-          ...swc,
-        },
-      });
+    if (options.bundler === "rolldown") {
+      bundlerOptions.output.minify = minify;
     } else {
-      options.babel ||= {};
-      if (options.targets) {
-        options.babel.presets ||= [];
-        const presetEnv = options.babel.presets.find(([path]) =>
-          path.includes("@babel/preset-env"),
-        );
-        presetEnv[1] ||= {};
-        presetEnv[1].targets ||= [];
-        presetEnv[1].targets.push(options.targets);
-      }
+      if (options.transpiler === "esbuild") {
+        options.esbuild ||= {};
+        if (options.targets) {
+          options.esbuild.target = browserslistToEsbuild(options.targets);
+        }
 
-      transpiler = await (
-        await import("@rollup/plugin-babel")
-      ).babel({ cwd: options.cwd, babelHelpers: "runtime", ...options.babel });
+        transpiler = await (
+          await import("rollup-plugin-esbuild")
+        ).default({ minify, sourceMap, ...options.esbuild });
+      } else if (options.transpiler === "swc") {
+        options.swc ||= {};
+        if (options.targets) {
+          options.swc.env ||= {};
+          options.swc.env.targets = options.targets;
+        }
 
-      if (minify) {
-        minifier = await (await import("@rollup/plugin-terser")).default();
+        const { exclude, include, ...swc } = options.swc;
+
+        transpiler = await (
+          await import("@rollup/plugin-swc")
+        ).default({
+          include,
+          exclude,
+          swc: {
+            cwd: options.cwd,
+            minify,
+            sourceMaps: sourceMap,
+            ...swc,
+          },
+        });
+      } else {
+        options.babel ||= {};
+        options.babel.targets ||= options.targets;
+
+        transpiler = await (
+          await import("@rollup/plugin-babel")
+        ).babel({
+          cwd: options.cwd,
+          babelHelpers: "runtime",
+          ...options.babel,
+        });
+
+        if (minify) {
+          minifier = await (await import("@rollup/plugin-terser")).default();
+        }
       }
     }
 
     const { pre, normal, post } = groupExtraPlugins(
-      options.rollup.extraPlugins.filter(Boolean),
+      bundlerOptions.extraPlugins.filter(Boolean),
     );
 
     plugins = [
       ...pre,
       ...parsePluginOptions(
-        {
-          nodeResolve,
-          commonjs,
-          commonjsNamedExports,
-          polyfillNode,
-          replace,
-          json,
-          noOp,
-        },
+        options.bundler === "rolldown"
+          ? {
+              commonjsNamedExports,
+              polyfillNode,
+              replace,
+              noOp,
+            }
+          : {
+              nodeResolve,
+              commonjs,
+              commonjsNamedExports,
+              polyfillNode,
+              replace,
+              json,
+              noOp,
+            },
         pluginsOptions,
       ),
       ...normal,
-      transpiler,
+      options.bundler === "rolldown" ? 0 : transpiler,
       ...post,
       minifier,
     ].filter(Boolean);
@@ -187,7 +207,7 @@ const bundle = async (options = {}) => {
 
         formatRollupLog(log, level);
       },
-      ...options.rollup.input,
+      ...bundlerOptions.input,
       plugins,
     };
 
@@ -201,16 +221,16 @@ const bundle = async (options = {}) => {
           return "polyfills";
         }
       },
-      ...options.rollup.output,
+      ...bundlerOptions.output,
     };
 
-    if (options.rollup.watch) {
+    if (bundlerOptions.watch) {
       console.info(`bundle: watching...`);
 
       const watcher = watch({
         ...inputOptions,
         output: outputOptions,
-        watch: options.rollup.watch,
+        watch: bundlerOptions.watch,
       });
 
       watcher.on("event", ({ code, error, result, duration }) => {
@@ -225,7 +245,7 @@ const bundle = async (options = {}) => {
       });
       result = watcher;
     } else {
-      bundle = await rollup(inputOptions);
+      bundle = await bundler(inputOptions);
       result = await bundle.write(outputOptions);
 
       await bundle.close();

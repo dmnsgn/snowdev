@@ -167,25 +167,18 @@ export const DEFAULTS_OPTIONS = {
 
   // Transpile
   transpiler: "swc",
+  transpileExclude:
+    /node_modules\/(assert|core-js|@babel\/runtime|es-module-shims)/,
   /** @type {import("@rollup/plugin-babel").RollupBabelInputPluginOptions} */
   babel: {
     exclude: /node_modules\/(assert|core-js|@babel\/runtime)/,
-    presets: [
-      [
-        require.resolve("@babel/preset-env"),
-        {
-          targets: [TARGETS],
-          bugfixes: true,
-          debug: false,
-          useBuiltIns: "usage",
-          corejs: { version: coreJsVersion, proposals: true },
-        },
-      ],
-    ],
+    targets: TARGETS,
+    presets: [[require.resolve("@babel/preset-env"), { debug: false }]],
     plugins: [
+      [require.resolve("@babel/plugin-transform-runtime")],
       [
-        require.resolve("@babel/plugin-transform-runtime"),
-        { corejs: { version: CORE_JS_SEMVER.major, proposals: true } },
+        require.resolve("babel-plugin-polyfill-corejs3"),
+        { method: "usage-pure", version: coreJsVersion, proposals: true },
       ],
     ],
   },
@@ -230,6 +223,9 @@ export const DEFAULTS_OPTIONS = {
     browserField: true,
     overrides: {},
   },
+
+  // Bundle
+  bundler: "rolldown",
   rollup: {
     /** @type {import("rollup").InputOptions} */
     input: {},
@@ -242,6 +238,17 @@ export const DEFAULTS_OPTIONS = {
     pluginsOptions: {},
     watch: false,
     sourceMap: false,
+  },
+  rolldown: {
+    /** @type {import("rolldown").InputOptions} */
+    input: {
+      transform: {
+        target: browserslistToEsbuild(TARGETS),
+      },
+      experimental: {
+        attachDebugInfo: "none",
+      },
+    },
   },
 
   // Docs
