@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "allowJs": true,
-    "allowSyntheticDefaultImports": true,
     "declaration": true,
     "declarationDir": "types",
     "esModuleInterop": true,
@@ -20,8 +19,8 @@
       "ES2023",
       "ESNext"
     ],
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "outDir": "lib",
     "rootDir": "./src",
     "sourceMap": true,
