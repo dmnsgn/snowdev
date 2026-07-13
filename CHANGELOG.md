@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [3.0.0-alpha.0](https://github.com/dmnsgn/snowdev/compare/v2.7.0...v3.0.0-alpha.0) (2026-07-13)
+
+
+### Bug Fixes
+
+* correct logDiagnostic ([73e2e0f](https://github.com/dmnsgn/snowdev/commit/73e2e0f09c407dbab39f94b18ed8e71173bf8c1b))
+
+
+### Features
+
+* add rolldown support ([4bb9dee](https://github.com/dmnsgn/snowdev/commit/4bb9dee358cd4142a68bee1695a24199827ec413))
+* default tsconfig moduleResolution to bundler + remove allowSyntheticDefaultImports for TypeScript@7 ([53492f9](https://github.com/dmnsgn/snowdev/commit/53492f9c5469cf0377da9d4af194e20cdb56a142))
+* externalise eslint.config.js + add linting for node test, md and html + add unicorn plugin ([99ee30f](https://github.com/dmnsgn/snowdev/commit/99ee30f1f2739986807e8e20f8a9ceb2d6700b79))
+* **template:** update tsconfig for TypeScript 6 ([3a11d81](https://github.com/dmnsgn/snowdev/commit/3a11d816d24cb1110315f7a2e32a121dda07f1d4))
+* uniformise ts log diagnostics ([400ce88](https://github.com/dmnsgn/snowdev/commit/400ce88b3bc4c4b52097b25f79d131f79b1c2dc7))
+
+
+### BREAKING CHANGES
+
+* default bundling to rolldown
+
+
+
 # [2.7.0](https://github.com/dmnsgn/snowdev/compare/v2.6.0...v2.7.0) (2025-11-17)
 
 
