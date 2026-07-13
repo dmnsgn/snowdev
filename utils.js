@@ -24,6 +24,8 @@ const FILES_GLOB = {
   react: ["**/*.jsx", "**/*.tsx"],
   commonjs: ["**/*.cjs", "**/*.cts"],
   assets: ["**/*.json", "**/*.css", "**/*.wasm"],
+  html: ["**/*.html"],
+  markdown: ["**/*.md"],
 };
 FILES_GLOB.typescriptAll = [...FILES_GLOB.typescript, "**/*.tsx", "**/*.cts"];
 

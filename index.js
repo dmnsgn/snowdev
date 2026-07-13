@@ -7,13 +7,8 @@ import console from "console-ansi";
 import deepmerge from "deepmerge";
 import semver from "semver";
 import browserslistToEsbuild from "browserslist-to-esbuild";
-import eslintJs from "@eslint/js";
-import globals from "globals";
-import babelParser from "@babel/eslint-parser";
-import tseslint from "typescript-eslint";
-import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
-import eslintPluginJsdoc from "eslint-plugin-jsdoc";
 
+import eslintConfig from "./eslint.config.js";
 import init from "./init.js";
 import dev from "./dev.js";
 import build from "./build.js";
@@ -84,75 +79,7 @@ export const DEFAULTS_OPTIONS = {
   /** @type {import("prettier").RequiredOptions} */
   prettier: null,
   /** @type {import("eslint").Linter.FlatConfig} */
-  eslint: [
-    eslintJs.configs.recommended,
-    ...tseslint.configs.recommended.map((config) => ({
-      ...config,
-      files: FILES_GLOB.typescriptAll,
-    })),
-    {
-      files: FILES_GLOB.javascript,
-      languageOptions: {
-        parser: babelParser,
-        parserOptions: {
-          ecmaVersion: "latest",
-          sourceType: "module",
-          requireConfigFile: false,
-          babelOptions: {}, // Overwritten with options.babel on lint
-        },
-        globals: {
-          ...globals.browser,
-          ...globals.node,
-          ...globals.worker,
-        },
-      },
-    },
-    {
-      files: FILES_GLOB.javascript,
-      ...eslintPluginJsdoc.configs["flat/recommended-typescript-flavor"],
-    },
-    {
-      files: FILES_GLOB.typescript,
-      ...eslintPluginJsdoc.configs["flat/recommended-typescript"],
-    },
-    {
-      files: [...FILES_GLOB.javascript, ...FILES_GLOB.typescript],
-      plugins: { jsdoc: eslintPluginJsdoc },
-      rules: {
-        "jsdoc/require-jsdoc": 0,
-        "jsdoc/require-param-description": 0,
-        "jsdoc/require-property-description": 0,
-        "jsdoc/require-returns-description": 0,
-        "jsdoc/tag-lines": 0,
-        "jsdoc/no-defaults": 0,
-      },
-      settings: { jsdoc: { ignorePrivate: true } },
-    },
-    {
-      files: ["test/**/*.js"],
-      languageOptions: {
-        // parser: "esprima",
-        globals: {
-          ...globals.browser,
-          ...globals.node,
-          ...globals.jest,
-          ...globals.jasmine,
-        },
-      },
-    },
-    eslintPluginPrettierRecommended,
-    // TODO: https://github.com/import-js/eslint-plugin-import/pull/2996
-    // {
-    //   extends: ["plugin:import/recommended"],
-    //   plugins: ["eslint-plugin-import"],
-    //   rules: {
-    //     "import/no-cycle": 1,
-    //     "import/order": [1, { groups: ["builtin", "external", "internal"] }],
-    //     "import/no-named-as-default": 0,
-    //     "import/newline-after-import": 2,
-    //   },
-    // },
-  ],
+  eslint: eslintConfig,
   /** @type {import("typescript").TranspileOptions} */
   tsconfig: {
     compilerOptions: {
