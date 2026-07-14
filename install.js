@@ -1,6 +1,14 @@
 import { promises as fs } from "node:fs";
 import { createRequire } from "node:module";
-import { dirname, extname, isAbsolute, join, parse, resolve } from "node:path";
+import {
+  dirname,
+  extname,
+  isAbsolute,
+  join,
+  parse,
+  relative,
+  resolve,
+} from "node:path";
 
 import console from "console-ansi";
 import deepmerge from "deepmerge";
@@ -63,8 +71,9 @@ const compareDependencies = ({ name, version }, { version: v, name: n }) =>
 
 const install = async (options) => {
   // Check package.json exists
+  let currentPackage;
   try {
-    await readJson(join(options.cwd, "package.json"));
+    currentPackage = await readJson(join(options.cwd, "package.json"));
   } catch (error) {
     console.error(`install - error reading package.json\n`, error);
     return { error };
@@ -211,6 +220,15 @@ const install = async (options) => {
     return { importMap: options.importMap };
   }
 
+  // Add the current package itself so examples can import it like any other dependency
+  if (
+    type === DEPENDENCY_TYPES.ALL &&
+    currentPackage.name &&
+    !dependenciesNames.includes(currentPackage.name)
+  ) {
+    dependenciesNames.push(currentPackage.name);
+  }
+
   const label = `install`;
   console.time(label);
 
@@ -291,6 +309,8 @@ const install = async (options) => {
 
     const dependenciesPath = Object.fromEntries(
       packageTargets.map((target) => {
+        if (target === currentPackage.name) return [target, options.cwd];
+
         let dependencyPath = dependencies.find(
           ({ name }) => name === target,
         )?.realpath;
@@ -331,6 +351,8 @@ const install = async (options) => {
     // TODO: parallelize
     for (let [dependency, entryPoints] of Object.entries(resolvedExportsMap)) {
       const dependencyPath = dependenciesPath[dependency];
+      const isCurrentPackage = dependency === currentPackage.name;
+
       if (!(await pathExists(dependencyPath))) {
         console.error(`Unresolved dependency: is "${dependency}" installed?`);
         continue;
@@ -357,6 +379,15 @@ const install = async (options) => {
 
           if (!(await pathExists(resolvedExport))) {
             console.error(`Unknown export: ${resolvedExport}`);
+            continue;
+          }
+
+          // Reference the current package's own source directly instead of bundling it
+          if (isCurrentPackage) {
+            const relativeExport = slash(relative(outputDir, resolvedExport));
+            importMap.imports[id] = relativeExport.startsWith(".")
+              ? relativeExport
+              : `./${relativeExport}`;
             continue;
           }
 
