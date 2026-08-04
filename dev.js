@@ -45,8 +45,18 @@ const dev = async (options = {}) => {
     }, 500);
 
     // Install on package.json change
-    bs.watch("package.json", watchOptions, async (event) => {
-      if (event === "change") await onDependencyChange();
+    bs.watch("package.json", watchOptions, async (event, file) => {
+      if (event === "change") {
+        await onDependencyChange();
+        const results = await lint(
+          options.cwd,
+          [join(options.cwd, file)],
+          options,
+        );
+        if (results) {
+          bs.sockets.emit("console:log", `[snowdev] ESLint Error:${results}`);
+        }
+      }
     });
     // Install on directory change in node_modules
     bs.watch("node_modules/!(.*){,/*/}", watchOptions, async (event) => {

@@ -6,6 +6,7 @@ import tseslint from "typescript-eslint";
 import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
 import eslintPluginUnicorn from "eslint-plugin-unicorn";
 import eslintPluginJsdoc from "eslint-plugin-jsdoc";
+import eslintPackageJson from "eslint-package-json";
 import eslintPluginHtml from "eslint-plugin-html";
 import eslintPluginMarkdown from "@eslint/markdown";
 import eslintNodeTest from "eslint-node-test";
@@ -83,6 +84,16 @@ export default defineConfig([
         ...globals.jest,
         ...globals.jasmine,
       },
+    },
+  },
+  {
+    files: ["**/package.json"],
+    plugins: { packageJson: eslintPackageJson },
+    extends: [eslintPackageJson.configs.recommended],
+    rules: {
+      "package-json/prefer-shorthand": 0,
+      "package-json/prefer-files-field": 0,
+      "package-json/sort-properties": 0,
     },
   },
   eslintPluginPrettierRecommended,
