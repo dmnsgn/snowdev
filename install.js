@@ -220,7 +220,7 @@ const install = async (options) => {
     return { importMap: options.importMap };
   }
 
-  // Add the current package itself so examples can import it like any other dependency
+  // Add the current package itself
   if (
     type === DEPENDENCY_TYPES.ALL &&
     currentPackage.name &&
@@ -382,7 +382,6 @@ const install = async (options) => {
             continue;
           }
 
-          // Reference the current package's own source directly instead of bundling it
           if (isCurrentPackage) {
             const relativeExport = slash(relative(outputDir, resolvedExport));
             importMap.imports[id] = relativeExport.startsWith(".")

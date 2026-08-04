@@ -8,6 +8,7 @@ import deepmerge from "deepmerge";
 import semver from "semver";
 import browserslistToEsbuild from "browserslist-to-esbuild";
 
+import prettierConfig from "./prettier.config.js";
 import eslintConfig from "./eslint.config.js";
 import init from "./init.js";
 import dev from "./dev.js";
@@ -77,7 +78,7 @@ export const DEFAULTS_OPTIONS = {
   // Formatter and linter
   // TODO: lint and format config in code editor? Do I need config in package.json instead?
   /** @type {import("prettier").RequiredOptions} */
-  prettier: null,
+  prettier: prettierConfig,
   /** @type {import("eslint").Linter.FlatConfig} */
   eslint: eslintConfig,
   /** @type {import("typescript").TranspileOptions} */
