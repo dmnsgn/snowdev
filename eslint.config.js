@@ -94,6 +94,7 @@ export default defineConfig([
       "package-json/prefer-shorthand": 0,
       "package-json/prefer-files-field": 0,
       "package-json/sort-properties": 0,
+      "package-json/prefer-exports": 0,
     },
   },
   eslintPluginPrettierRecommended,

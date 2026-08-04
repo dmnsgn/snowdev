@@ -103,7 +103,7 @@ const init = async (options = {}) => {
       await writeJson(
         join(options.cwd, "package.json"),
         {
-          main: "lib/index.js",
+          main: "./lib/index.js",
           exports: {
             ".": {
               types: "./types/index.d.ts",
