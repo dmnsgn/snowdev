@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [3.0.0-alpha.1](https://github.com/dmnsgn/snowdev/compare/v3.0.0-alpha.0...v3.0.0-alpha.1) (2026-08-04)
+
+
+### Features
+
+* add back eslint prettier plugin ([caca728](https://github.com/dmnsgn/snowdev/commit/caca728c348634c7b972ac1cc4bdd9bf90e2b2d8))
+* add eslint css ([52e4795](https://github.com/dmnsgn/snowdev/commit/52e4795e6c568a7372699567fea046f87300f81d))
+* add eslint-package-json ([40b288d](https://github.com/dmnsgn/snowdev/commit/40b288dab79d5e9e2d694e75a19bc6a49d44fa88))
+* add prettier-plugin-jsdoc ([c50cb27](https://github.com/dmnsgn/snowdev/commit/c50cb27d9230d337269fec9b0d6d593fec34dfa2))
+* add support for eslint fix ([a1edc8e](https://github.com/dmnsgn/snowdev/commit/a1edc8e52e9b5f2e18cd6b593857e8e9a14d7902))
+* include current package in importmap for dependency type "all" ([4267e6f](https://github.com/dmnsgn/snowdev/commit/4267e6fe88e102f5bf5feb992d367d041eb499eb))
+* **template:** update main/types defaults ([f7490ec](https://github.com/dmnsgn/snowdev/commit/f7490ec26d911a3871494007e239bb8fbb70a798))
+
+
+
 # [3.0.0-alpha.0](https://github.com/dmnsgn/snowdev/compare/v2.7.0...v3.0.0-alpha.0) (2026-07-13)
 
 
