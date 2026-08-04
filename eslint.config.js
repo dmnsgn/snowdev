@@ -9,11 +9,16 @@ import eslintPluginJsdoc from "eslint-plugin-jsdoc";
 import eslintPluginHtml from "eslint-plugin-html";
 import eslintPluginMarkdown from "@eslint/markdown";
 import eslintNodeTest from "eslint-node-test";
+import css from "@eslint/css";
 
 import { FILES_GLOB } from "./utils.js";
 
 export default defineConfig([
-  eslintJs.configs.recommended,
+  {
+    files: FILES_GLOB.javascript,
+    plugins: { js: eslintJs },
+    extends: [eslintJs.configs.recommended],
+  },
   ...tseslint.configs.recommended.map((config) => ({
     ...config,
     files: FILES_GLOB.typescriptAll,
@@ -106,6 +111,16 @@ export default defineConfig([
     rules: {
       "markdown/no-irregular-whitespace": 0, // https://github.com/eslint/markdown/issues/299
       "markdown/no-missing-label-refs": 0,
+    },
+  },
+  {
+    files: FILES_GLOB.css,
+    plugins: { css },
+    language: "css/css",
+    extends: [css.configs.recommended],
+    rules: {
+      "css/use-baseline": 0,
+      "css/no-invalid-properties": 0,
     },
   },
 ]);

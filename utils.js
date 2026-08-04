@@ -23,11 +23,12 @@ const FILES_GLOB = {
   typescript: ["**/*.ts", "**/*.mts"],
   react: ["**/*.jsx", "**/*.tsx"],
   commonjs: ["**/*.cjs", "**/*.cts"],
-  assets: ["**/*.json", "**/*.css", "**/*.wasm"],
   html: ["**/*.html"],
+  css: ["**/*.css"],
   markdown: ["**/*.md"],
 };
 FILES_GLOB.typescriptAll = [...FILES_GLOB.typescript, "**/*.tsx", "**/*.cts"];
+FILES_GLOB.assets = [...FILES_GLOB.css, "**/*.json", "**/*.wasm"];
 
 const RF_OPTIONS = { recursive: true, force: true };
 const exec = promisify(execCb);
