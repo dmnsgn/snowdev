@@ -37,14 +37,18 @@ const lint = async (cwd, files, options) => {
       };
     }
 
+    const fix = options.eslint?.fix;
+
     const eslint = new ESLint({
       cwd,
       ignorePatterns: options.ignore,
       baseConfig: options.eslint,
       overrideConfigFile: true,
+      fix,
       // concurrency: "auto",
     });
     const lintResults = await eslint.lintFiles(files);
+    if (fix) await ESLint.outputFixes(lintResults);
     const results = (await eslint.loadFormatter("stylish")).format(lintResults);
 
     if (results) console.log(lint.description, results);
