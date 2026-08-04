@@ -3,6 +3,7 @@ import { defineConfig } from "eslint/config";
 import globals from "globals";
 import babelParser from "@babel/eslint-parser";
 import tseslint from "typescript-eslint";
+import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
 import eslintPluginUnicorn from "eslint-plugin-unicorn";
 import eslintPluginJsdoc from "eslint-plugin-jsdoc";
 import eslintPluginHtml from "eslint-plugin-html";
@@ -79,7 +80,7 @@ export default defineConfig([
       },
     },
   },
-  // eslintPluginPrettierRecommended,
+  eslintPluginPrettierRecommended,
   // TODO: https://github.com/import-js/eslint-plugin-import/pull/3230
   // {
   //   extends: ["plugin:import/recommended"],
