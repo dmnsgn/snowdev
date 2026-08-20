@@ -52,6 +52,7 @@ export const DEFAULTS_OPTIONS = {
 
   // Process
   ts: undefined,
+  workspace: undefined,
   serve: true,
   lint: true,
   format: true,
@@ -219,6 +220,11 @@ export const run = async (fn, options) => {
     // Auto-detect TypeScript project
     options.ts ??= isTypeScriptProject(options.cwd);
 
+    // Auto-detect npm/yarn workspace package membership
+    options.workspace ??=
+      (await npm.run(options.cwd, "query", [":scope.workspace", "--json"]))[0]
+        ?.name ?? false;
+
     // Set default docs
     options.docs = options.docs ?? (options.ts ? "docs" : "README.md");
     options.docsFormat = options.docsFormat ?? (options.ts ? "html" : "md");
@@ -242,7 +248,9 @@ export const run = async (fn, options) => {
           join(__dirname, "template", "package.json"),
         );
         const { prerelease, major, minor } = semver.minVersion(VERSION);
-        engines[NAME] = prerelease.length ? VERSION : `>=${major}.${minor}.x`;
+        engines[NAME] = prerelease.length
+          ? `>=${VERSION}`
+          : `>=${major}.${minor}.x`;
         packageJson = deepmerge(packageJson, { engines });
         await writeJson(packageJsonPath, packageJson);
       }
