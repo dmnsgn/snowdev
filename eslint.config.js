@@ -74,6 +74,17 @@ export default defineConfig([
     files: [...FILES_GLOB.javascript, ...FILES_GLOB.typescript],
     plugins: { unicorn: eslintPluginUnicorn },
     extends: [eslintPluginUnicorn.configs.unopinionated],
+    rules: {
+      "unicorn/number-literal-case": [
+        "error",
+        { hexadecimalValue: "lowercase" },
+      ],
+      "unicorn/no-anonymous-default-export": 0,
+      "unicorn/no-for-each": 0,
+      "unicorn/no-array-sort": 0,
+      "unicorn/no-array-reverse": 0,
+      "unicorn/no-array-reduce": 0,
+    },
   },
   {
     files: ["test/**/*.js"],
