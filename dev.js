@@ -1,5 +1,5 @@
 import { watch } from "node:fs/promises";
-import { join } from "node:path";
+import { basename, join, relative } from "node:path";
 import http2 from "node:http2";
 
 import console from "console-ansi";
@@ -8,7 +8,12 @@ import pDebounce from "p-debounce";
 
 import install from "./install.js";
 import { types, lint } from "./build.js";
-import { getFileExtension, htmlHotInject, resolveFiles } from "./utils.js";
+import {
+  getFileExtension,
+  htmlHotInject,
+  readJson,
+  resolveFiles,
+} from "./utils.js";
 
 const dev = async (options = {}) => {
   if (options.lint) await lint(options.cwd, options.files, options);
@@ -80,6 +85,36 @@ const dev = async (options = {}) => {
         }
       },
     );
+
+    // Options are resolved once at startup (server options can't hot-apply)
+    // so a config change only gets a hint
+    if (options.configFile) {
+      const readConfig = async () => {
+        if (basename(options.configFile) !== "package.json") return null;
+        try {
+          return JSON.stringify((await readJson(options.configFile)).snowdev);
+        } catch {
+          // Mid-write or invalid JSON: package.json lint will report it
+          return null;
+        }
+      };
+      let config = await readConfig();
+
+      bs.watch(options.configFile, watchOptions, async (event) => {
+        if (event !== "change") return;
+
+        // package.json changes for many other reasons: only hint on the key
+        if (config !== null) {
+          const current = await readConfig();
+          if (current === null || current === config) return;
+          config = current;
+        }
+
+        console.warn(
+          `Config changed: "${relative(options.cwd, options.configFile)}". Restart to apply.`,
+        );
+      });
+    }
 
     // HMR
     if (options.hmr) {

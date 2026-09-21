@@ -9,16 +9,14 @@ import { commands, run } from "./index.js";
 import { NAME, VERSION } from "./utils.js";
 
 export const getConfig = async () => {
-  let cosmiconfigOptions = {};
   try {
-    const result =
+    const { config = {}, filepath } =
       (await cosmiconfig(NAME, { searchStrategy: "global" }).search()) || {};
-    cosmiconfigOptions = result.config || {};
+    return { ...config, configFile: filepath };
   } catch (error) {
     console.error(error);
     process.exit(0);
   }
-  return cosmiconfigOptions;
 };
 
 // CLI
