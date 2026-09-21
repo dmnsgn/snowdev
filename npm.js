@@ -9,7 +9,7 @@ const substringAfterChar = (string, char) =>
 
 const quotes = new Set(['"', "'"]);
 const stripQuotes = (s) =>
-  quotes.has(s.at(0)) && quotes.has(s.at(-1)) ? s.slice(1, -2) : s;
+  quotes.has(s.at(0)) && quotes.has(s.at(-1)) ? s.slice(1, -1) : s;
 
 class Npm {
   process = null;
