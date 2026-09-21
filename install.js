@@ -9,6 +9,7 @@ import {
   relative,
   resolve,
 } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import console from "console-ansi";
 import deepmerge from "deepmerge";
@@ -20,12 +21,17 @@ import {
   resolveExports,
   resolveBrowserIgnores,
   pathExists,
+  realpathSafe,
+  isInside,
+  statFiles,
+  compareStats,
   VERSION,
   listFormatter,
   arrayDifference,
   dotRelativeToBarePath,
   bareToDotRelativePath,
   pick,
+  hashObject,
   readJson,
   writeJson,
 } from "./utils.js";
@@ -34,6 +40,7 @@ import npm from "./npm.js";
 import bundle from "./bundle.js";
 
 const require = createRequire(import.meta.url);
+const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 const DEPENDENCY_TYPES = Object.freeze({
   ALL: "all",
@@ -49,6 +56,10 @@ const DEPENDENCY_SAVE_TYPE_MAP = {
   [DEPENDENCY_TYPES.CUSTOM]: [],
 };
 
+// realpath catches "npm link"/workspaces, resolved catches git/tarball deps
+// re-fetched at the same version
+const DEPENDENCY_FIELDS = ["name", "version", "realpath", "resolved"];
+
 const getDependencies = async (options, type, names = []) => {
   const depsSelector =
     type === DEPENDENCY_TYPES.CUSTOM
@@ -60,14 +71,97 @@ const getDependencies = async (options, type, names = []) => {
   return JSON.parse(
     await npm.run(options.cwd, "query", [`':scope > ${depsSelector}'`]),
   )
-    .map((dependency) =>
-      pick(dependency, ["name", "version", "dev", "realpath"]),
-    )
+    .map((dependency) => pick(dependency, DEPENDENCY_FIELDS))
     .filter(({ name }) => (names.length ? names.includes(name) : true));
 };
 
-const compareDependencies = ({ name, version }, { version: v, name: n }) =>
-  version === v && name === n;
+const compareDependencies = (a, b) =>
+  DEPENDENCY_FIELDS.every((key) => a[key] === b[key]);
+
+// Options affecting the bundled output without any package.json change.
+// "dependencies" is diffed separately to report which ones changed.
+const OUTPUT_OPTIONS = [
+  "resolve",
+  "importMap",
+  "transpiler",
+  "transpileExclude",
+  "bundler",
+  "targets",
+  "NODE_ENV",
+  "minify",
+  "babel",
+  "esbuild",
+  "swc",
+  "rollup",
+  "rolldown",
+];
+
+const hashOptions = (options) => hashObject(pick(options, OUTPUT_OPTIONS));
+
+// Bundled files outside node_modules (npm link, "file:" deps, workspaces) have
+// no version/resolved to compare so their stats are tracked instead.
+const getLinkedFiles = async (options, watchFiles = []) => {
+  const nodeModules = await Promise.all(
+    [options.cwd, __dirname].map((directory) =>
+      realpathSafe(join(directory, "node_modules")),
+    ),
+  );
+
+  return watchFiles.filter(
+    (file) =>
+      isAbsolute(file) &&
+      nodeModules.every((directory) => !isInside(directory, file)),
+  );
+};
+
+const getInstallReason = async (
+  options,
+  cache,
+  { outputDir, type, optionsHash, dependencies, dependenciesHardcoded },
+) => {
+  if (options.force) return "force install";
+  if (options.cache === false) return "cache disabled";
+  if (!(await pathExists(outputDir))) return "initial installation";
+  if (!cache) return "no dependencies cached";
+  if (type !== cache.type) return "dependency type changed";
+  if (VERSION !== cache.version) return "snowdev version changed";
+  // Calling install from CLI will always force install
+  if (options.caller === "cli" && options.command === "install") {
+    return "from cli";
+  }
+  if (optionsHash !== cache.options) return "options changed";
+
+  const changedDependencies = [
+    ...new Set(
+      arrayDifference(
+        dependencies,
+        cache.dependencies ?? [],
+        compareDependencies,
+      )
+        .map(({ name }) => name)
+        .concat(
+          arrayDifference(
+            dependenciesHardcoded,
+            cache.dependenciesHardcoded ?? [],
+          ),
+        ),
+    ),
+  ];
+  if (changedDependencies.length) {
+    return `dependencies changed: ${listFormatter.format(changedDependencies)}`;
+  }
+
+  const cachedFiles = cache.files ?? {};
+  const files = await statFiles(Object.keys(cachedFiles));
+  const changedFiles = Object.keys(cachedFiles).filter(
+    (file) => !compareStats(cachedFiles[file], files[file]),
+  );
+  if (changedFiles.length) {
+    return `linked files changed: ${listFormatter.format(changedFiles)}`;
+  }
+
+  return null;
+};
 
 const install = async (options) => {
   // Check package.json exists
@@ -128,74 +222,33 @@ const install = async (options) => {
       ? options.dependencies.filter((name) => !dependenciesNames.includes(name))
       : [];
 
-  if (options.force) {
-    console.info("install - force install.");
-  } else if (!(await pathExists(outputDir))) {
-    // Check if dist folder exists
-    console.info("install - initial installation.");
-  } else {
-    try {
-      // Get cached values
-      // TODO: handle options.importMap change
-      let cachedVersion = "";
-      let cachedType = DEPENDENCY_TYPES.CUSTOM;
-      let cachedDependencies = {};
-      let cachedDependenciesHardcoded = [];
-
-      ({
-        version: cachedVersion,
-        type: cachedType,
-        dependencies: cachedDependencies,
-        dependenciesHardcoded: cachedDependenciesHardcoded,
-      } = await readJson(dependenciesCacheFile));
-
-      // Check type or list of dependencies change
-      // Calling install from CLI will always force install
-      if (type !== cachedType) {
-        console.info("install - dependency type changed.");
-      } else if (VERSION !== cachedVersion) {
-        console.info("install - snowdev version changed.");
-      } else if (options.caller === "cli" && options.command === "install") {
-        console.info("install - from cli.");
-      } else {
-        const changedDependencies = arrayDifference(
-          dependencies,
-          cachedDependencies,
-          compareDependencies,
-        );
-        const changedDependenciesHardcoded = arrayDifference(
-          dependenciesHardcoded,
-          cachedDependenciesHardcoded,
-        );
-
-        if (
-          changedDependencies.length + changedDependenciesHardcoded.length ===
-          0
-        ) {
-          console.log("install - all dependencies installed.");
-
-          return {
-            importMap: deepmerge(
-              await readJson(importMapFile),
-              options.importMap,
-            ),
-          };
-        } else {
-          console.log(
-            `install - dependencies changed: ${listFormatter.format([
-              ...new Set(
-                changedDependencies
-                  .map((dependency) => dependency.name)
-                  .concat(changedDependenciesHardcoded),
-              ),
-            ])}.`,
-          );
-        }
-      }
-    } catch (error) {
-      console.info(`install - no dependencies cached.`);
-    }
+  let cache;
+  try {
+    cache = await readJson(dependenciesCacheFile);
+  } catch {
+    cache = null;
   }
+
+  const optionsHash = hashOptions(options);
+
+  const reason = await getInstallReason(options, cache, {
+    outputDir,
+    type,
+    optionsHash,
+    dependencies,
+    dependenciesHardcoded,
+  });
+
+  if (!reason) {
+    console.log("install - all dependencies installed.");
+
+    return {
+      importMap: deepmerge(await readJson(importMapFile), options.importMap),
+      linkedFiles: Object.keys(cache.files ?? {}),
+    };
+  }
+
+  console.info(`install - ${reason}.`);
 
   // Remove output to empty it or bundle in it
   try {
@@ -212,12 +265,14 @@ const install = async (options) => {
     await writeJson(dependenciesCacheFile, {
       version: VERSION,
       type,
-      dependencies: {},
-      dependenciesHardcoded: {},
+      options: optionsHash,
+      dependencies: [],
+      dependenciesHardcoded: [],
+      files: {},
     });
 
     console.warn(`No ESM dependencies to install. Set "options.dependencies".`);
-    return { importMap: options.importMap };
+    return { importMap: options.importMap, linkedFiles: [] };
   }
 
   // Add the current package itself
@@ -240,6 +295,7 @@ const install = async (options) => {
   let input = {};
   let importMap = { imports: {} };
   let copies = {};
+  let linkedFiles = [];
 
   const filter = createFilter(
     options.resolve.include,
@@ -449,13 +505,16 @@ const install = async (options) => {
 
     // Bundle
     const bundleOptions = { ...options };
-    bundleOptions.rollup.input = { ...bundleOptions.rollup.input, input };
-    bundleOptions.rollup.output = {
-      ...bundleOptions.rollup.output,
-      entryFileNames: ({ name }) =>
-        packageTargets.includes(name) || extname(name) !== ".js"
-          ? `${name}.js`
-          : name,
+    bundleOptions.rollup = {
+      ...options.rollup,
+      input: { ...options.rollup.input, input },
+      output: {
+        ...options.rollup.output,
+        entryFileNames: ({ name }) =>
+          packageTargets.includes(name) || extname(name) !== ".js"
+            ? `${name}.js`
+            : name,
+      },
     };
 
     if (noOpIds.length) {
@@ -465,6 +524,7 @@ const install = async (options) => {
     }
 
     result = await bundle(bundleOptions);
+    linkedFiles = await getLinkedFiles(options, result.watchFiles);
 
     await Promise.allSettled(
       Object.entries(copies).map(async ([resolvedExport, copyDestination]) => {
@@ -490,8 +550,10 @@ const install = async (options) => {
       await writeJson(dependenciesCacheFile, {
         version: VERSION,
         type,
+        options: optionsHash,
         dependencies,
         dependenciesHardcoded,
+        files: await statFiles(linkedFiles),
       });
 
       console.log("install - complete.");
@@ -502,7 +564,7 @@ const install = async (options) => {
   }
   console.timeEnd(label);
 
-  return { ...result, input, importMap };
+  return { ...result, input, importMap, linkedFiles };
 };
 install.description = `Install ESM dependencies.`;
 

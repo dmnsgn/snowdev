@@ -63,6 +63,7 @@ export const DEFAULTS_OPTIONS = {
   docsEnd: "<!-- api-end -->",
   commitAndTagVersion: true,
   pkgFix: true,
+  cache: true,
 
   // Server
   /** @type {import("browser-sync").Options} */

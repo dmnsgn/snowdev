@@ -167,6 +167,10 @@ Commands options:
   --commitAndTagVersion   Bump the version, generate changelog release, create a
                            new commit with git tag on release command.
                                                                  [default: true]
+  --cache                 Skip installing ESM dependencies on dev command when n
+                          othing changed (dependencies, linked files or bundling
+                           options). Set to false to always install.
+                                                       [boolean] [default: true]
   --crossOriginIsolation  Add Cross-Origin-Opener-Policy (COOP) and Cross-Origin
                           -Embedder-Policy (COEP) headers to browsersync. Requir
                           ed for the use of SharedArrayBuffer.

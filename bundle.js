@@ -104,22 +104,17 @@ const bundle = async (options = {}) => {
       bundlerOptions.output.minify = minify;
     } else {
       if (options.transpiler === "esbuild") {
-        options.esbuild ||= {};
+        const esbuild = { ...options.esbuild };
         if (options.targets) {
-          options.esbuild.target = browserslistToEsbuild(options.targets);
+          esbuild.target = browserslistToEsbuild(options.targets);
         }
 
         transpiler = await (
           await import("rollup-plugin-esbuild")
-        ).default({ minify, sourceMap, ...options.esbuild });
+        ).default({ minify, sourceMap, ...esbuild });
       } else if (options.transpiler === "swc") {
-        options.swc ||= {};
-        if (options.targets) {
-          options.swc.env ||= {};
-          options.swc.env.targets = options.targets;
-        }
-
-        const { exclude, include, ...swc } = options.swc;
+        const { exclude, include, ...swc } = options.swc || {};
+        if (options.targets) swc.env = { ...swc.env, targets: options.targets };
 
         transpiler = await (
           await import("@rollup/plugin-swc")
@@ -134,14 +129,12 @@ const bundle = async (options = {}) => {
           },
         });
       } else {
-        options.babel ||= {};
-        options.babel.targets ||= options.targets;
-
         transpiler = await (
           await import("@rollup/plugin-babel")
         ).babel({
           cwd: options.cwd,
           babelHelpers: "runtime",
+          targets: options.targets,
           ...options.babel,
         });
 
@@ -247,6 +240,7 @@ const bundle = async (options = {}) => {
     } else {
       bundle = await bundler(inputOptions);
       result = await bundle.write(outputOptions);
+      result.watchFiles = await bundle.watchFiles;
 
       await bundle.close();
     }

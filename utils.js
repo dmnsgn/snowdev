@@ -1,5 +1,6 @@
+import { createHash } from "node:crypto";
 import { promises as fs } from "node:fs";
-import { dirname, extname, join, parse, relative } from "node:path";
+import { dirname, extname, isAbsolute, join, parse, relative } from "node:path";
 import { promisify } from "node:util";
 import { exec as execCb } from "node:child_process";
 import deepmerge from "deepmerge";
@@ -33,8 +34,7 @@ FILES_GLOB.assets = [...FILES_GLOB.css, "**/*.json", "**/*.wasm"];
 const RF_OPTIONS = { recursive: true, force: true };
 const exec = promisify(execCb);
 
-const readJson = async (path) =>
-  (await import(path, { with: { type: "json" } })).default;
+const readJson = async (path) => JSON.parse(await fs.readFile(path, "utf-8"));
 
 const writeJson = async (path, obj, { merge = false } = {}) =>
   await fs.writeFile(
@@ -128,6 +128,30 @@ const pathExists = (path) =>
     .access(path)
     .then(() => true)
     .catch(() => false);
+
+const realpathSafe = (path) => fs.realpath(path).catch(() => path);
+
+const isInside = (directory, file) => {
+  const path = relative(directory, file);
+  return path && !path.startsWith("..") && !isAbsolute(path);
+};
+
+// Missing files map to null so they still take part in comparisons
+const statFiles = async (files) =>
+  Object.fromEntries(
+    await Promise.all(
+      files.map(async (file) => {
+        try {
+          const { mtimeMs, size } = await fs.stat(file);
+          return [file, { mtimeMs, size }];
+        } catch {
+          return [file, null];
+        }
+      }),
+    ),
+  );
+
+const compareStats = (a, b) => a?.mtimeMs === b?.mtimeMs && a?.size === b?.size;
 
 const getFileExtension = (file) => parse(file).ext;
 
@@ -353,6 +377,18 @@ const resolveBrowserIgnores = async (options, src) => {
 const pick = (obj, keys) =>
   Object.fromEntries(keys.map((key) => [key, obj[key]]));
 
+// RegExp and functions would otherwise serialize to {} / be dropped
+const hashObject = (obj) =>
+  createHash("sha1")
+    .update(
+      JSON.stringify(obj, (key, value) =>
+        value instanceof RegExp || typeof value === "function"
+          ? value.toString()
+          : value,
+      ),
+    )
+    .digest("hex");
+
 const filterLeft = (a, b, compareFn) =>
   a.filter((valueA) => !b.some((valueB) => compareFn(valueA, valueB)));
 
@@ -382,11 +418,16 @@ export {
   escapeRegExp,
   isTypeScriptProject,
   pathExists,
+  realpathSafe,
+  isInside,
+  statFiles,
+  compareStats,
   getFileExtension,
   htmlHotInject,
   resolveExports,
   resolveBrowserIgnores,
   pick,
+  hashObject,
   arrayDifference,
   dotRelativeToBarePath,
   bareToDotRelativePath,

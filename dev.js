@@ -16,6 +16,27 @@ const dev = async (options = {}) => {
   if (options.serve) {
     const bs = browserSyncCreate();
 
+    const watchOptions = { ignoreInitial: true };
+
+    let linkedFilesWatcher;
+    const watchLinkedFiles = async ({ error, linkedFiles = [] }) => {
+      if (error) return;
+
+      await linkedFilesWatcher?.close();
+      linkedFilesWatcher = linkedFiles.length
+        ? bs.watch(linkedFiles, watchOptions, async (event) => {
+            if (["change", "unlink"].includes(event)) {
+              await onDependencyChange();
+            }
+          })
+        : null;
+    };
+
+    const onDependencyChange = pDebounce(async () => {
+      await watchLinkedFiles(await install(options));
+      if (options.hmr) bs.sockets.emit("reload");
+    }, 500);
+
     if (options.lint || options.ts) {
       bs.use({
         plugin() {},
@@ -38,31 +59,27 @@ const dev = async (options = {}) => {
       });
     }
 
-    const watchOptions = { ignoreInitial: true };
+    // Install on manifest change
+    bs.watch(
+      ["package.json", "package-lock.json"],
+      watchOptions,
+      async (event, file) => {
+        if (event !== "change") return;
 
-    const onDependencyChange = pDebounce(async () => {
-      await install(options);
-      if (options.hmr) bs.sockets.emit("reload");
-    }, 500);
+        await onDependencyChange();
 
-    // Install on package.json change
-    bs.watch("package.json", watchOptions, async (event, file) => {
-      if (event !== "change") return;
+        if (file !== "package.json") return;
 
-      await onDependencyChange();
-      const results = await lint(
-        options.cwd,
-        [join(options.cwd, file)],
-        options,
-      );
-      if (results) {
-        bs.sockets.emit("console:log", `[snowdev] ESLint Error:${results}`);
-      }
-    });
-    // Install on directory change in node_modules
-    bs.watch("node_modules/!(.*){,/*/}", watchOptions, async (event) => {
-      if (["addDir", "unlinkDir"].includes(event)) await onDependencyChange();
-    });
+        const results = await lint(
+          options.cwd,
+          [join(options.cwd, file)],
+          options,
+        );
+        if (results) {
+          bs.sockets.emit("console:log", `[snowdev] ESLint Error:${results}`);
+        }
+      },
+    );
 
     // HMR
     if (options.hmr) {
@@ -122,7 +139,7 @@ const dev = async (options = {}) => {
       },
       async () => {
         try {
-          await install(options);
+          await watchLinkedFiles(await install(options));
 
           if (options.ts) {
             await types(options.cwd, null, options, (results) => {

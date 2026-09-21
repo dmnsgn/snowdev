@@ -161,6 +161,12 @@ parser
       describe: `Run "npm pkg fix" on release command.`,
       defaultDescription: `true`,
     },
+    cache: {
+      group: "Commands options:",
+      type: "boolean",
+      describe: `Skip installing ESM dependencies on dev command when nothing changed (dependencies, linked files or bundling options). Set to false to always install.`,
+      defaultDescription: `true`,
+    },
     crossOriginIsolation: {
       group: "Commands options:",
       type: "boolean",
