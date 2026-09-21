@@ -1,3 +1,4 @@
+import { watch } from "node:fs/promises";
 import { join } from "node:path";
 import http2 from "node:http2";
 
@@ -7,7 +8,7 @@ import pDebounce from "p-debounce";
 
 import install from "./install.js";
 import { types, lint } from "./build.js";
-import { getFileExtension, htmlHotInject } from "./utils.js";
+import { getFileExtension, htmlHotInject, resolveFiles } from "./utils.js";
 
 const dev = async (options = {}) => {
   if (options.lint) await lint(options.cwd, options.files, options);
@@ -24,15 +25,15 @@ const dev = async (options = {}) => {
       });
 
       bs.watch(options.files, async (event, file) => {
-        if (event === "change") {
-          const results = await lint(
-            options.cwd,
-            [join(options.cwd, file)],
-            options,
-          );
-          if (results) {
-            bs.sockets.emit("console:log", `[snowdev] ESLint Error:${results}`);
-          }
+        if (event !== "change") return;
+
+        const results = await lint(
+          options.cwd,
+          [join(options.cwd, file)],
+          options,
+        );
+        if (results) {
+          bs.sockets.emit("console:log", `[snowdev] ESLint Error:${results}`);
         }
       });
     }
@@ -46,16 +47,16 @@ const dev = async (options = {}) => {
 
     // Install on package.json change
     bs.watch("package.json", watchOptions, async (event, file) => {
-      if (event === "change") {
-        await onDependencyChange();
-        const results = await lint(
-          options.cwd,
-          [join(options.cwd, file)],
-          options,
-        );
-        if (results) {
-          bs.sockets.emit("console:log", `[snowdev] ESLint Error:${results}`);
-        }
+      if (event !== "change") return;
+
+      await onDependencyChange();
+      const results = await lint(
+        options.cwd,
+        [join(options.cwd, file)],
+        options,
+      );
+      if (results) {
+        bs.sockets.emit("console:log", `[snowdev] ESLint Error:${results}`);
       }
     });
     // Install on directory change in node_modules
@@ -116,8 +117,8 @@ const dev = async (options = {}) => {
         httpModule: options.browsersync?.https && options.http2 && "node:http2",
         codeSync: !options.hmr,
         logPrefix: "snowdev:browser-sync",
-        ...(options.browsersync || {}),
-        ...(options.argv || {}),
+        ...options.browsersync,
+        ...options.argv,
       },
       async () => {
         try {
@@ -138,8 +139,21 @@ const dev = async (options = {}) => {
         }
       },
     );
-  } else if (options.ts) {
-    await types(options.cwd, null, options, true);
+  } else {
+    if (options.ts) {
+      await types(options.cwd, null, options, true);
+    } else {
+      for (const file of await resolveFiles(options.cwd, options)) {
+        (async () => {
+          const watcher = watch(file);
+          for await (const event of watcher) {
+            if (event.eventType === "change") {
+              await lint(options.cwd, [file], options);
+            }
+          }
+        })();
+      }
+    }
   }
 };
 dev.description = `Start dev server and install ESM dependencies.`;
