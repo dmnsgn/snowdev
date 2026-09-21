@@ -11,6 +11,9 @@ import eslintPluginHtml from "eslint-plugin-html";
 import eslintPluginMarkdown from "@eslint/markdown";
 import eslintNodeTest from "eslint-node-test";
 import css from "@eslint/css";
+import cssPropertyOrder, {
+  createHtmlProcessor,
+} from "eslint-plugin-css-property-order";
 
 import { FILES_GLOB } from "./utils.js";
 
@@ -115,6 +118,7 @@ export default defineConfig([
     languageOptions: {
       sourceType: "module",
     },
+    processor: createHtmlProcessor({ emitSource: true }),
   },
   {
     files: FILES_GLOB.markdown,
@@ -126,10 +130,15 @@ export default defineConfig([
     },
   },
   {
+    files: [...FILES_GLOB.javascript, ...FILES_GLOB.typescript],
+    plugins: { "css-property-order": cssPropertyOrder },
+    processor: "css-property-order/tagged-template",
+  },
+  {
     files: FILES_GLOB.css,
     plugins: { css },
     language: "css/css",
-    extends: [css.configs.recommended],
+    extends: [css.configs.recommended, cssPropertyOrder.configs.recommended],
     rules: {
       "css/use-baseline": 0,
       "css/no-invalid-properties": 0,

@@ -110,6 +110,7 @@
     "eslint-package-json": "^0.2.0",
     "eslint-plugin-html": "^8.1.4",
     "eslint-plugin-jsdoc": "^63.0.13",
+    "eslint-plugin-css-property-order": "^1.0.0",
     "eslint-plugin-prettier": "^5.5.6",
     "eslint-plugin-unicorn": "^71.1.0",
     "globals": "^17.7.0",
