@@ -1,8 +1,7 @@
 {
   "name": "snowdev",
-  "version": "3.0.0-alpha.1",
+  "version": "3.0.0-alpha.2",
   "description": "Zero configuration, unbundled, opinionated, development and prototyping server for simple ES modules development: types generation, format and linting, dev server and TypeScript support.",
-  "sideEffects": false,
   "keywords": [
     "esm",
     "es-modules",
@@ -45,6 +44,7 @@
   ],
   "license": "MIT",
   "author": "Damien Seguin (https://github.com/dmnsgn)",
+  "sideEffects": false,
   "type": "module",
   "exports": {
     ".": {
@@ -55,7 +55,7 @@
   "main": "./index.js",
   "types": "./types/index.d.ts",
   "bin": {
-    "snowdev": "./cli.js"
+    "snowdev": "cli.js"
   },
   "files": [
     "*.js",
@@ -148,11 +148,11 @@
     "typescript-eslint": "^8.70.0",
     "yargs": "^18.2.0"
   },
+  "packageManager": "npm@11.3.0",
   "engines": {
     "node": ">=22.0.0",
     "snowdev": ">=3.0.0-alpha.1"
   },
-  "packageManager": "npm@11.3.0",
   "snowdev": {
     "serve": false,
     "dependencies": []
