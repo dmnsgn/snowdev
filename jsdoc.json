@@ -2,6 +2,7 @@
   "plugins": [
     "node_modules/jsdoc-export-default-interop/dist/index.js",
     "node_modules/jsdoc-tsimport-plugin/index.js",
-    "jsdoc-plugin-intersection"
+    "jsdoc-plugin-intersection",
+    "jsdoc-plugin-tuple"
   ]
 }
