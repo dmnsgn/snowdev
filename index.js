@@ -176,6 +176,7 @@ export const DEFAULTS_OPTIONS = {
       },
       experimental: {
         attachDebugInfo: "none",
+        resolveNewUrlToAsset: true,
       },
     },
   },
