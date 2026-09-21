@@ -149,11 +149,12 @@
     "yargs": "^18.2.0"
   },
   "engines": {
-    "node": ">=24.0.0",
-    "snowdev": ">=2.7.0"
+    "node": ">=22.0.0",
+    "snowdev": ">=3.0.0-alpha.1"
   },
   "packageManager": "npm@11.3.0",
   "snowdev": {
+    "serve": false,
     "dependencies": []
   }
 }

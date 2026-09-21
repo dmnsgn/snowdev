@@ -19,9 +19,9 @@ const init = async (options = {}) => {
 
   // Check for empty directory
   if (
-    (await fs.readdir(options.cwd)).filter(
+    (await fs.readdir(options.cwd)).some(
       (file) => ![".DS_Store"].includes(file),
-    ).length > 0
+    )
   ) {
     console.warn(`Directory not empty. Files will not be overwritten.`);
   }
@@ -29,14 +29,7 @@ const init = async (options = {}) => {
   // Get npm infos
   let user = { ...options };
 
-  if (!user.username) {
-    const { stdout, stderr } = await exec("npm profile get --json");
-    if (stderr) console.error(stderr);
-    const npmProfile = JSON.parse(stdout);
-    user.username ||= npmProfile.name;
-    user.authorName ||= npmProfile.fullname || user.username;
-    user.gitHubUsername ||= npmProfile.github || user.username;
-  } else {
+  if (user.username) {
     user.username = user.username.trim();
     try {
       const npmProfile = await npmUser(user.username);
@@ -45,6 +38,13 @@ const init = async (options = {}) => {
     } catch (error) {
       console.error(error);
     }
+  } else {
+    const { stdout, stderr } = await exec("npm profile get --json");
+    if (stderr) console.error(stderr);
+    const npmProfile = JSON.parse(stdout);
+    user.username ||= npmProfile.name;
+    user.authorName ||= npmProfile.fullname || user.username;
+    user.gitHubUsername ||= npmProfile.github || user.username;
   }
 
   console.info(

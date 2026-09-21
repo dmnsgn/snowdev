@@ -31,7 +31,7 @@ const deploy = async (options = {}) => {
         ghPagesBranchExist = false;
         console.log("Checking out a new gh-pages branch.");
       } else {
-        throw new Error(error);
+        throw new Error(error, { cause: error });
       }
     }
     await execCommand(
@@ -49,7 +49,7 @@ const deploy = async (options = {}) => {
 
     // Ignore changes
     const gitIgnorePath = join(options.cwd, ".gitignore");
-    const gitIgnore = await fs.readFile(gitIgnorePath, "utf-8");
+    const gitIgnore = await fs.readFile(gitIgnorePath, "utf8");
     // https://github.com/kaelzhang/node-ignore/blob/7cc95d22ea9a647442c06f4383a73e7a439a48d6/index.js#L14
     const REGEX_SPLITALL_CRLF = /\r?\n/g;
     const ignored = gitIgnore
@@ -57,11 +57,7 @@ const deploy = async (options = {}) => {
       ?.filter(
         (ignore) => ![options.rollup.output.dir, "lib"].includes(ignore),
       );
-    await fs.writeFile(
-      gitIgnorePath,
-      ignored?.join("\n") || gitIgnore,
-      "utf-8",
-    );
+    await fs.writeFile(gitIgnorePath, ignored?.join("\n") || gitIgnore, "utf8");
 
     await install(options);
     await build(options);

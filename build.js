@@ -32,8 +32,8 @@ const lint = async (cwd, files, options) => {
     if (babelEslint) {
       babelEslint.languageOptions.parserOptions.babelOptions = {
         cwd,
-        ...(options.babel || {}),
-        ...(babelEslint.languageOptions.parserOptions.babelOptions || {}),
+        ...options.babel,
+        ...babelEslint.languageOptions.parserOptions.babelOptions,
       };
     }
 
@@ -68,12 +68,12 @@ const format = async (cwd, files, options) => {
     try {
       await fs.writeFile(
         file,
-        await prettier.format(await fs.readFile(file, "utf-8"), {
+        await prettier.format(await fs.readFile(file, "utf8"), {
           parser: options.ts ? "typescript" : "babel",
-          ...((await prettier.resolveConfig(file)) || {}),
-          ...(options.prettier || {}),
+          ...(await prettier.resolveConfig(file)),
+          ...options.prettier,
         }),
-        "utf-8",
+        "utf8",
       );
     } catch (error) {
       console.error(error);
@@ -84,8 +84,8 @@ const format = async (cwd, files, options) => {
     const packageJsonFile = join(cwd, "package.json");
     await fs.writeFile(
       packageJsonFile,
-      sortPackageJson(await fs.readFile(packageJsonFile, "utf-8")),
-      "utf-8",
+      sortPackageJson(await fs.readFile(packageJsonFile, "utf8")),
+      "utf8",
     );
   } catch (error) {
     console.error(error);
@@ -157,7 +157,7 @@ const docs = async (cwd, files, options) => {
             : {
                 plugin: ["typedoc-material-theme"],
               }),
-          ...(options.typedoc || {}),
+          ...options.typedoc,
         },
         [
           new TypeDoc.TSConfigReader(),
@@ -184,7 +184,7 @@ const docs = async (cwd, files, options) => {
       const project = await app.convert();
 
       if (project) await app.generateDocs(project, docsFolder);
-      await fs.writeFile(join(cwd, docsFolder, ".nojekyll"), "", "utf-8");
+      await fs.writeFile(join(cwd, docsFolder, ".nojekyll"), "", "utf8");
 
       if (isMarkdown && isFile) {
         inlinedDocs = await concatMd.default(join(cwd, docsFolder));
@@ -207,7 +207,7 @@ const docs = async (cwd, files, options) => {
           await fs.writeFile(
             join(cwd, docsFolder, "README.md"),
             inlinedDocs,
-            "utf-8",
+            "utf8",
           );
           return;
         }
@@ -237,7 +237,7 @@ const docs = async (cwd, files, options) => {
     const formattedDocs = (
       await prettier.format(inlinedDocs, {
         parser: isMarkdown ? "markdown" : "html",
-        ...((await prettier.resolveConfig(filePath)) || {}),
+        ...(await prettier.resolveConfig(filePath)),
       })
     )
       .split("\n")
@@ -247,18 +247,18 @@ const docs = async (cwd, files, options) => {
     if (options.docsStart && options.docsEnd) {
       await fs.writeFile(
         filePath,
-        (await fs.readFile(filePath, "utf-8")).replace(
+        (await fs.readFile(filePath, "utf8")).replace(
           new RegExp(
-            `${escapeRegExp(options.docsStart)}([\\s\\S]*?)${escapeRegExp(
+            String.raw`${escapeRegExp(options.docsStart)}([\s\S]*?)${escapeRegExp(
               options.docsEnd,
             )}`,
           ),
           `${options.docsStart}\n\n${formattedDocs}\n${options.docsEnd}`,
         ),
-        "utf-8",
+        "utf8",
       );
     } else {
-      await fs.writeFile(filePath, formattedDocs, "utf-8");
+      await fs.writeFile(filePath, formattedDocs, "utf8");
     }
   }
 

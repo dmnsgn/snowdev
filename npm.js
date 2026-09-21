@@ -5,13 +5,11 @@ import console from "console-ansi";
 import { execCommand } from "./utils.js";
 
 const substringAfterChar = (string, char) =>
-  string.substring(string.indexOf(char));
+  string.slice(Math.max(0, string.indexOf(char)));
 
-const quotes = ['"', "'"];
+const quotes = new Set(['"', "'"]);
 const stripQuotes = (s) =>
-  quotes.includes(s.charAt(0)) && quotes.includes(s.charAt(s.length - 1))
-    ? s.substr(1, s.length - 2)
-    : s;
+  quotes.has(s.at(0)) && quotes.has(s.at(-1)) ? s.slice(1, -2) : s;
 
 class Npm {
   process = null;

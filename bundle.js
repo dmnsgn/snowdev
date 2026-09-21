@@ -25,10 +25,7 @@ let minifier;
 
 const parsePluginOptions = (plugins, options) =>
   Object.entries(plugins)
-    .filter(([name]) => {
-      if (!options[name]) return true;
-      return options[name].enabled ?? true;
-    })
+    .filter(([name]) => !options[name] || (options[name].enabled ?? true))
     .map(([name, pluginFactory]) => pluginFactory(options[name]));
 
 const groupExtraPlugins = (plugins) =>

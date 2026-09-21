@@ -72,7 +72,7 @@ const getDependencies = async (options, type, names = []) => {
     await npm.run(options.cwd, "query", [`':scope > ${depsSelector}'`]),
   )
     .map((dependency) => pick(dependency, DEPENDENCY_FIELDS))
-    .filter(({ name }) => (names.length ? names.includes(name) : true));
+    .filter(({ name }) => !names.length || names.includes(name));
 };
 
 const compareDependencies = (a, b) =>
@@ -156,11 +156,9 @@ const getInstallReason = async (
   const changedFiles = Object.keys(cachedFiles).filter(
     (file) => !compareStats(cachedFiles[file], files[file]),
   );
-  if (changedFiles.length) {
-    return `linked files changed: ${listFormatter.format(changedFiles)}`;
-  }
-
-  return null;
+  return changedFiles.length
+    ? `linked files changed: ${listFormatter.format(changedFiles)}`
+    : null;
 };
 
 const install = async (options) => {
@@ -187,7 +185,7 @@ const install = async (options) => {
         );
       }
     }
-  } catch (error) {
+  } catch {
     // This is only a warning. Don't throw if anything unexpected happen.
   }
 
@@ -329,9 +327,7 @@ const install = async (options) => {
             ? resolve(options.cwd, dependency)
             : require.resolve(dependency, { paths: [options.cwd] });
 
-          if (!filter(resolvedExport)) {
-            console.info(`Filtered out export: ${resolvedExport}`);
-          } else {
+          if (filter(resolvedExport)) {
             const id = isRelative
               ? dotRelativeToBarePath(dependency)
               : dependency;
@@ -348,6 +344,8 @@ const install = async (options) => {
             importMap.imports[id] = isRelative
               ? dependency
               : bareToDotRelativePath(dependency);
+          } else {
+            console.info(`Filtered out export: ${resolvedExport}`);
           }
         } else {
           packageTargets.push(dependency);
@@ -543,7 +541,7 @@ const install = async (options) => {
       await writeJson(importMapFile, importMap);
 
       if (options.caller === "cli") {
-        await fs.writeFile(join(options.cwd, ".nojekyll"), "", "utf-8");
+        await fs.writeFile(join(options.cwd, ".nojekyll"), "", "utf8");
       }
 
       // Write cache

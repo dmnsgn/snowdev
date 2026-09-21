@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/prefer-await */
 import { createHash } from "node:crypto";
 import { promises as fs } from "node:fs";
 import { dirname, extname, isAbsolute, join, parse, relative } from "node:path";
@@ -34,7 +35,7 @@ FILES_GLOB.assets = [...FILES_GLOB.css, "**/*.json", "**/*.wasm"];
 const RF_OPTIONS = { recursive: true, force: true };
 const exec = promisify(execCb);
 
-const readJson = async (path) => JSON.parse(await fs.readFile(path, "utf-8"));
+const readJson = async (path) => JSON.parse(await fs.readFile(path, "utf8"));
 
 const writeJson = async (path, obj, { merge = false } = {}) =>
   await fs.writeFile(
@@ -44,7 +45,7 @@ const writeJson = async (path, obj, { merge = false } = {}) =>
       null,
       2,
     ).trim() + "\n",
-    "utf-8",
+    "utf8",
   );
 
 const { version: VERSION, name: NAME, dependencies } = packageJson;
@@ -71,17 +72,15 @@ const sortPaths = (
         if (!(i in b)) return 1;
         if (prepend.includes(a[i]) || prepend.includes(b[i])) {
           const aIndex = prepend.indexOf(a[i]);
-          const bIndex = prepend.indexOf(b[i]);
           if (aIndex === -1) return 1;
-          if (bIndex === -1) return -1;
-          return Math.sign(aIndex - bIndex);
+          const bIndex = prepend.indexOf(b[i]);
+          return bIndex === -1 ? -1 : Math.sign(aIndex - bIndex);
         }
         if (append.includes(a[i]) || append.includes(b[i])) {
           const aIndex = append.indexOf(a[i]);
-          const bIndex = append.indexOf(b[i]);
           if (aIndex === -1) return -1;
-          if (bIndex === -1) return 1;
-          return Math.sign(aIndex - bIndex);
+          const bIndex = append.indexOf(b[i]);
+          return bIndex === -1 ? 1 : Math.sign(aIndex - bIndex);
         }
         if (a[i].toUpperCase() > b[i].toUpperCase()) return 1;
         if (a[i].toUpperCase() < b[i].toUpperCase()) return -1;
@@ -113,14 +112,15 @@ const checkUncommitedChanges = async (options) => {
 };
 
 function escapeRegExp(string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
+  return string.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`); // $& means the whole matched string
 }
 
 function isTypeScriptProject(cwd) {
   const configPath = ts.findConfigFile(cwd, ts.sys.fileExists, "tsconfig.json");
-  if (!configPath) return false;
-  return ts.readConfigFile(configPath, ts.sys.readFile).config?.compilerOptions
-    ?.outDir;
+  return configPath
+    ? ts.readConfigFile(configPath, ts.sys.readFile).config?.compilerOptions
+        ?.outDir
+    : false;
 }
 
 const pathExists = (path) =>
@@ -203,25 +203,26 @@ let intervalId = setInterval(() => {
             : "script",
         });
         acornWalk.full(ast, (node) => {
-          if (node.type === "AssignmentExpression") {
-            if (
-              ["window", "globalThis"].includes(node.left?.object?.name) &&
-              node.left?.property?.name === "esmsInitOptions" &&
-              node.right?.type === "ObjectExpression"
-            ) {
-              node.right.properties ||= [];
-              node.right.properties.push({
-                type: "Property",
-                method: false,
-                shorthand: false,
-                computed: false,
-                key: { type: "Identifier", name: "hotReload" },
-                value: { type: "Literal", value: "true", raw: '"true"' },
-                kind: "init",
-              });
-              hasOptions = true;
-            }
+          if (!(
+            node.type === "AssignmentExpression" &&
+            ["window", "globalThis"].includes(node.left?.object?.name) &&
+            node.left?.property?.name === "esmsInitOptions" &&
+            node.right?.type === "ObjectExpression"
+          )) {
+            return;
           }
+
+          node.right.properties ||= [];
+          node.right.properties.push({
+            type: "Property",
+            method: false,
+            shorthand: false,
+            computed: false,
+            key: { type: "Identifier", name: "hotReload" },
+            value: { type: "Literal", value: "true", raw: '"true"' },
+            kind: "init",
+          });
+          hasOptions = true;
         });
         if (hasOptions) $(element).text(aString.generate(ast));
       });
@@ -241,7 +242,7 @@ let intervalId = setInterval(() => {
 const picomatchOptions = { capture: true, noglobstar: false };
 
 const getWildcardEntries = async (cwd, key, value) => {
-  const directoryName = dirname(value.split("*")[0]);
+  const directoryName = dirname(value.split("*", 1)[0]);
   const directoryFullPath = join(cwd, directoryName);
 
   if (!(await pathExists(directoryFullPath))) {
@@ -262,12 +263,12 @@ const getWildcardEntries = async (cwd, key, value) => {
       .map((name) => {
         const match = regex.exec(name);
 
-        if (match?.[1]) {
-          const [matchingPath, matchGroup] = match;
-          const normalizedKey = key.replace("*", matchGroup);
-          const normalizedFilePath = `./${matchingPath}`;
-          return [normalizedKey, normalizedFilePath];
-        }
+        if (!match?.[1]) return;
+
+        const [matchingPath, matchGroup] = match;
+        const normalizedKey = key.replace("*", matchGroup);
+        const normalizedFilePath = `./${matchingPath}`;
+        return [normalizedKey, normalizedFilePath];
       })
       .filter(Boolean),
   );
@@ -314,11 +315,6 @@ const resolveExports = async (options, src) => {
 
     const resolvedExports = {};
 
-    const exportOptions = {
-      browser: options.resolve.browserField,
-      conditions: options.resolve.conditions,
-    };
-
     // Resolve array exports (no conditions here)
     if (Array.isArray(pkg.exports)) {
       for (const entryValue of exports(pkg, ".")) {
@@ -326,6 +322,11 @@ const resolveExports = async (options, src) => {
       }
       return resolvedExports;
     }
+
+    const exportOptions = {
+      browser: options.resolve.browserField,
+      conditions: options.resolve.conditions,
+    };
 
     // Resolve object of conditions
     if (!Object.keys(pkg.exports)?.[0]?.startsWith(".")) {
@@ -390,13 +391,13 @@ const hashObject = (obj) =>
     .digest("hex");
 
 const filterLeft = (a, b, compareFn) =>
-  a.filter((valueA) => !b.some((valueB) => compareFn(valueA, valueB)));
+  a.filter((valueA) => b.every((valueB) => !compareFn(valueA, valueB)));
 
 const arrayDifference = (a, b, compareFn = (a, b) => a === b) =>
   filterLeft(a, b, compareFn).concat(filterLeft(b, a, compareFn));
 
 const dotRelativeToBarePath = (p) =>
-  p.lastIndexOf("./") !== -1 ? p.substring(p.lastIndexOf("./") + 2) : p;
+  p.includes("./") ? p.slice(Math.max(0, p.lastIndexOf("./") + 2)) : p;
 
 const bareToDotRelativePath = (p) => `./${p}`;
 
