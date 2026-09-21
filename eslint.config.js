@@ -5,6 +5,7 @@ import babelParser from "@babel/eslint-parser";
 import tseslint from "typescript-eslint";
 import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
 import eslintPluginUnicorn from "eslint-plugin-unicorn";
+import eslintPluginSonarjs from "eslint-plugin-sonarjs";
 import eslintPluginJsdoc from "eslint-plugin-jsdoc";
 import eslintPackageJson from "eslint-package-json";
 import eslintPluginHtml from "eslint-plugin-html";
@@ -85,6 +86,10 @@ export default defineConfig([
       "unicorn/no-array-reverse": 0,
       "unicorn/no-array-reduce": 0,
     },
+  },
+  {
+    files: [...FILES_GLOB.javascript, ...FILES_GLOB.typescript],
+    ...eslintPluginSonarjs.configs.recommended,
   },
   {
     files: ["test/**/*.js"],
