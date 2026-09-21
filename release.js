@@ -1,17 +1,19 @@
 import { join } from "node:path";
-import { createRequire } from "node:module";
+import { fileURLToPath } from "node:url";
 
 import console from "console-ansi";
 
 import commitAndTagVersion from "commit-and-tag-version";
-import angularWriterOpts from "conventional-changelog-angular/writer-opts.js";
+import createAngularPreset from "conventional-changelog-angular";
 
 import npm from "./npm.js";
 import build from "./build.js";
 
 import { checkUncommitedChanges, exec } from "./utils.js";
 
-const require = createRequire(import.meta.url);
+const angularPresetPath = fileURLToPath(
+  import.meta.resolve("conventional-changelog-angular"),
+);
 
 const release = async (options) => {
   try {
@@ -28,11 +30,11 @@ const release = async (options) => {
 
       const { workspace } = options;
       const scope = workspace && workspace.split("/").pop();
-      const { transform } = await angularWriterOpts;
+      const { transform } = createAngularPreset().writer;
 
       await commitAndTagVersion({
         path: options.cwd,
-        preset: require.resolve("conventional-changelog-angular"),
+        preset: angularPresetPath,
         infile: join(options.cwd, "CHANGELOG.md"),
         commitAll: true,
         writerOpts: {
@@ -46,8 +48,8 @@ const release = async (options) => {
           npmPublishHint: `npm publish --workspace ${workspace}`,
           releaseCommitMessageFormat: `chore(release): ${workspace}@{{currentTag}}`,
         }),
-        ...(options.commitAndTagVersion || {}),
-        ...(options.argv || {}),
+        ...options.commitAndTagVersion,
+        ...options.argv,
       });
     }
   } catch (error) {

@@ -90,7 +90,7 @@ parser
     updateVersions: {
       group: "Input/meta options:",
       type: "boolean",
-      describe: `Update package.json engines with current Node.js/npm version from template, and currently used snowdev version.`,
+      describe: `Update package.json engines/packageManager with current Node.js/npm version from template, and currently used snowdev version.`,
       defaultDescription: `true`,
     },
     npmPath: {
