@@ -7,7 +7,7 @@ import { create as browserSyncCreate } from "browser-sync";
 import pDebounce from "p-debounce";
 
 import install from "./install.js";
-import { types, lint } from "./build.js";
+import { types, lint, checkDocs } from "./build.js";
 import {
   getFileExtension,
   htmlHotInject,
@@ -16,7 +16,15 @@ import {
 } from "./utils.js";
 
 const dev = async (options = {}) => {
+  const checkJsdoc = options.docs && !options.ts;
+
   if (options.lint) await lint(options.cwd, options.files, options);
+  if (checkJsdoc) {
+    void (async () => {
+      const files = await resolveFiles(options.cwd, options);
+      return checkDocs(options.cwd, files, options);
+    })();
+  }
 
   if (options.serve) {
     const bs = browserSyncCreate();
@@ -42,7 +50,7 @@ const dev = async (options = {}) => {
       if (options.hmr) bs.sockets.emit("reload");
     }, 500);
 
-    if (options.lint || options.ts) {
+    if (options.lint || options.ts || checkJsdoc) {
       bs.use({
         plugin() {},
         hooks: {
@@ -53,13 +61,20 @@ const dev = async (options = {}) => {
       bs.watch(options.files, async (event, file) => {
         if (event !== "change") return;
 
-        const results = await lint(
-          options.cwd,
-          [join(options.cwd, file)],
-          options,
-        );
+        const files = [join(options.cwd, file)];
+
+        if (options.lint) {
+          const results = await lint(options.cwd, files, options);
+          if (results) {
+            bs.sockets.emit("console:log", `[snowdev] ESLint Error:${results}`);
+          }
+        }
+
+        if (!checkJsdoc) return;
+
+        const results = await checkDocs(options.cwd, files, options);
         if (results) {
-          bs.sockets.emit("console:log", `[snowdev] ESLint Error:${results}`);
+          bs.sockets.emit("console:log", `[snowdev] JSDoc Error:\n${results}`);
         }
       });
     }
@@ -200,7 +215,8 @@ const dev = async (options = {}) => {
           const watcher = watch(file);
           for await (const event of watcher) {
             if (event.eventType === "change") {
-              await lint(options.cwd, [file], options);
+              if (options.lint) await lint(options.cwd, [file], options);
+              if (checkJsdoc) await checkDocs(options.cwd, [file], options);
             }
           }
         })();

@@ -95,6 +95,40 @@ const format = async (cwd, files, options) => {
 };
 format.description = `build: format sources`;
 
+const getJsdocConfig = (options) =>
+  options.jsdoc || join(__dirname, "jsdoc.json");
+
+const formatJsdocError = (error) => {
+  const seen = new Set();
+  return error.message
+    .split("\n")
+    .map((line) => line.replace(/: Expected .*? found\.$/, ""))
+    .filter((line) => {
+      const key = line.replace(/ in line \d+ /, " ");
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .join("\n");
+};
+
+const checkDocs = async (cwd, files, options) => {
+  console.time(checkDocs.description);
+
+  let results;
+  try {
+    await jsdoc.explain({ files, configure: getJsdocConfig(options) });
+  } catch (error) {
+    results = formatJsdocError(error);
+    console.error(checkDocs.description, results);
+  }
+
+  console.timeEnd(checkDocs.description);
+
+  return results;
+};
+checkDocs.description = `build: check docs`;
+
 const docs = async (cwd, files, options) => {
   console.time(docs.description);
 
@@ -159,29 +193,40 @@ const docs = async (cwd, files, options) => {
       console.error(error);
     }
   } else {
-    if (isMarkdown) {
-      inlinedDocs = await jsdoc2md.render({
-        files,
-        configure: options.jsdoc || join(__dirname, "jsdoc.json"),
-        ...options.jsdoc2md,
-      });
-      // TODO: remove if jsdoc ever properly works with ESM and classes
-      inlinedDocs = inlinedDocs.replaceAll("new exports.", "new ");
-      if (!isFile) {
-        await fs.mkdir(join(cwd, docsFolder), { recursive: true });
-        await fs.writeFile(
-          join(cwd, docsFolder, "README.md"),
-          inlinedDocs,
-          "utf-8",
-        );
-        return;
+    try {
+      if (isMarkdown) {
+        inlinedDocs = await jsdoc2md.render({
+          files,
+          configure: getJsdocConfig(options),
+          ...options.jsdoc2md,
+        });
+        // TODO: remove if jsdoc ever properly works with ESM and classes
+        inlinedDocs = inlinedDocs.replaceAll("new exports.", "new ");
+        if (!isFile) {
+          await fs.mkdir(join(cwd, docsFolder), { recursive: true });
+          await fs.writeFile(
+            join(cwd, docsFolder, "README.md"),
+            inlinedDocs,
+            "utf-8",
+          );
+          return;
+        }
+      } else {
+        await jsdoc.render({
+          files,
+          configure: getJsdocConfig(options),
+          destination: join(cwd, docsFolder),
+        });
+        if (isFile) {
+          console.error("Output html to a file not supported.");
+          return;
+        }
       }
-    } else {
-      await jsdoc.render({ files, destination: join(cwd, docsFolder) });
-      if (isFile) {
-        console.error("Output html to a file not supported.");
-        return;
-      }
+    } catch (error) {
+      console.error(
+        error.name === "JSDOC_ERROR" ? formatJsdocError(error) : error,
+      );
+      return;
     }
   }
 
@@ -337,6 +382,6 @@ const build = async (options) => {
 };
 build.description = `Lint and Format sources, run TypeScript, update README API.`;
 
-export { types, lint };
+export { types, lint, checkDocs };
 
 export default build;
