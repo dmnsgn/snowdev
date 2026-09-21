@@ -91,6 +91,15 @@ const sortPaths = (
     })
     .map((p) => p.join(separator));
 
+const resolveFiles = async (cwd, options) =>
+  sortPaths(
+    (
+      await Array.fromAsync(
+        fs.glob(options.files, { cwd, exclude: options.ignore }),
+      )
+    ).map((file) => join(cwd, file)),
+  );
+
 const execCommand = async (command, options) => {
   const { stdout, stderr } = await exec(command, options);
   if (stderr) throw new Error(stderr);
@@ -366,6 +375,7 @@ export {
   readJson,
   writeJson,
   sortPaths,
+  resolveFiles,
   exec,
   execCommand,
   checkUncommitedChanges,
