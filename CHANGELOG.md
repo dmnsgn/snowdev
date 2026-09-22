@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [3.0.0-alpha.3](https://github.com/dmnsgn/snowdev/compare/v3.0.0-alpha.2...v3.0.0-alpha.3) (2026-09-22)
+
+### Bug Fixes
+
+* correct changelog writting for pre-releases ([1a8b709](https://github.com/dmnsgn/snowdev/commit/1a8b709e080742f454b70bff2289274be7ae73b3))
+* correct stripQuotes end index ([72b92ea](https://github.com/dmnsgn/snowdev/commit/72b92eaee1e08b8bfc0671b9438536b2c6454031))
+
 # [3.0.0-alpha.2](https://github.com/dmnsgn/snowdev/compare/v3.0.0-alpha.1...v3.0.0-alpha.2) (2026-09-21)
 
 ### Features
