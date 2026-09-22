@@ -2,42 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
-# [3.0.0-alpha.2](https://github.com/dmnsgn/snowdev/compare/v2.7.0...v3.0.0-alpha.2) (2026-09-21)
-
-### Bug Fixes
-
-* correct logDiagnostic ([73e2e0f](https://github.com/dmnsgn/snowdev/commit/73e2e0f09c407dbab39f94b18ed8e71173bf8c1b))
+# [3.0.0-alpha.2](https://github.com/dmnsgn/snowdev/compare/v3.0.0-alpha.1...v3.0.0-alpha.2) (2026-09-21)
 
 ### Features
 
-* add back eslint prettier plugin ([caca728](https://github.com/dmnsgn/snowdev/commit/caca728c348634c7b972ac1cc4bdd9bf90e2b2d8))
 * add checkDocs ([80c401f](https://github.com/dmnsgn/snowdev/commit/80c401ff0f46a852ed18c1ca213d9d3bc234248c))
 * add config change hint on dev ([21840c7](https://github.com/dmnsgn/snowdev/commit/21840c71147b41e5f0df2e89c2b756a18fd11616))
-* add eslint css ([52e4795](https://github.com/dmnsgn/snowdev/commit/52e4795e6c568a7372699567fea046f87300f81d))
-* add eslint-package-json ([40b288d](https://github.com/dmnsgn/snowdev/commit/40b288dab79d5e9e2d694e75a19bc6a49d44fa88))
 * add eslint-plugin-css-property-order ([f9929b1](https://github.com/dmnsgn/snowdev/commit/f9929b124f6c7d94ed8f9027b4d31398f8bb2a1f))
 * add eslint-plugin-sonarjs ([4cf9bf7](https://github.com/dmnsgn/snowdev/commit/4cf9bf7ac9259c9e07335b8c2ed351e40958b234))
 * add jsdoc-plugin-tuple ([939cc4c](https://github.com/dmnsgn/snowdev/commit/939cc4c051a2a733287332f75c1613ed1a6e4021))
 * add linked dependency diff support with cache overwrite ([ee476b2](https://github.com/dmnsgn/snowdev/commit/ee476b247b2bace43074f328ae5ab477cf5e06d7))
 * add opinionated eslint unicorn rules ([9f85336](https://github.com/dmnsgn/snowdev/commit/9f853367683a71911f8051c807bacbf7762bfb67))
-* add prettier-plugin-jsdoc ([c50cb27](https://github.com/dmnsgn/snowdev/commit/c50cb27d9230d337269fec9b0d6d593fec34dfa2))
 * add rolldown experimental resolveNewUrlToAsset ([facd790](https://github.com/dmnsgn/snowdev/commit/facd79056616d02bfe290d5e2a311db33f8ad2f3))
-* add rolldown support ([4bb9dee](https://github.com/dmnsgn/snowdev/commit/4bb9dee358cd4142a68bee1695a24199827ec413))
-* add support for eslint fix ([a1edc8e](https://github.com/dmnsgn/snowdev/commit/a1edc8e52e9b5f2e18cd6b593857e8e9a14d7902))
 * add support for workspace release ([43ffb79](https://github.com/dmnsgn/snowdev/commit/43ffb7995eac034dd0aa0c439f4e78f26373f81c))
 * add watch linter on no-serve dev command ([4285e86](https://github.com/dmnsgn/snowdev/commit/4285e866a497ad88b048067a6ecee9f9c2b40eba))
-* default tsconfig moduleResolution to bundler + remove allowSyntheticDefaultImports for TypeScript@7 ([53492f9](https://github.com/dmnsgn/snowdev/commit/53492f9c5469cf0377da9d4af194e20cdb56a142))
-* externalise eslint.config.js + add linting for node test, md and html + add unicorn plugin ([99ee30f](https://github.com/dmnsgn/snowdev/commit/99ee30f1f2739986807e8e20f8a9ceb2d6700b79))
-* include current package in importmap for dependency type "all" ([4267e6f](https://github.com/dmnsgn/snowdev/commit/4267e6fe88e102f5bf5feb992d367d041eb499eb))
-* **template:** update main/types defaults ([f7490ec](https://github.com/dmnsgn/snowdev/commit/f7490ec26d911a3871494007e239bb8fbb70a798))
-* **template:** update tsconfig for TypeScript 6 ([3a11d81](https://github.com/dmnsgn/snowdev/commit/3a11d816d24cb1110315f7a2e32a121dda07f1d4))
-* uniformise ts log diagnostics ([400ce88](https://github.com/dmnsgn/snowdev/commit/400ce88b3bc4c4b52097b25f79d131f79b1c2dc7))
 * update template ([30ccd84](https://github.com/dmnsgn/snowdev/commit/30ccd841d40971c6c5021a9294fd5aaa3035d00a))
 * use bare specifiers for all jsdoc plugins ([6c46033](https://github.com/dmnsgn/snowdev/commit/6c46033d35b02bf0a6a11bea05d0269da1604972))
-
-### BREAKING CHANGES
-
-* default bundling to rolldown
 
 # [3.0.0-alpha.1](https://github.com/dmnsgn/snowdev/compare/v3.0.0-alpha.0...v3.0.0-alpha.1) (2026-08-04)
 
