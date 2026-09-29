@@ -6,11 +6,7 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "importHelpers": true,
-    "lib": [
-      "DOM",
-      "ES2023",
-      "ESNext"
-    ],
+    "lib": ["DOM", "ES2023", "ESNext"],
     "module": "esnext",
     "moduleResolution": "bundler",
     "outDir": "lib",

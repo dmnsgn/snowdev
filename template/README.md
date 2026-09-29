@@ -17,7 +17,7 @@ Package description.
 [![twitter](https://img.shields.io/twitter/follow/dmnsgn?style=social)](https://twitter.com/dmnsgn)
 [![bluesky](https://img.shields.io/badge/-blue?logo=bluesky&label=Follow%20%40dmnsgn.me&style=social)](https://bsky.app/profile/dmnsgn.me)
 
-![](https://raw.githubusercontent.com/gitHubUsername/packageName/main/screenshot.gif)
+[![packageName screenshot](https://raw.githubusercontent.com/gitHubUsername/packageName/main/screenshot.gif)](https://gitHubUsername.github.io/packageName/)
 
 ## Installation
 
