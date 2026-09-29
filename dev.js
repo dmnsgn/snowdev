@@ -168,6 +168,14 @@ const dev = async (options = {}) => {
         server: {
           baseDir: options.cwd,
           middleware: async (req, res, next) => {
+            // TODO: connect@3.6 -> finalhandler@1.1 (fixed in @1.3.0)
+            if (req.httpVersionMajor >= 2) {
+              Object.defineProperty(res, "statusMessage", {
+                get: () => "",
+                set: () => {},
+              });
+            }
+
             if (options.crossOriginIsolation) {
               res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
               res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
