@@ -242,7 +242,9 @@ const install = timed(async (options) => {
     console.log("install - all dependencies installed.");
 
     return {
-      importMap: deepmerge(await readJson(importMapFile), options.importMap),
+      importMap: (await pathExists(importMapFile))
+        ? deepmerge(await readJson(importMapFile), options.importMap)
+        : options.importMap,
       linkedFiles: Object.keys(cache.files ?? {}),
     };
   }
