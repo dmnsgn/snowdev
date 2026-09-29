@@ -111,6 +111,26 @@ const checkUncommitedChanges = async (options) => {
   }
 };
 
+const timers = new Set();
+const timed = (fn, label) => {
+  const wrapped = async (...args) => {
+    const name =
+      (typeof label === "function" ? label(...args) : label) ||
+      wrapped.description;
+    let key = name;
+    for (let i = 2; timers.has(key); i++) key = `${name} (${i})`;
+    timers.add(key);
+    console.time(key);
+    try {
+      return await fn(...args);
+    } finally {
+      console.timeEnd(key);
+      timers.delete(key);
+    }
+  };
+  return wrapped;
+};
+
 function escapeRegExp(string) {
   return string.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`); // $& means the whole matched string
 }
@@ -416,6 +436,7 @@ export {
   exec,
   execCommand,
   checkUncommitedChanges,
+  timed,
   escapeRegExp,
   isTypeScriptProject,
   pathExists,

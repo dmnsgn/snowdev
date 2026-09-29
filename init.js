@@ -7,14 +7,11 @@ import { replaceInFile } from "replace-in-file";
 import npmUser from "npm-user";
 import camelcase from "camelcase";
 
-import { exec, writeJson } from "./utils.js";
+import { exec, timed, writeJson } from "./utils.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
-const init = async (options = {}) => {
-  const label = `init`;
-  console.time(label);
-
+const init = timed(async (options = {}) => {
   const packageName = options.name || basename(options.cwd);
 
   // Check for empty directory
@@ -117,8 +114,7 @@ const init = async (options = {}) => {
   } catch (error) {
     console.error(error);
   }
-  console.timeEnd(label);
-};
+}, `init`);
 init.description = `Create simple package structure.`;
 
 export default init;

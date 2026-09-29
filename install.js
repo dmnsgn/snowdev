@@ -34,6 +34,7 @@ import {
   hashObject,
   readJson,
   writeJson,
+  timed,
 } from "./utils.js";
 
 import npm from "./npm.js";
@@ -161,7 +162,7 @@ const getInstallReason = async (
     : null;
 };
 
-const install = async (options) => {
+const install = timed(async (options) => {
   // Check package.json exists
   let currentPackage;
   try {
@@ -281,9 +282,6 @@ const install = async (options) => {
   ) {
     dependenciesNames.push(currentPackage.name);
   }
-
-  const label = `install`;
-  console.time(label);
 
   console.info(
     `install - ESM dependencies: ${listFormatter.format(installTargets)}`,
@@ -560,10 +558,9 @@ const install = async (options) => {
     console.error(error);
     result = { error };
   }
-  console.timeEnd(label);
 
   return { ...result, input, importMap, linkedFiles };
-};
+}, `install`);
 install.description = `Install ESM dependencies.`;
 
 export default install;

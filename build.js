@@ -16,13 +16,11 @@ import jsdoc2md from "jsdoc-to-markdown";
 import * as TypeDoc from "typedoc";
 import concatMd from "concat-md";
 
-import { RF_OPTIONS, escapeRegExp, resolveFiles } from "./utils.js";
+import { RF_OPTIONS, escapeRegExp, resolveFiles, timed } from "./utils.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
-const lint = async (cwd, files, options) => {
-  console.time(lint.description);
-
+const lint = timed(async (cwd, files, options) => {
   try {
     const babelEslint = options.eslint?.find(
       ({ languageOptions }) =>
@@ -52,18 +50,15 @@ const lint = async (cwd, files, options) => {
     const results = (await eslint.loadFormatter("stylish")).format(lintResults);
 
     if (results) console.log(lint.description, results);
-    console.timeEnd(lint.description);
 
     return results;
   } catch (error) {
     console.error(error);
   }
-  console.timeEnd(lint.description);
-};
+});
 lint.description = `build: lint sources`;
 
-const format = async (cwd, files, options) => {
-  console.time(format.description);
+const format = timed(async (cwd, files, options) => {
   for (const file of files) {
     try {
       await fs.writeFile(
@@ -90,9 +85,7 @@ const format = async (cwd, files, options) => {
   } catch (error) {
     console.error(error);
   }
-
-  console.timeEnd(format.description);
-};
+});
 format.description = `build: format sources`;
 
 const getJsdocConfig = (options) =>
@@ -112,9 +105,7 @@ const formatJsdocError = (error) => {
     .join("\n");
 };
 
-const checkDocs = async (cwd, files, options) => {
-  console.time(checkDocs.description);
-
+const checkDocs = timed(async (cwd, files, options) => {
   let results;
   try {
     await jsdoc.explain({ files, configure: getJsdocConfig(options) });
@@ -123,15 +114,11 @@ const checkDocs = async (cwd, files, options) => {
     console.error(checkDocs.description, results);
   }
 
-  console.timeEnd(checkDocs.description);
-
   return results;
-};
+});
 checkDocs.description = `build: check docs`;
 
-const docs = async (cwd, files, options) => {
-  console.time(docs.description);
-
+const docs = timed(async (cwd, files, options) => {
   const isFile = !!extname(options.docs);
   const docsFolder = isFile ? ".temp_docs" : options.docs;
   const isMarkdown = options.docsFormat === "md";
@@ -261,14 +248,10 @@ const docs = async (cwd, files, options) => {
       await fs.writeFile(filePath, formattedDocs, "utf8");
     }
   }
-
-  console.timeEnd(docs.description);
-};
+});
 docs.description = `build: update docs`;
 
-const types = async (cwd, files, options, watch) => {
-  console.time(types.description);
-
+const types = timed(async (cwd, files, options, watch) => {
   try {
     const diagnosticToConsoleMethod = {
       [ts.DiagnosticCategory["Message"]]: "log",
@@ -361,8 +344,7 @@ const types = async (cwd, files, options, watch) => {
   } catch (error) {
     console.error(error);
   }
-  console.timeEnd(types.description);
-};
+});
 types.description = `build: run TypeScript (generate types, watch or compile)`;
 
 const build = async (options) => {

@@ -12,7 +12,7 @@ import noOp from "rollup-plugin-no-op";
 import browserslistToEsbuild from "browserslist-to-esbuild";
 import deepmerge from "deepmerge";
 
-import { FILES_GLOB, secondsFormatter } from "./utils.js";
+import { FILES_GLOB, secondsFormatter, timed } from "./utils.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
@@ -53,10 +53,9 @@ const formatRollupLog = (
   if (frame) globalThis.console[level](frame);
 };
 
-const bundle = async (options = {}) => {
-  const label = `bundle (${options.bundler})`;
-  console.time(label);
+const label = (options = {}) => `bundle (${options.bundler})`;
 
+const bundle = timed(async (options = {}) => {
   if (options.bundler === "rolldown") {
     ({ rolldown: bundler, watch } = await import("rolldown"));
     bundlerOptions = deepmerge(options.rollup, options.rolldown);
@@ -225,10 +224,11 @@ const bundle = async (options = {}) => {
 
       watcher.on("event", ({ code, error, result, duration }) => {
         if (code === "ERROR") formatRollupLog(error);
-        if (code === "BUNDLE_START") console.info(`${label}: bundling...`);
+        if (code === "BUNDLE_START")
+          console.info(`${label(options)}: bundling...`);
         if (code === "BUNDLE_END") {
           console.info(
-            `${label}: bundled in ${secondsFormatter.format(duration / 1000)}.`,
+            `${label(options)}: bundled in ${secondsFormatter.format(duration / 1000)}.`,
           );
         }
         if (result) result.close();
@@ -247,10 +247,8 @@ const bundle = async (options = {}) => {
     result = { error };
   }
 
-  console.timeEnd(label);
-
   return result;
-};
+}, label);
 bundle.description = `Bundle dependencies for development or production.`;
 
 export default bundle;
