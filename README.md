@@ -38,7 +38,7 @@ npm install -g snowdev
 
 ### Write examples
 
-- Simple Browsersync dev server to watch and reload on changes with HMR (Hot Module Replacement) support via `import.meta.hot` similar to [Vite](https://vitejs.dev/guide/api-hmr.html#hmr-api)
+- Simple HTTP/2 dev server (trusted HTTPS with [mkcert](https://github.com/FiloSottile/mkcert) after `mkcert -install`, self-signed otherwise) to watch and reload on changes with HMR (Hot Module Replacement) support via `import.meta.hot` similar to [Vite](https://vitejs.dev/guide/api-hmr.html#hmr-api)
 - Write examples using standard [ES Modules](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules) directly with [import-map](https://github.com/WICG/import-maps). See [template/index.html](template/index.html).
 - Build examples dependencies using [browserlist](https://github.com/browserslist/browserslist) with targets `defaults and supports es6-module` to publish as GitHub pages with decent browser support.
 - Choose which dependencies to convert to ESM (devDependencies, dependencies or hardcoded list)
@@ -64,8 +64,8 @@ npx snowdev init --ts --gitHubUsername YourUsername
 
 # Start a dev server and compile dependencies to ESM in web_modules
 npx snowdev dev
-# ...optionally passing options to browser-sync
-npx snowdev dev --port 8080
+# ...optionally passing server options
+npx snowdev dev --server.port 8080 --server.open /examples/
 # ...optionally watching ts files
 npx snowdev dev --ts
 # ...optionally watching ts files without dev server

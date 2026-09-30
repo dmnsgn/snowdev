@@ -66,16 +66,26 @@ export const DEFAULTS_OPTIONS = {
   cache: true,
 
   // Server
-  /** @type {import("browser-sync").Options} */
-  browsersync: {
-    open: true,
+  /** @type {import("./server.js").ServerOptions} */
+  server: {
+    host: undefined,
+    port: 3000,
     https: true,
+    http2: true,
+    open: true,
     single: true,
-    watch: true,
+    crossOriginIsolation: false,
+    headers: {},
+    hmr: false,
+    watch: [
+      "*.{html,css,js,mjs}",
+      "src/**/*.{js,mjs}",
+      // TypeScript "outDir"
+      "lib/**/*.js",
+      "examples/**",
+      "web_modules/**",
+    ],
   },
-  hmr: false,
-  http2: true,
-  crossOriginIsolation: false,
 
   // Formatter and linter
   // TODO: lint and format config in code editor? Do I need config in package.json instead?

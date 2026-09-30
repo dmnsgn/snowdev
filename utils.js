@@ -6,7 +6,7 @@ import { promisify } from "node:util";
 import { exec as execCb } from "node:child_process";
 import deepmerge from "deepmerge";
 
-import console from "console-ansi";
+import console, { getConsole } from "console-ansi";
 import semver from "semver";
 import ts from "typescript";
 import { exports, legacy as legacyExport } from "resolve.exports";
@@ -49,6 +49,9 @@ const writeJson = async (path, obj, { merge = false } = {}) =>
   );
 
 const { version: VERSION, name: NAME, dependencies } = packageJson;
+
+const getCommandConsole = (command) =>
+  getConsole({ prefix: `[${NAME}] ${command}:` });
 
 const CORE_JS_SEMVER = semver.minVersion(dependencies["core-js"]);
 
@@ -175,31 +178,8 @@ const compareStats = (a, b) => a?.mtimeMs === b?.mtimeMs && a?.size === b?.size;
 
 const getFileExtension = (file) => parse(file).ext;
 
-const htmlHotInject = async (options, req) => {
-  const html = await fs.readFile(join(options.cwd, req.url), "utf8");
+const htmlHotInject = (html) => {
   const $ = cheerio.load(html);
-
-  // Append the hot reload script
-  $("head").append(/* html */ `<script type="module">
-const baseURI = document.baseURI;
-let intervalId = setInterval(() => {
-  if (window.___browserSync___?.socket) {
-    clearInterval(intervalId);
-
-    console.info("[snowdev] Hot Reload Connected");
-
-    window.___browserSync___.socket.on("hmr", (evt) => {
-      const { data } = evt;
-      if (data === "Connected") {
-        console.info("Hot Reload " + data);
-      } else {
-        const url = new URL(data, baseURI).href;
-        importShim.hotReload(url);
-      }
-    });
-  }
-}, 0);
-</script>`);
 
   try {
     // Set shimMode by parsing json or window.esmsOptions options
@@ -422,6 +402,7 @@ const dotRelativeToBarePath = (p) =>
 const bareToDotRelativePath = (p) => `./${p}`;
 
 export {
+  getCommandConsole,
   FILES_GLOB,
   NAME,
   VERSION,

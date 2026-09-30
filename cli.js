@@ -113,7 +113,7 @@ parser
     serve: {
       group: "Commands options:",
       type: "boolean",
-      describe: `Start Browsersync on dev command.`,
+      describe: `Start the dev server on dev command.`,
       defaultDescription: `true`,
     },
     lint: {
@@ -165,23 +165,23 @@ parser
       describe: `Skip installing ESM dependencies on dev command when nothing changed (dependencies, linked files or bundling options). Set to false to always install.`,
       defaultDescription: `true`,
     },
-    crossOriginIsolation: {
+    "server.crossOriginIsolation": {
       group: "Commands options:",
       type: "boolean",
-      describe: `Add Cross-Origin-Opener-Policy (COOP) and Cross-Origin-Embedder-Policy (COEP) headers to browsersync. Required for the use of SharedArrayBuffer.`,
+      describe: `Add Cross-Origin-Opener-Policy (COOP) and Cross-Origin-Embedder-Policy (COEP) headers to the dev server. Required for the use of SharedArrayBuffer.`,
       defaultDescription: `false`,
     },
-    http2: {
+    "server.http2": {
       group: "Commands options:",
       type: "boolean",
       describe: `Serve with "node:http2".`,
       defaultDescription: `true`,
     },
-    hmr: {
+    "server.hmr": {
       group: "Commands options:",
       type: "boolean",
-      describe: `Add Hot Module Replacement to browsersync. Requires "es-module-shims" with "shimMode".`,
-      defaultDescription: `true`,
+      describe: `Add Hot Module Replacement to the dev server. Requires "es-module-shims" with "shimMode".`,
+      defaultDescription: `false`,
     },
   })
   .wrap(parser.terminalWidth())

@@ -111,7 +111,7 @@ const checkDocs = timed(async (cwd, files, options) => {
     await jsdoc.explain({ files, configure: getJsdocConfig(options) });
   } catch (error) {
     results = formatJsdocError(error);
-    console.error(checkDocs.description, results);
+    console.error(`${checkDocs.description}\n`, results);
   }
 
   return results;
