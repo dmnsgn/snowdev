@@ -132,6 +132,15 @@ const timed = (fn, label) => {
   return wrapped;
 };
 
+// TODO: replace with native Promise.allKeyed when available in Node.js
+// https://github.com/tc39/proposal-await-dictionary
+const allKeyed = async (promises) =>
+  Object.fromEntries(
+    await Promise.all(
+      Object.entries(promises).map(async ([key, value]) => [key, await value]),
+    ),
+  );
+
 function escapeRegExp(string) {
   return string.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`); // $& means the whole matched string
 }
@@ -418,6 +427,7 @@ export {
   execCommand,
   checkUncommitedChanges,
   timed,
+  allKeyed,
   escapeRegExp,
   isTypeScriptProject,
   pathExists,

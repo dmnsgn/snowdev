@@ -15,6 +15,7 @@ import {
   VERSION,
   CORE_JS_SEMVER,
   isTypeScriptProject,
+  allKeyed,
   readJson,
   writeJson,
 } from "./utils.js";
@@ -233,6 +234,12 @@ export const commands = defineCommands({
 
 export { npm, FILES_GLOB };
 
+const getVersion = async (cwd) => (await npm.run(cwd, "--version")).trim();
+
+const getWorkspace = async (cwd) =>
+  (await npm.run(cwd, "query", [":scope.workspace", "--json"]))[0]?.name ??
+  false;
+
 export const run = async (fn, options) => {
   const { [fn.name]: commandOptions, ...globalOptions } = options;
 
@@ -244,29 +251,30 @@ export const run = async (fn, options) => {
   try {
     await npm.load(options.npmPath);
 
-    if (options.caller === "cli") {
-      console.debug(`v${VERSION}`);
-      console.debug(
-        `Using npm@${(await npm.run(options.cwd, "--version")).trim()} (${options.npmPath || "global"})`,
-      );
-    }
-
     options.command = fn.name;
     options.cwd = resolve(options.cwd);
     options.cacheFolder = join(options.cwd, "node_modules", ".cache", NAME);
-    console.info(`${fn.name} in '${options.cwd}'`);
 
     await fs.access(options.cwd, constants.R_OK | constants.W_OK);
 
+    Object.assign(
+      options,
+      await allKeyed({
+        npmVersion: options.caller === "cli" && getVersion(options.cwd),
+        workspace: options.workspace ?? getWorkspace(options.cwd),
+        ts: options.ts ?? isTypeScriptProject(options.cwd),
+      }),
+    );
+
+    if (options.caller === "cli") {
+      console.debug(`v${VERSION}`);
+      console.debug(
+        `Using npm@${options.npmVersion} (${options.npmPath || "global"})`,
+      );
+    }
+    console.info(`${fn.name} in '${options.cwd}'`);
+
     options.ignore.push(`**/${options.rollup.output.dir}/**`);
-
-    // Auto-detect TypeScript project
-    options.ts ??= await isTypeScriptProject(options.cwd);
-
-    // Auto-detect npm/yarn workspace package membership
-    options.workspace ??=
-      (await npm.run(options.cwd, "query", [":scope.workspace", "--json"]))[0]
-        ?.name ?? false;
 
     // Set default docs
     options.docs = options.docs ?? (options.ts ? "docs" : "README.md");

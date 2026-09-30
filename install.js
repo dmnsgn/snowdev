@@ -162,6 +162,28 @@ const getInstallReason = async (
     : null;
 };
 
+const checkDependencies = async (options) => {
+  try {
+    const selectors = ["missing", "invalid", "extraneous"];
+
+    const results = await Promise.all(
+      selectors.map(async (selector) =>
+        JSON.parse(await npm.run(options.cwd, "query", [`':${selector}'`])),
+      ),
+    );
+
+    for (const [index, selector] of selectors.entries()) {
+      if (results[index].length) {
+        console.warn(
+          `install - ${selector} dependencies: ${listFormatter.format(results[index].map(({ pkgid }) => pkgid))}`,
+        );
+      }
+    }
+  } catch {
+    // This is only a warning. Don't throw if anything unexpected happen.
+  }
+};
+
 const install = timed(async (options) => {
   // Check package.json exists
   let currentPackage;
@@ -172,23 +194,7 @@ const install = timed(async (options) => {
     return { error };
   }
 
-  // Check dependencies
-  try {
-    const selectors = ["missing", "invalid", "extraneous"];
-
-    for (let selector of selectors) {
-      const results = JSON.parse(
-        await npm.run(options.cwd, "query", [`':${selector}'`]),
-      );
-      if (results.length) {
-        console.warn(
-          `install - ${selector} dependencies: ${listFormatter.format(results.map(({ pkgid }) => pkgid))}`,
-        );
-      }
-    }
-  } catch {
-    // This is only a warning. Don't throw if anything unexpected happen.
-  }
+  const checking = checkDependencies(options);
 
   // Get install type: an array of custom dependencies or one of DEPENDENCY_TYPES values
   const type = Array.isArray(options.dependencies)
@@ -213,6 +219,8 @@ const install = timed(async (options) => {
           type,
           type === DEPENDENCY_TYPES.CUSTOM ? options.dependencies : [],
         );
+
+  await checking;
 
   const dependenciesNames = dependencies.map(({ name }) => name);
 
