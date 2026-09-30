@@ -249,6 +249,5 @@ const bundle = timed(async (options = {}) => {
 
   return result;
 }, label);
-bundle.description = `Bundle dependencies for development or production.`;
 
 export default bundle;

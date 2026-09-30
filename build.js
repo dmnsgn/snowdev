@@ -372,7 +372,6 @@ const build = async (options) => {
   );
   if (options.lint) await lint(cwd, files, options);
 };
-build.description = `Lint and Format sources, run TypeScript, update README API.`;
 
 export { types, lint, checkDocs };
 

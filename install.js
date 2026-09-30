@@ -563,6 +563,5 @@ const install = timed(async (options) => {
 
   return { ...result, input, importMap, linkedFiles };
 }, `install`);
-install.description = `Install ESM dependencies.`;
 
 export default install;

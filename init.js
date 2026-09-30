@@ -115,6 +115,5 @@ const init = timed(async (options = {}) => {
     console.error(error);
   }
 }, `init`);
-init.description = `Create simple package structure.`;
 
 export default init;

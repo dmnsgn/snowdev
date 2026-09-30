@@ -8,13 +8,6 @@ import deepmerge from "deepmerge";
 import semver from "semver";
 import browserslistToEsbuild from "browserslist-to-esbuild";
 
-import init from "./init.js";
-import dev from "./dev.js";
-import build from "./build.js";
-import bundle from "./bundle.js";
-import release from "./release.js";
-import deploy from "./deploy.js";
-import install from "./install.js";
 import npm from "./npm.js";
 import {
   FILES_GLOB,
@@ -197,7 +190,46 @@ export const DEFAULTS_OPTIONS = {
   jsdoc2md: null,
 };
 
-export const commands = { init, dev, build, bundle, release, deploy, install };
+const defineCommands = (definitions) =>
+  Object.fromEntries(
+    Object.entries(definitions).map(([name, { description, load }]) => {
+      const command = async (options) => (await load()).default(options);
+      Object.defineProperty(command, "name", { value: name });
+      command.description = description;
+      return [name, command];
+    }),
+  );
+
+export const commands = defineCommands({
+  init: {
+    description: `Create simple package structure.`,
+    load: () => import("./init.js"),
+  },
+  dev: {
+    description: `Start dev server and install ESM dependencies.`,
+    load: () => import("./dev.js"),
+  },
+  build: {
+    description: `Lint and Format sources, run TypeScript, update README API.`,
+    load: () => import("./build.js"),
+  },
+  bundle: {
+    description: `Bundle dependencies for development or production.`,
+    load: () => import("./bundle.js"),
+  },
+  release: {
+    description: `Bump the version, generate changelog release, create a new commit with git tag.`,
+    load: () => import("./release.js"),
+  },
+  deploy: {
+    description: `Deploy to gh-pages.`,
+    load: () => import("./deploy.js"),
+  },
+  install: {
+    description: `Install ESM dependencies.`,
+    load: () => import("./install.js"),
+  },
+});
 
 export { npm, FILES_GLOB };
 

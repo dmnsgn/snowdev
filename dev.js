@@ -177,6 +177,5 @@ const dev = async (options = {}) => {
     await types(options.cwd, null, options, true);
   }
 };
-dev.description = `Start dev server and install ESM dependencies.`;
 
 export default dev;

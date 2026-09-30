@@ -76,6 +76,5 @@ const deploy = async (options = {}) => {
     console.error(error);
   }
 };
-deploy.description = `Deploy to gh-pages.`;
 
 export default deploy;

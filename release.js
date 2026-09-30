@@ -89,6 +89,5 @@ const release = async (options) => {
     console.error(error);
   }
 };
-release.description = `Bump the version, generate changelog release, create a new commit with git tag.`;
 
 export default release;
