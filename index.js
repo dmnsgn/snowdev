@@ -8,8 +8,6 @@ import deepmerge from "deepmerge";
 import semver from "semver";
 import browserslistToEsbuild from "browserslist-to-esbuild";
 
-import prettierConfig from "./prettier.config.js";
-import eslintConfig from "./eslint.config.js";
 import init from "./init.js";
 import dev from "./dev.js";
 import build from "./build.js";
@@ -89,10 +87,11 @@ export const DEFAULTS_OPTIONS = {
 
   // Formatter and linter
   // TODO: lint and format config in code editor? Do I need config in package.json instead?
+  // Merged with "prettier.config.js" and appended to "eslint.config.js" on use
   /** @type {import("prettier").RequiredOptions} */
-  prettier: prettierConfig,
+  prettier: {},
   /** @type {import("eslint").Linter.FlatConfig} */
-  eslint: eslintConfig,
+  eslint: [],
   /** @type {import("typescript").TranspileOptions} */
   tsconfig: {
     compilerOptions: {
@@ -230,7 +229,7 @@ export const run = async (fn, options) => {
     options.ignore.push(`**/${options.rollup.output.dir}/**`);
 
     // Auto-detect TypeScript project
-    options.ts ??= isTypeScriptProject(options.cwd);
+    options.ts ??= await isTypeScriptProject(options.cwd);
 
     // Auto-detect npm/yarn workspace package membership
     options.workspace ??=

@@ -3,18 +3,7 @@ import { join, extname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import console from "console-ansi";
-
-import ts from "typescript";
-
-import * as prettier from "prettier";
-import sortPackageJson from "sort-package-json";
-
-import { ESLint } from "eslint";
-
-import jsdoc from "jsdoc-api";
-import jsdoc2md from "jsdoc-to-markdown";
-import * as TypeDoc from "typedoc";
-import concatMd from "concat-md";
+import deepmerge from "deepmerge";
 
 import { RF_OPTIONS, escapeRegExp, resolveFiles, timed } from "./utils.js";
 
@@ -22,7 +11,11 @@ const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 const lint = timed(async (cwd, files, options) => {
   try {
-    const babelEslint = options.eslint?.find(
+    const { ESLint } = await import("eslint");
+    const { default: eslintConfig } = await import("./eslint.config.js");
+    const baseConfig = [...eslintConfig, ...(options.eslint ?? [])];
+
+    const babelEslint = baseConfig.find(
       ({ languageOptions }) =>
         languageOptions?.parser?.meta?.name === "@babel/eslint-parser",
     );
@@ -40,7 +33,7 @@ const lint = timed(async (cwd, files, options) => {
     const eslint = new ESLint({
       cwd,
       ignorePatterns: options.ignore,
-      baseConfig: options.eslint,
+      baseConfig,
       overrideConfigFile: true,
       fix,
       // concurrency: "auto",
@@ -59,6 +52,13 @@ const lint = timed(async (cwd, files, options) => {
 lint.description = `build: lint sources`;
 
 const format = timed(async (cwd, files, options) => {
+  const prettier = await import("prettier");
+  const { default: sortPackageJson } = await import("sort-package-json");
+  const { default: prettierConfig } = await import("./prettier.config.js");
+  const config = deepmerge(prettierConfig, options.prettier ?? {}, {
+    clone: false,
+  });
+
   for (const file of files) {
     try {
       await fs.writeFile(
@@ -66,7 +66,7 @@ const format = timed(async (cwd, files, options) => {
         await prettier.format(await fs.readFile(file, "utf8"), {
           parser: options.ts ? "typescript" : "babel",
           ...(await prettier.resolveConfig(file)),
-          ...options.prettier,
+          ...config,
         }),
         "utf8",
       );
@@ -108,6 +108,7 @@ const formatJsdocError = (error) => {
 const checkDocs = timed(async (cwd, files, options) => {
   let results;
   try {
+    const { default: jsdoc } = await import("jsdoc-api");
     await jsdoc.explain({ files, configure: getJsdocConfig(options) });
   } catch (error) {
     results = formatJsdocError(error);
@@ -127,6 +128,10 @@ const docs = timed(async (cwd, files, options) => {
 
   if (options.ts) {
     try {
+      const { default: ts } = await import("typescript");
+      const TypeDoc = await import("typedoc");
+      const { default: concatMd } = await import("concat-md");
+
       await fs.rm(join(cwd, docsFolder), RF_OPTIONS);
       await fs.mkdir(join(cwd, docsFolder), { recursive: true });
 
@@ -182,6 +187,7 @@ const docs = timed(async (cwd, files, options) => {
   } else {
     try {
       if (isMarkdown) {
+        const { default: jsdoc2md } = await import("jsdoc-to-markdown");
         inlinedDocs = await jsdoc2md.render({
           files,
           configure: getJsdocConfig(options),
@@ -199,6 +205,7 @@ const docs = timed(async (cwd, files, options) => {
           return;
         }
       } else {
+        const { default: jsdoc } = await import("jsdoc-api");
         await jsdoc.render({
           files,
           configure: getJsdocConfig(options),
@@ -220,6 +227,7 @@ const docs = timed(async (cwd, files, options) => {
   if (isFile) {
     await fs.rm(join(cwd, docsFolder), RF_OPTIONS);
 
+    const prettier = await import("prettier");
     const filePath = join(cwd, options.docs);
     const formattedDocs = (
       await prettier.format(inlinedDocs, {
@@ -253,6 +261,8 @@ docs.description = `build: update docs`;
 
 const types = timed(async (cwd, files, options, watch) => {
   try {
+    const { default: ts } = await import("typescript");
+
     const diagnosticToConsoleMethod = {
       [ts.DiagnosticCategory["Message"]]: "log",
       [ts.DiagnosticCategory["Suggestion"]]: "info",

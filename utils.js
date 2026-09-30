@@ -8,12 +8,10 @@ import deepmerge from "deepmerge";
 
 import console, { getConsole } from "console-ansi";
 import semver from "semver";
-import ts from "typescript";
 import { exports, legacy as legacyExport } from "resolve.exports";
 import { sync as resolveSync } from "resolve";
 import slash from "slash";
 import picomatch from "picomatch";
-import * as cheerio from "cheerio";
 import * as acorn from "acorn";
 import * as acornWalk from "acorn-walk";
 import * as aString from "astring";
@@ -138,7 +136,8 @@ function escapeRegExp(string) {
   return string.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`); // $& means the whole matched string
 }
 
-function isTypeScriptProject(cwd) {
+async function isTypeScriptProject(cwd) {
+  const { default: ts } = await import("typescript");
   const configPath = ts.findConfigFile(cwd, ts.sys.fileExists, "tsconfig.json");
   return configPath
     ? ts.readConfigFile(configPath, ts.sys.readFile).config?.compilerOptions
@@ -178,7 +177,8 @@ const compareStats = (a, b) => a?.mtimeMs === b?.mtimeMs && a?.size === b?.size;
 
 const getFileExtension = (file) => parse(file).ext;
 
-const htmlHotInject = (html) => {
+const htmlHotInject = async (html) => {
+  const cheerio = await import("cheerio");
   const $ = cheerio.load(html);
 
   try {
