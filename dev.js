@@ -132,12 +132,6 @@ const serve = async (options, { server, watcher, log }) => {
 
   try {
     watchLinkedFiles(await install(options));
-
-    if (options.ts) {
-      await types(options.cwd, null, options, (results) => {
-        if (results) log(`TypeScript Error:\n${results}`);
-      });
-    }
   } catch (error) {
     console.error(error);
   }
@@ -156,6 +150,14 @@ const dev = async (options = {}) => {
   });
   const server = options.serve ? await createServer(options) : null;
 
+  const log = (message) => server?.send("console:log", `[snowdev] ${message}`);
+
+  if (options.lint || checkJsdoc) {
+    watchSources(watcher, options, checkJsdoc, log);
+  }
+
+  if (server) await serve(options, { server, watcher, log });
+
   const linting = options.lint && lint(options.cwd, options.files, options);
   if (checkJsdoc) {
     void (async () => {
@@ -163,17 +165,10 @@ const dev = async (options = {}) => {
       return checkDocs(options.cwd, files, options);
     })();
   }
-
-  const log = (message) => server?.send("console:log", `[snowdev] ${message}`);
-
-  if (options.lint || checkJsdoc) {
-    watchSources(watcher, options, checkJsdoc, log);
-  }
-
-  if (server) {
-    await serve(options, { server, watcher, log });
-  } else if (options.ts) {
-    await types(options.cwd, null, options, true);
+  if (options.ts) {
+    await types(options.cwd, null, options, (results) => {
+      if (results) log(`TypeScript Error:\n${results}`);
+    });
   }
 
   await linting;
