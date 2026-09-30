@@ -146,14 +146,6 @@ const serve = async (options, { server, watcher, log }) => {
 const dev = async (options = {}) => {
   const checkJsdoc = options.docs && !options.ts;
 
-  if (options.lint) await lint(options.cwd, options.files, options);
-  if (checkJsdoc) {
-    void (async () => {
-      const files = await resolveFiles(options.cwd, options);
-      return checkDocs(options.cwd, files, options);
-    })();
-  }
-
   const watcher = createWatcher(options.cwd, {
     onError: (error) =>
       console.error(
@@ -164,7 +156,14 @@ const dev = async (options = {}) => {
   });
   const server = options.serve ? await createServer(options) : null;
 
-  // Terminal already gets the results: mirror them to the browser console
+  const linting = options.lint && lint(options.cwd, options.files, options);
+  if (checkJsdoc) {
+    void (async () => {
+      const files = await resolveFiles(options.cwd, options);
+      return checkDocs(options.cwd, files, options);
+    })();
+  }
+
   const log = (message) => server?.send("console:log", `[snowdev] ${message}`);
 
   if (options.lint || checkJsdoc) {
@@ -176,6 +175,8 @@ const dev = async (options = {}) => {
   } else if (options.ts) {
     await types(options.cwd, null, options, true);
   }
+
+  await linting;
 };
 
 export default dev;
