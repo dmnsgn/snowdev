@@ -284,7 +284,7 @@ const types = timed(async (cwd, files, options, watch) => {
       console[consoleMethod](results);
 
       if (typeof watch === "function") {
-        watch(`${diagnostic.file.path}\n${results}`);
+        watch(`${diagnostic.file?.path}\n${results}`);
       }
     };
 
