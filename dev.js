@@ -15,6 +15,16 @@ import {
 
 const console = getCommandConsole("dev");
 
+const lintAndLog = async (files, options, log) => {
+  const results = await lint(options.cwd, files, options);
+  if (results) log(`ESLint Error:${results}`);
+};
+
+const checkDocsAndLog = async (files, options, log) => {
+  const results = await checkDocs(options.cwd, files, options);
+  if (results) log(`JSDoc Error:\n${results}`);
+};
+
 const watchSources = (watcher, options, checkJsdoc, log) =>
   watcher.add(
     options.files,
@@ -23,15 +33,8 @@ const watchSources = (watcher, options, checkJsdoc, log) =>
 
       const files = [join(options.cwd, file)];
 
-      if (options.lint) {
-        const results = await lint(options.cwd, files, options);
-        if (results) log(`ESLint Error:${results}`);
-      }
-
-      if (!checkJsdoc) return;
-
-      const results = await checkDocs(options.cwd, files, options);
-      if (results) log(`JSDoc Error:\n${results}`);
+      if (options.lint) await lintAndLog(files, options, log);
+      if (checkJsdoc) await checkDocsAndLog(files, options, log);
     },
     { ignore: options.ignore },
   );
@@ -79,8 +82,7 @@ const serve = async (options, { server, watcher, log }) => {
 
     if (file !== "package.json") return;
 
-    const results = await lint(options.cwd, [join(options.cwd, file)], options);
-    if (results) log(`ESLint Error:${results}`);
+    await lintAndLog([join(options.cwd, file)], options, log);
   });
 
   // Options are resolved once at startup (server options can't hot-apply)
@@ -158,11 +160,11 @@ const dev = async (options = {}) => {
 
   if (server) await serve(options, { server, watcher, log });
 
-  const linting = options.lint && lint(options.cwd, options.files, options);
+  const linting = options.lint && lintAndLog(options.files, options, log);
   if (checkJsdoc) {
     void (async () => {
       const files = await resolveFiles(options.cwd, options);
-      return checkDocs(options.cwd, files, options);
+      return checkDocsAndLog(files, options, log);
     })();
   }
   if (options.ts) {
