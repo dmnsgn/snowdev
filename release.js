@@ -7,41 +7,11 @@ import createAngularPreset from "conventional-changelog-angular";
 import npm from "./npm.js";
 import build from "./build.js";
 
-import { console, checkUncommitedChanges, exec, execCommand } from "./utils.js";
+import { console, checkUncommitedChanges, exec } from "./utils.js";
 
 const angularPresetPath = fileURLToPath(
   import.meta.resolve("conventional-changelog-angular"),
 );
-
-// HACK: commit-and-tag-version >= 13.1.1 always generates the changelog from
-// the last stable tag, so every prerelease repeats all entries since that tag.
-// https://github.com/absolute-version/commit-and-tag-version/issues/349
-const getSinceLastTagWriterOpts = async ({ cwd, tagPrefix, transform }) => {
-  let lastTag;
-  try {
-    lastTag = await execCommand(
-      `git describe --tags --abbrev=0 --match "${tagPrefix}*"`,
-      { cwd },
-    );
-  } catch {
-    return { transform };
-  }
-
-  const hashes = new Set(
-    (await execCommand(`git rev-list ${lastTag}..HEAD`, { cwd })).split("\n"),
-  );
-
-  return {
-    transform: (commit, context) =>
-      hashes.has(commit.hash) ? transform(commit, context) : undefined,
-    finalizeContext: (context) => ({
-      ...context,
-      previousTag: lastTag,
-      currentTag: `${tagPrefix}${context.version}`,
-      linkCompare: true,
-    }),
-  };
-};
 
 const release = async (options) => {
   try {
@@ -67,14 +37,12 @@ const release = async (options) => {
         infile: join(options.cwd, "CHANGELOG.md"),
         commitAll: true,
         tagPrefix,
-        writerOpts: await getSinceLastTagWriterOpts({
-          cwd: options.cwd,
-          tagPrefix,
+        writerOpts: {
           transform: (commit, context) =>
             scope && commit.scope !== scope
               ? undefined
               : transform(commit, context),
-        }),
+        },
         ...(workspace && {
           npmPublishHint: `npm publish --workspace ${workspace}`,
           releaseCommitMessageFormat: `chore(release): ${workspace}@{{currentTag}}`,
