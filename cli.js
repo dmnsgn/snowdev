@@ -1,12 +1,11 @@
 #!/usr/bin/env node --max-old-space-size=6144
 
-import console from "console-ansi";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import { cosmiconfig } from "cosmiconfig";
 
-import { commands, run } from "./index.js";
-import { NAME, VERSION } from "./utils.js";
+import { DEFAULTS_OPTIONS, TARGETS, commands, run } from "./index.js";
+import { console, NAME, VERSION } from "./utils.js";
 
 export const getConfig = async () => {
   try {
@@ -58,13 +57,13 @@ parser
       group: "Input/meta options:",
       type: "string",
       describe: `A glob pattern for files to be processed by build command. All JS and TS files in root or "src/" folder.`,
-      defaultDescription: `"{*.+(t|j||mj)s,src/**/*.+(t|j||mj)s}"`,
+      defaultDescription: JSON.stringify(DEFAULTS_OPTIONS.files),
     },
     ignore: {
       group: "Input/meta options:",
       type: "array",
       describe: `Files to be ignored by build command.`,
-      defaultDescription: `["**/node_modules/**", "**/web_modules/**"]`,
+      defaultDescription: JSON.stringify(DEFAULTS_OPTIONS.ignore),
     },
     dependencies: {
       group: "Input/meta options:",
@@ -83,7 +82,7 @@ parser
       group: "Input/meta options:",
       type: "string",
       describe: `Browserslist targets used by build command.`,
-      defaultDescription: `defaults and fully supports es6-module`,
+      defaultDescription: TARGETS,
     },
     updateVersions: {
       group: "Input/meta options:",
@@ -164,6 +163,13 @@ parser
       type: "boolean",
       describe: `Skip installing ESM dependencies on dev command when nothing changed (dependencies, linked files or bundling options). Set to false to always install.`,
       defaultDescription: `true`,
+    },
+    "console.level": {
+      group: "Commands options:",
+      type: "string",
+      choices: ["debug", "log", "info", "warn", "error"],
+      describe: `Minimum console level to output.`,
+      defaultDescription: `debug`,
     },
     "server.crossOriginIsolation": {
       group: "Commands options:",

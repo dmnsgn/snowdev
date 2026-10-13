@@ -2,10 +2,10 @@ import { promises as fs } from "node:fs";
 import { join, extname } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import console from "console-ansi";
 import deepmerge from "deepmerge";
 
 import {
+  console,
   RF_OPTIONS,
   escapeRegExp,
   formatFileList,
@@ -55,7 +55,7 @@ const lint = timed(async (cwd, files, options) => {
     console.error(error);
   }
 });
-lint.description = `build: lint sources`;
+lint.description = `build — lint sources`;
 
 const format = timed(async (cwd, files, options) => {
   const prettier = await import("prettier");
@@ -92,7 +92,7 @@ const format = timed(async (cwd, files, options) => {
     console.error(error);
   }
 });
-format.description = `build: format sources`;
+format.description = `build — format sources`;
 
 const getJsdocConfig = (options) =>
   options.jsdoc || join(__dirname, "jsdoc.json");
@@ -123,7 +123,7 @@ const checkDocs = timed(async (cwd, files, options) => {
 
   return results;
 });
-checkDocs.description = `build: check docs`;
+checkDocs.description = `build — check docs`;
 
 const docs = timed(async (cwd, files, options) => {
   const isFile = !!extname(options.docs);
@@ -218,7 +218,7 @@ const docs = timed(async (cwd, files, options) => {
           destination: join(cwd, docsFolder),
         });
         if (isFile) {
-          console.error("Output html to a file not supported.");
+          console.error("build — Output html to a file not supported.");
           return;
         }
       }
@@ -263,7 +263,7 @@ const docs = timed(async (cwd, files, options) => {
     }
   }
 });
-docs.description = `build: update docs`;
+docs.description = `build — update docs`;
 
 const types = timed(async (cwd, files, options, watch) => {
   try {
@@ -355,19 +355,19 @@ const types = timed(async (cwd, files, options, watch) => {
 
       allDiagnostics.forEach(logDiagnostic);
 
-      if (emitSkipped) console.error("Emit skipped.");
+      if (emitSkipped) console.error("build — Emit skipped.");
     }
   } catch (error) {
     console.error(error);
   }
 });
-types.description = `build: run TypeScript (generate types, watch or compile)`;
+types.description = `build — run TypeScript (generate types, watch or compile)`;
 
 const build = async (options) => {
   const cwd = options.cwd;
   const files = await resolveFiles(cwd, options);
 
-  console.log(`build files:${formatFileList(files)}`);
+  console.log(`build — files:${formatFileList(files)}`);
 
   if (options.format) await format(cwd, files, options);
   await Promise.all(

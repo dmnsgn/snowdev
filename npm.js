@@ -1,8 +1,6 @@
 import { fork } from "node:child_process";
 
-import console from "console-ansi";
-
-import { execCommand } from "./utils.js";
+import { console, execCommand } from "./utils.js";
 
 const substringAfterChar = (string, char) =>
   string.slice(Math.max(0, string.indexOf(char)));

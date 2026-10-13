@@ -6,14 +6,7 @@ import install from "./install.js";
 import createServer from "./server.js";
 import createWatcher from "./watcher.js";
 import { types, lint, checkDocs } from "./build.js";
-import {
-  getCommandConsole,
-  getFileExtension,
-  readJson,
-  resolveFiles,
-} from "./utils.js";
-
-const console = getCommandConsole("dev");
+import { console, getFileExtension, readJson, resolveFiles } from "./utils.js";
 
 const lintAndLog = async (files, options, log) => {
   const results = await lint(options.cwd, files, options);
@@ -45,11 +38,11 @@ const serve = async (options, { server, watcher, log }) => {
   const flushReload = pDebounce(async () => {
     const [file] = changedFiles;
     if (changedFiles.size > 1) {
-      console.info(`${changedFiles.size} files changed. Reloading.`);
+      console.info(`dev — ${changedFiles.size} files changed. Reloading.`);
     } else if (file) {
-      console.info(`File changed: "${file}". Reloading.`);
+      console.info(`dev — File changed: "${file}". Reloading.`);
     } else {
-      console.info("Reloading.");
+      console.info("dev — Reloading.");
     }
     changedFiles.clear();
     server.send("reload");
@@ -110,7 +103,7 @@ const serve = async (options, { server, watcher, log }) => {
       }
 
       console.warn(
-        `Config changed: "${relative(options.cwd, options.configFile)}". Restart to apply.`,
+        `dev — Config changed: "${relative(options.cwd, options.configFile)}". Restart to apply.`,
       );
     });
   }
@@ -121,10 +114,10 @@ const serve = async (options, { server, watcher, log }) => {
 
       const extension = getFileExtension(file);
       if (extension === ".css") {
-        console.info(`File changed: "${file}". Injecting.`);
+        console.info(`dev — File changed: "${file}". Injecting.`);
         server.send("css", file);
       } else if (options.server.hmr && extension === ".js") {
-        console.info(`File changed: "${file}". Hot reloading.`);
+        console.info(`dev — File changed: "${file}". Hot reloading.`);
         server.send("hmr", file);
       } else {
         reload(file);
@@ -146,7 +139,7 @@ const dev = async (options = {}) => {
     onError: (error) =>
       console.error(
         error.code === "ENOSPC"
-          ? `File watching limit reached. Increase "fs.inotify.max_user_watches". ${error.message}`
+          ? `dev — File watching limit reached. Increase "fs.inotify.max_user_watches". ${error.message}`
           : error,
       ),
   });

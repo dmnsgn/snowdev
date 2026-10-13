@@ -1,15 +1,13 @@
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import console from "console-ansi";
-
 import commitAndTagVersion from "commit-and-tag-version";
 import createAngularPreset from "conventional-changelog-angular";
 
 import npm from "./npm.js";
 import build from "./build.js";
 
-import { checkUncommitedChanges, exec, execCommand } from "./utils.js";
+import { console, checkUncommitedChanges, exec, execCommand } from "./utils.js";
 
 const angularPresetPath = fileURLToPath(
   import.meta.resolve("conventional-changelog-angular"),

@@ -11,12 +11,12 @@ import {
 } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import console from "console-ansi";
 import deepmerge from "deepmerge";
 import slash from "slash";
 import { createFilter } from "@rollup/pluginutils";
 
 import {
+  console,
   RF_OPTIONS,
   resolveExports,
   resolveBrowserIgnores,
@@ -176,7 +176,7 @@ const checkDependencies = async (options) => {
     for (const [index, selector] of selectors.entries()) {
       if (results[index].length) {
         console.warn(
-          `install - ${selector} dependencies: ${listFormatter.format(results[index].map(({ pkgid }) => pkgid))}`,
+          `install — ${selector} dependencies: ${listFormatter.format(results[index].map(({ pkgid }) => pkgid))}`,
         );
       }
     }
@@ -191,7 +191,7 @@ const install = timed(async (options) => {
   try {
     currentPackage = await readJson(join(options.cwd, "package.json"));
   } catch (error) {
-    console.error(`install - error reading package.json\n`, error);
+    console.error(`install — error reading package.json\n`, error);
     return { error };
   }
 
@@ -248,7 +248,7 @@ const install = timed(async (options) => {
   });
 
   if (!reason) {
-    console.log("install - all dependencies installed.");
+    console.log("install — all dependencies installed.");
 
     return {
       importMap: (await pathExists(importMapFile))
@@ -258,14 +258,14 @@ const install = timed(async (options) => {
     };
   }
 
-  console.info(`install - ${reason}.`);
+  console.info(`install — ${reason}`);
 
   // Remove output to empty it or bundle in it
   try {
     await fs.rm(outputDir, RF_OPTIONS);
     await fs.mkdir(outputDir, { recursive: true });
   } catch (error) {
-    console.error(`install - error removing output directory\n`, error);
+    console.error(`install — error removing output directory\n`, error);
     return { error };
   }
 
@@ -281,7 +281,9 @@ const install = timed(async (options) => {
       files: {},
     });
 
-    console.warn(`No ESM dependencies to install. Set "options.dependencies".`);
+    console.warn(
+      `install — No ESM dependencies to install. Set "options.dependencies".`,
+    );
     return { importMap: options.importMap, linkedFiles: [] };
   }
 
@@ -295,7 +297,7 @@ const install = timed(async (options) => {
   }
 
   console.info(
-    `install - ESM dependencies: ${listFormatter.format(installTargets)}`,
+    `install — ESM dependencies: ${listFormatter.format(installTargets)}`,
   );
 
   let result;
@@ -354,7 +356,7 @@ const install = timed(async (options) => {
               ? dependency
               : bareToDotRelativePath(dependency);
           } else {
-            console.info(`Filtered out export: ${resolvedExport}`);
+            console.info(`install — Filtered out export: "${resolvedExport}"`);
           }
         } else {
           packageTargets.push(dependency);
@@ -367,7 +369,7 @@ const install = timed(async (options) => {
 
   try {
     console.log(
-      `install - installing (${options.bundler === "rolldown" ? "oxc" : options.transpiler})...`,
+      `install — installing (${options.bundler === "rolldown" ? "oxc" : options.transpiler})…`,
     );
 
     const dependenciesPath = Object.fromEntries(
@@ -417,7 +419,9 @@ const install = timed(async (options) => {
       const isCurrentPackage = dependency === currentPackage.name;
 
       if (!(await pathExists(dependencyPath))) {
-        console.error(`Unresolved dependency: is "${dependency}" installed?`);
+        console.error(
+          `install — Unresolved dependency: is "${dependency}" installed?`,
+        );
         continue;
       }
 
@@ -427,7 +431,7 @@ const install = timed(async (options) => {
 
         if (!entryPoint) {
           console.error(
-            `Unresolved export: "${dependency}" "${specifier}": is "${dependency}" installed or not exporting anything?`,
+            `install — Unresolved export: "${dependency}" "${specifier}": is "${dependency}" installed or not exporting anything?`,
           );
           continue;
         }
@@ -436,12 +440,12 @@ const install = timed(async (options) => {
           const resolvedExport = join(dependencyPath, entryPoint);
 
           if (!filter(resolvedExport)) {
-            console.info(`Filtered out export: ${resolvedExport}`);
+            console.info(`install — Filtered out export: "${resolvedExport}"`);
             continue;
           }
 
           if (!(await pathExists(resolvedExport))) {
-            console.error(`Unknown export: ${resolvedExport}`);
+            console.error(`install — Unknown export: "${resolvedExport}"`);
             continue;
           }
 
@@ -493,7 +497,9 @@ const install = timed(async (options) => {
             const resolvedIgnore = slash(join(dependencyPath, specifier));
 
             if (!(await pathExists(resolvedIgnore))) {
-              console.warn(`Unresolved browser ignore: "${resolvedIgnore}"`);
+              console.warn(
+                `install — Unresolved browser ignore: "${resolvedIgnore}"`,
+              );
               continue;
             }
 
@@ -563,7 +569,7 @@ const install = timed(async (options) => {
         files: await statFiles(linkedFiles),
       });
 
-      console.log("install - complete.");
+      console.log("install — complete.");
     }
   } catch (error) {
     console.error(error);

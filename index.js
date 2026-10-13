@@ -3,13 +3,13 @@ import { join, resolve } from "node:path";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 
-import console from "console-ansi";
 import deepmerge from "deepmerge";
 import semver from "semver";
 import browserslistToEsbuild from "browserslist-to-esbuild";
 
 import npm from "./npm.js";
 import {
+  console,
   FILES_GLOB,
   NAME,
   VERSION,
@@ -22,8 +22,6 @@ import {
 
 const require = createRequire(import.meta.url);
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
-
-console.prefix = `[${NAME}]`;
 
 // Options
 const TARGETS = `defaults and supports es6-module`;
@@ -56,6 +54,9 @@ export const DEFAULTS_OPTIONS = {
   commitAndTagVersion: true,
   pkgFix: true,
   cache: true,
+
+  /** @type {import("console-ansi").ConsoleAnsi} */
+  console: undefined,
 
   // Server
   /** @type {import("./server.js").ServerOptions} */
@@ -232,7 +233,7 @@ export const commands = defineCommands({
   },
 });
 
-export { npm, FILES_GLOB };
+export { npm, FILES_GLOB, TARGETS };
 
 const getVersion = async (cwd) => (await npm.run(cwd, "--version")).trim();
 
@@ -247,6 +248,8 @@ export const run = async (fn, options) => {
     [DEFAULTS_OPTIONS, globalOptions || {}, commandOptions || {}],
     { clone: false },
   );
+
+  Object.assign(console, options.console);
 
   try {
     await npm.load(options.npmPath);
@@ -272,7 +275,7 @@ export const run = async (fn, options) => {
         `Using npm@${options.npmVersion} (${options.npmPath || "global"})`,
       );
     }
-    console.info(`${fn.name} in '${options.cwd}'`);
+    console.info(`${fn.name} in "${options.cwd}"`);
 
     options.ignore.push(`**/${options.rollup.output.dir}/**`);
 

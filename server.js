@@ -13,9 +13,7 @@ import selfsigned from "selfsigned";
 import open from "open";
 import getPort from "get-port";
 
-import { getCommandConsole, htmlHotInject } from "./utils.js";
-
-const console = getCommandConsole("dev");
+import { console, htmlHotInject } from "./utils.js";
 
 const execFile = promisify(execFileCb);
 
@@ -79,7 +77,7 @@ const getCertificates = async (hosts, options) => {
     // Not installed: expected, silently fallback
     if (error.code !== "ENOENT") {
       console.warn(
-        `"mkcert" failed, using a self-signed certificate: ${error.message.trim()}`,
+        `dev — "mkcert" failed, using a self-signed certificate: ${error.message.trim()}`,
       );
     }
   }
@@ -210,7 +208,7 @@ const transformHtml = async (file, options) => {
 const openBrowser = async (url) => {
   const warn = (reason) =>
     console.warn(
-      `Couldn't open browser (${reason}). Set "server.open" to false in headless environments.`,
+      `dev — Couldn't open browser (${reason}). Set "server.open" to false in headless environments.`,
     );
 
   try {

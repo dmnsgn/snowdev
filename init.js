@@ -2,12 +2,11 @@ import { promises as fs } from "node:fs";
 import { basename, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import console from "console-ansi";
 import { replaceInFile } from "replace-in-file";
 import npmUser from "npm-user";
 import camelcase from "camelcase";
 
-import { exec, timed, writeJson } from "./utils.js";
+import { console, exec, timed, writeJson } from "./utils.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
@@ -20,7 +19,7 @@ const init = timed(async (options = {}) => {
       (file) => ![".DS_Store"].includes(file),
     )
   ) {
-    console.warn(`Directory not empty. Files will not be overwritten.`);
+    console.warn(`init — Directory not empty. Files will not be overwritten.`);
   }
 
   // Get npm infos
@@ -45,7 +44,7 @@ const init = timed(async (options = {}) => {
   }
 
   console.info(
-    `user: ${user.authorName} (npm: "${user.username}", github: "${user.gitHubUsername}")`,
+    `init — user: ${user.authorName} (npm: "${user.username}", github: "${user.gitHubUsername}")`,
   );
 
   try {
@@ -60,7 +59,7 @@ const init = timed(async (options = {}) => {
           : !["tsconfig.json", "src"].includes(basename(source));
 
         if (copy && !(await fs.lstat(source)).isDirectory()) {
-          console.log("Copying:", relative(templatePath, source));
+          console.log(`init — Copying: "${relative(templatePath, source)}"`);
         }
 
         return copy;

@@ -6,7 +6,7 @@ import { promisify } from "node:util";
 import { exec as execCb } from "node:child_process";
 import deepmerge from "deepmerge";
 
-import console, { getConsole } from "console-ansi";
+import { getConsole } from "console-ansi";
 import semver from "semver";
 import { exports, legacy as legacyExport } from "resolve.exports";
 import { sync as resolveSync } from "resolve";
@@ -48,8 +48,7 @@ const writeJson = async (path, obj, { merge = false } = {}) =>
 
 const { version: VERSION, name: NAME, dependencies } = packageJson;
 
-const getCommandConsole = (command) =>
-  getConsole({ prefix: `[${NAME}] ${command}:` });
+const console = getConsole({ prefix: `[${NAME}]` });
 
 const CORE_JS_SEMVER = semver.minVersion(dependencies["core-js"]);
 
@@ -418,7 +417,7 @@ const dotRelativeToBarePath = (p) =>
 const bareToDotRelativePath = (p) => `./${p}`;
 
 export {
-  getCommandConsole,
+  console,
   FILES_GLOB,
   NAME,
   VERSION,

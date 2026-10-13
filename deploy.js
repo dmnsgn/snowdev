@@ -1,12 +1,10 @@
 import { join } from "node:path";
 import { promises as fs } from "node:fs";
 
-import console from "console-ansi";
-
 import install from "./install.js";
 import build from "./build.js";
 
-import { checkUncommitedChanges, execCommand } from "./utils.js";
+import { console, checkUncommitedChanges, execCommand } from "./utils.js";
 
 const deploy = async (options = {}) => {
   try {
@@ -17,7 +15,7 @@ const deploy = async (options = {}) => {
       `git rev-parse --abbrev-ref HEAD`,
       options,
     );
-    console.log(`Current branch: ${currentBranch}`);
+    console.log(`deploy — Current branch: "${currentBranch}"`);
 
     // Check gh-pages branches exist of create it
     let ghPagesBranchExist = true;
@@ -29,7 +27,7 @@ const deploy = async (options = {}) => {
     } catch (error) {
       if (error.code === 1) {
         ghPagesBranchExist = false;
-        console.log("Checking out a new gh-pages branch.");
+        console.log("deploy — Checking out a new gh-pages branch.");
       } else {
         throw new Error(error, { cause: error });
       }
@@ -42,7 +40,7 @@ const deploy = async (options = {}) => {
       `git rev-parse --abbrev-ref HEAD`,
       options,
     );
-    console.log(`Checked out: ${ghBranch}`);
+    console.log(`deploy — Checked out: "${ghBranch}"`);
 
     // Merge current branch into gh-pages branch
     await execCommand(`git merge ${currentBranch} --no-edit`, options);

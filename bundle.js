@@ -1,7 +1,6 @@
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import console from "console-ansi";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import polyfillNode from "rollup-plugin-polyfill-node";
@@ -12,7 +11,7 @@ import noOp from "rollup-plugin-no-op";
 import browserslistToEsbuild from "browserslist-to-esbuild";
 import deepmerge from "deepmerge";
 
-import { FILES_GLOB, secondsFormatter, timed } from "./utils.js";
+import { console, FILES_GLOB, secondsFormatter, timed } from "./utils.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
@@ -214,7 +213,7 @@ const bundle = timed(async (options = {}) => {
     };
 
     if (bundlerOptions.watch) {
-      console.info(`bundle: watching...`);
+      console.info(`bundle — watching…`);
 
       const watcher = watch({
         ...inputOptions,
@@ -225,10 +224,10 @@ const bundle = timed(async (options = {}) => {
       watcher.on("event", ({ code, error, result, duration }) => {
         if (code === "ERROR") formatRollupLog(error);
         if (code === "BUNDLE_START")
-          console.info(`${label(options)}: bundling...`);
+          console.info(`${label(options)} — bundling…`);
         if (code === "BUNDLE_END") {
           console.info(
-            `${label(options)}: bundled in ${secondsFormatter.format(duration / 1000)}.`,
+            `${label(options)} — bundled in ${secondsFormatter.format(duration / 1000)}.`,
           );
         }
         if (result) result.close();
