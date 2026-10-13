@@ -54,6 +54,7 @@ const getCommandConsole = (command) =>
 const CORE_JS_SEMVER = semver.minVersion(dependencies["core-js"]);
 
 const listFormatter = new Intl.ListFormat("en");
+const formatFileList = (files) => files.map((file) => `\n- ${file}`).join("");
 
 const secondsFormatter = new Intl.NumberFormat("en", {
   unit: "second",
@@ -112,12 +113,18 @@ const checkUncommitedChanges = async (options) => {
   }
 };
 
+const getTaskLabel = (description, cwd, files) =>
+  files?.length === 1
+    ? `${description}: "${relative(cwd, files[0])}"`
+    : description;
+
 const timers = new Set();
 const timed = (fn, label) => {
   const wrapped = async (...args) => {
     const name =
-      (typeof label === "function" ? label(...args) : label) ||
-      wrapped.description;
+      typeof label === "function"
+        ? label(...args)
+        : (label ?? getTaskLabel(wrapped.description, ...args));
     let key = name;
     for (let i = 2; timers.has(key); i++) key = `${name} (${i})`;
     timers.add(key);
@@ -418,6 +425,7 @@ export {
   CORE_JS_SEMVER,
   RF_OPTIONS,
   listFormatter,
+  formatFileList,
   secondsFormatter,
   readJson,
   writeJson,

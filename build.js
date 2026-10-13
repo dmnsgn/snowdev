@@ -5,7 +5,13 @@ import { fileURLToPath } from "node:url";
 import console from "console-ansi";
 import deepmerge from "deepmerge";
 
-import { RF_OPTIONS, escapeRegExp, resolveFiles, timed } from "./utils.js";
+import {
+  RF_OPTIONS,
+  escapeRegExp,
+  formatFileList,
+  resolveFiles,
+  timed,
+} from "./utils.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
@@ -361,7 +367,7 @@ const build = async (options) => {
   const cwd = options.cwd;
   const files = await resolveFiles(cwd, options);
 
-  console.log(`build files:\n- ${files.join("\n- ")}`);
+  console.log(`build files:${formatFileList(files)}`);
 
   if (options.format) await format(cwd, files, options);
   await Promise.all(

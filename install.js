@@ -27,6 +27,7 @@ import {
   compareStats,
   VERSION,
   listFormatter,
+  formatFileList,
   arrayDifference,
   dotRelativeToBarePath,
   bareToDotRelativePath,
@@ -158,7 +159,7 @@ const getInstallReason = async (
     (file) => !compareStats(cachedFiles[file], files[file]),
   );
   return changedFiles.length
-    ? `linked files changed: ${listFormatter.format(changedFiles)}`
+    ? `linked files changed:${formatFileList(changedFiles)}`
     : null;
 };
 
