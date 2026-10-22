@@ -7,6 +7,10 @@ import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended"
 import eslintPluginUnicorn from "eslint-plugin-unicorn";
 import eslintPluginSonarjs from "eslint-plugin-sonarjs";
 import eslintPluginJsdoc from "eslint-plugin-jsdoc";
+import eslintPluginImportX, {
+  createNodeResolver,
+  flatConfigs as importXConfigs,
+} from "eslint-plugin-import-x";
 import eslintPackageJson from "eslint-package-json";
 import eslintPluginHtml from "eslint-plugin-html";
 import eslintPluginMarkdown from "@eslint/markdown";
@@ -16,8 +20,14 @@ import cssPropertyOrder, {
   createHtmlProcessor,
 } from "eslint-plugin-css-property-order";
 
-import { FILES_GLOB } from "./utils.js";
+import { FILES_GLOB, getFileExtension } from "./utils.js";
 
+const IMPORT_EXTENSIONS = [
+  ...FILES_GLOB.javascript,
+  ...FILES_GLOB.typescriptAll,
+].map(getFileExtension);
+
+// eslint-disable-next-line unicorn/no-top-level-side-effects
 export default defineConfig([
   {
     files: FILES_GLOB.javascript,
@@ -120,18 +130,98 @@ export default defineConfig([
       "package-json/prefer-exports": 0,
     },
   },
+  {
+    files: [...FILES_GLOB.javascript, ...FILES_GLOB.typescriptAll],
+    plugins: { "import-x": eslintPluginImportX },
+    settings: {
+      "import-x/extensions": IMPORT_EXTENSIONS,
+      "import-x/parsers":
+        importXConfigs.typescript.settings["import-x/parsers"],
+      "import-x/resolver-next": [
+        createNodeResolver({
+          extensions: [...IMPORT_EXTENSIONS, ".json"],
+          extensionAlias: {
+            ".js": [".ts", ".tsx", ".js"],
+            ".mjs": [".mts", ".mjs"],
+          },
+        }),
+      ],
+    },
+    rules: {
+      ...importXConfigs.recommended.rules,
+      // Helpful warnings
+      "import-x/export": "warn",
+      "import-x/no-empty-named-blocks": "error",
+      "import-x/no-extraneous-dependencies": [
+        "error",
+        {
+          devDependencies: [
+            "{example,examples,test,tests,scripts}/**",
+            "**/*.config.{js,mjs,ts,mts}",
+          ],
+        },
+      ],
+      "import-x/no-mutable-exports": "error",
+
+      // Module systems
+      "import-x/no-amd": "error",
+      "import-x/no-commonjs": "error",
+      "import-x/no-import-module-exports": "error",
+
+      // Performance
+      // "import-x/avoid-barrel-files": "error",
+      // "import-x/avoid-importing-barrel-files": "error",
+      // "import-x/avoid-namespace-import": "error",
+      // "import-x/avoid-re-export-all": "error",
+
+      // Static analysis
+      "import-x/namespace": ["error", { allowComputed: true }],
+      "import-x/no-absolute-path": "error",
+      "import-x/no-cycle": ["error", { ignoreExternal: true }],
+      "import-x/no-relative-packages": "error",
+      "import-x/no-self-import": "error",
+      "import-x/no-useless-path-segments": "error",
+
+      // Style guide
+      "import-x/consistent-type-specifier-style": "error",
+      "import-x/exports-last": "warn",
+      "import-x/extensions": ["warn", "ignorePackages"],
+      "import-x/first": "error",
+      "import-x/group-exports": "warn",
+      "import-x/newline-after-import": ["error", { considerComments: true }],
+      "import-x/order": [
+        "error",
+        {
+          groups: [
+            "builtin",
+            "external",
+            "internal",
+            ["parent", "sibling", "index"],
+            "unknown",
+            "object",
+            "type",
+          ],
+          // Allow sub-grouping local imports
+          "newlines-between": "always-and-inside-groups",
+          // named: true,
+          // alphabetize: { order: "asc" },
+          // warnOnUnassignedImports: "top",
+        },
+      ],
+    },
+  },
+  {
+    files: FILES_GLOB.typescriptAll,
+    rules: {
+      ...importXConfigs.typescript.rules,
+      "import-x/default": 0,
+      "import-x/namespace": 0,
+      "import-x/no-named-as-default-member": 0,
+      "import-x/no-unresolved": 0,
+      "import-x/extensions": 0, // ".js" specifiers resolving to ".ts" files are reported as missing ".ts"
+    },
+  },
   eslintPluginPrettierRecommended,
-  // TODO: https://github.com/import-js/eslint-plugin-import/pull/3230
-  // {
-  //   extends: ["plugin:import/recommended"],
-  //   plugins: ["eslint-plugin-import"],
-  //   rules: {
-  //     "import/no-cycle": 1,
-  //     "import/order": [1, { groups: ["builtin", "external", "internal"] }],
-  //     "import/no-named-as-default": 0,
-  //     "import/newline-after-import": 2,
-  //   },
-  // },
   {
     files: FILES_GLOB.html,
     plugins: { html: eslintPluginHtml },

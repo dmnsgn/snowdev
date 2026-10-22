@@ -283,16 +283,6 @@ export const run = async (fn, options) => {
     options.docs = options.docs ?? (options.ts ? "docs" : "README.md");
     options.docsFormat = options.docsFormat ?? (options.ts ? "html" : "md");
 
-    // if (options.ts) {
-    //   options.eslint.extends.push(
-    //     "plugin:import/typescript",
-    //   );
-    //   options.eslint.settings["import/resolver"] = {
-    //     typescript: true,
-    //     node: true,
-    //   };
-    // }
-
     // Check package.json exists and update versions
     if (options.command === "dev") {
       const packageJsonPath = join(options.cwd, "package.json");
