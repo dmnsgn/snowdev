@@ -51,7 +51,16 @@
     ".": {
       "types": "./types/index.d.ts",
       "default": "./index.js"
-    }
+    },
+    "./eslint.config.js": {
+      "types": "./types/eslint.config.d.ts",
+      "default": "./eslint.config.js"
+    },
+    "./prettier.config.js": {
+      "types": "./types/prettier.config.d.ts",
+      "default": "./prettier.config.js"
+    },
+    "./jsdoc.json": "./jsdoc.json"
   },
   "main": "./index.js",
   "types": "./types/index.d.ts",
