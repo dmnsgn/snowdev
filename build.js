@@ -230,37 +230,37 @@ const docs = timed(async (cwd, files, options) => {
     }
   }
 
-  if (isFile) {
-    await fs.rm(join(cwd, docsFolder), RF_OPTIONS);
+  if (!isFile) return;
 
-    const prettier = await import("prettier");
-    const filePath = join(cwd, options.docs);
-    const formattedDocs = (
-      await prettier.format(inlinedDocs, {
-        parser: isMarkdown ? "markdown" : "html",
-        ...(await prettier.resolveConfig(filePath)),
-      })
-    )
-      .split("\n")
-      .map((line) => line.trimEnd())
-      .join("\n");
+  await fs.rm(join(cwd, docsFolder), RF_OPTIONS);
 
-    if (options.docsStart && options.docsEnd) {
-      await fs.writeFile(
-        filePath,
-        (await fs.readFile(filePath, "utf8")).replace(
-          new RegExp(
-            String.raw`${escapeRegExp(options.docsStart)}([\s\S]*?)${escapeRegExp(
-              options.docsEnd,
-            )}`,
-          ),
-          `${options.docsStart}\n\n${formattedDocs}\n${options.docsEnd}`,
+  const prettier = await import("prettier");
+  const filePath = join(cwd, options.docs);
+  const formattedDocs = (
+    await prettier.format(inlinedDocs, {
+      parser: isMarkdown ? "markdown" : "html",
+      ...(await prettier.resolveConfig(filePath)),
+    })
+  )
+    .split("\n")
+    .map((line) => line.trimEnd())
+    .join("\n");
+
+  if (options.docsStart && options.docsEnd) {
+    await fs.writeFile(
+      filePath,
+      (await fs.readFile(filePath, "utf8")).replace(
+        new RegExp(
+          String.raw`${escapeRegExp(options.docsStart)}([\s\S]*?)${escapeRegExp(
+            options.docsEnd,
+          )}`,
         ),
-        "utf8",
-      );
-    } else {
-      await fs.writeFile(filePath, formattedDocs, "utf8");
-    }
+        `${options.docsStart}\n\n${formattedDocs}\n${options.docsEnd}`,
+      ),
+      "utf8",
+    );
+  } else {
+    await fs.writeFile(filePath, formattedDocs, "utf8");
   }
 });
 docs.description = `build — update docs`;
@@ -269,36 +269,19 @@ const types = timed(async (cwd, files, options, watch) => {
   try {
     const { default: ts } = await import("typescript");
 
-    const diagnosticToConsoleMethod = {
-      [ts.DiagnosticCategory["Message"]]: "log",
-      [ts.DiagnosticCategory["Suggestion"]]: "info",
-      [ts.DiagnosticCategory["Warning"]]: "warn",
-      [ts.DiagnosticCategory["Error"]]: "error",
-    };
-
-    const logDiagnostic = (diagnostic) => {
-      const { line, character } = diagnostic.file
-        ? ts.getLineAndCharacterOfPosition(diagnostic.file, diagnostic.start)
-        : { line: 0, character: 0 };
-      const results = `TypeScript\n${diagnostic.file?.fileName} (${line + 1}, ${
-        character + 1
-      }): ${ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")}`;
-
-      const consoleMethod =
-        diagnosticToConsoleMethod[diagnostic.category] || "log";
-
-      console[consoleMethod](results);
-
-      if (typeof watch === "function") {
-        watch(`${diagnostic.file?.path}\n${results}`);
-      }
-    };
-
     const configPath = ts.findConfigFile(
       cwd,
       ts.sys.fileExists,
       "tsconfig.json",
     );
+
+    // Ordered by severity: the most severe category present picks the console method
+    const consoleMethods = [
+      [ts.DiagnosticCategory.Error, "error"],
+      [ts.DiagnosticCategory.Warning, "warn"],
+      [ts.DiagnosticCategory.Suggestion, "info"],
+      [ts.DiagnosticCategory.Message, "log"],
+    ];
 
     const formatHost = {
       getCanonicalFileName: (path) => path,
@@ -306,17 +289,49 @@ const types = timed(async (cwd, files, options, watch) => {
       getNewLine: () => ts.sys.newLine,
     };
 
+    const CODE_FRAME_LINE = /^\s*\u{1B}\[7m/u; // eslint-disable-line no-control-regex
+
+    const reportDiagnostics = (diagnostics) => {
+      if (!diagnostics.length) return;
+
+      const sorted = ts.sortAndDeduplicateDiagnostics(diagnostics);
+      const [, consoleMethod] = consoleMethods.find(([category]) =>
+        sorted.some((diagnostic) => diagnostic.category === category),
+      );
+
+      // tsc --pretty without code frames
+      const results = ts
+        .formatDiagnosticsWithColorAndContext(sorted, formatHost)
+        .split(ts.sys.newLine)
+        .filter((line) => line.trim() && !CODE_FRAME_LINE.test(line))
+        .join("\n");
+
+      console[consoleMethod](`${types.description}\n${results}`);
+
+      if (typeof watch === "function") watch(stripVTControlCharacters(results));
+    };
+
     if (watch) {
+      let diagnostics = [];
+
+      const reportWatchStatus = ts.createWatchStatusReporter(
+        { ...ts.sys, write: (output) => console.info(output.trimEnd()) },
+        true,
+      );
+
       ts.createWatchProgram(
         ts.createWatchCompilerHost(
           configPath,
-          {},
-          // config.compilerOptions,
+          { preserveWatchOutput: true },
           ts.sys,
           ts.createEmitAndSemanticDiagnosticsBuilderProgram,
-          logDiagnostic,
-          function (diagnostic) {
-            console.info(ts.formatDiagnostic(diagnostic, formatHost));
+          (diagnostic) => diagnostics.push(diagnostic),
+          (diagnostic, newLine, options, errorCount) => {
+            if (errorCount !== undefined) {
+              reportDiagnostics(diagnostics);
+              diagnostics = [];
+            }
+            reportWatchStatus(diagnostic, newLine, options);
           },
         ),
       );
@@ -353,7 +368,7 @@ const types = timed(async (cwd, files, options, watch) => {
         .getPreEmitDiagnostics(program)
         .concat(diagnostics, parsedCommandLine.errors);
 
-      allDiagnostics.forEach(logDiagnostic);
+      reportDiagnostics(allDiagnostics);
 
       if (emitSkipped) console.error("build — Emit skipped.");
     }
