@@ -45,6 +45,7 @@ export const DEFAULTS_OPTIONS = {
   workspace: undefined,
   serve: true,
   lint: true,
+  analyse: true,
   format: true,
   types: true,
   docs: undefined,

@@ -235,6 +235,8 @@ const openBrowser = async (url) => {
  * @property {string} url
  * @property {ServerSend} send
  * @property {function(): Promise<void>} close
+ * @property {function(): void} printUrls
+ * @property {function(): Promise<void>} open
  */
 
 /**
@@ -326,19 +328,20 @@ const createServer = async (options) => {
   const networkUrls = isWildcardHost(host)
     ? getNetworkAddresses().map((address) => toUrl(address))
     : [];
-  console.log(`
+  const printUrls = () =>
+    console.log(`
 
 Server running:
 ➜ Local:   ${url}
 ${networkUrls.map((networkUrl) => `➜ Network: ${networkUrl}`).join("\n")}
 `);
+  printUrls();
 
   const { open: openPath } = options.server;
-  if (openPath) {
-    await openBrowser(
-      typeof openPath === "string" ? new URL(openPath, url).href : url,
-    );
-  }
+  const openUrl =
+    typeof openPath === "string" ? new URL(openPath, url).href : url;
+  const openInBrowser = () => openBrowser(openUrl);
+  if (openPath) await openInBrowser();
 
   const close = async () => {
     for (const socket of wss.clients) socket.terminate();
@@ -349,7 +352,7 @@ ${networkUrls.map((networkUrl) => `➜ Network: ${networkUrl}`).join("\n")}
     await closed;
   };
 
-  return { url, send, close };
+  return { url, send, close, printUrls, open: openInBrowser };
 };
 
 export default createServer;

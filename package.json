@@ -65,7 +65,7 @@
   "main": "./index.js",
   "types": "./types/index.d.ts",
   "bin": {
-    "snowdev": "cli.js"
+    "snowdev": "./cli.js"
   },
   "files": [
     "*.js",
@@ -161,6 +161,7 @@
     "typedoc-plugin-markdown": "^4.13.1",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.71.2",
+    "value-format-table": "^1.0.0",
     "ws": "^8.22.0",
     "yargs": "^18.2.0"
   },

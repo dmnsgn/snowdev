@@ -1,14 +1,25 @@
 import { promises as fs } from "node:fs";
-import { join, extname } from "node:path";
+import { isBuiltin } from "node:module";
+import { join, extname, relative } from "node:path";
 import { fileURLToPath } from "node:url";
+import { stripVTControlCharacters } from "node:util";
+import {
+  brotliCompressSync,
+  constants as zlibConstants,
+  gzipSync,
+} from "node:zlib";
 
 import deepmerge from "deepmerge";
+import { valueFormatTableAsText } from "value-format-table";
 
 import {
   console,
   RF_OPTIONS,
   escapeRegExp,
   formatFileList,
+  isInside,
+  readJson,
+  resolveExports,
   resolveFiles,
   timed,
 } from "./utils.js";
@@ -56,6 +67,190 @@ const lint = timed(async (cwd, files, options) => {
   }
 });
 lint.description = `build — lint sources`;
+
+// Bare specifiers name packages: not relative, absolute, subpath import, virtual or URL
+const isBareSpecifier = (id) => !/^([./#\0]|[a-z]+:)/i.test(id);
+const getPackageName = (specifier) =>
+  specifier
+    .split("/")
+    .slice(0, specifier.startsWith("@") ? 2 : 1)
+    .join("/");
+const stripExtension = (file) =>
+  file.slice(0, -extname(file).length || undefined);
+
+// Loaded by their tool, not imported
+const CONFIG_FILE = /\.config\.[cm]?[jt]s$/;
+
+// Type only modules (TypeScript types, JSDoc typedefs) are erased before bundling
+const hasRuntimeCode = async (file) => {
+  const { parseAst } = await import("rolldown/parseAst");
+  const lang = extname(file).slice(1).replace(/^[cm]/, "");
+  const { body } = parseAst(await fs.readFile(file, "utf8"), { lang }, file);
+  return body.some(
+    (node) =>
+      !node.type.startsWith("TS") &&
+      node.importKind !== "type" &&
+      node.exportKind !== "type" &&
+      // "export {}"
+      !(
+        node.type === "ExportNamedDeclaration" &&
+        !node.declaration &&
+        !node.specifiers.length
+      ),
+  );
+};
+
+const formatSize = (bytes) => `${(bytes / 1000).toFixed(2)} kB`;
+const measure = (code) => ({
+  minified: formatSize(Buffer.byteLength(code)),
+  gzip: formatSize(gzipSync(code, { level: 9 }).length),
+  brotli: formatSize(
+    brotliCompressSync(code, {
+      params: { [zlibConstants.BROTLI_PARAM_QUALITY]: 11 },
+    }).length,
+  ),
+});
+
+// TypeScript entries point to compiled "outDir" files: map them back to sources
+const getSourceMapper = async (cwd, options) => {
+  if (!options.ts) return (id) => id;
+
+  const { default: ts } = await import("typescript");
+  const configPath = ts.findConfigFile(cwd, ts.sys.fileExists, "tsconfig.json");
+  const config = configPath
+    ? ts.readConfigFile(configPath, ts.sys.readFile).config
+    : options.tsconfig;
+  const { outDir, rootDir = cwd } = ts.parseJsonConfigFileContent(
+    config,
+    ts.sys,
+    cwd,
+  ).options;
+
+  return (id) =>
+    outDir && isInside(outDir, id) ? join(rootDir, relative(outDir, id)) : id;
+};
+
+const analyse = timed(async (cwd, files, options, { sizes = true } = {}) => {
+  let results;
+  try {
+    const { rolldown } = await import("rolldown");
+    const pkg = await readJson(join(cwd, "package.json"));
+
+    // Analysed as published: consumers only reach exports and binaries
+    const input = [
+      ...Object.values(await resolveExports(options, cwd)),
+      ...[pkg.bin ?? []].flatMap((bin) =>
+        typeof bin === "string" ? bin : Object.values(bin),
+      ),
+    ]
+      .filter(Boolean)
+      .map((entry) => join(cwd, entry));
+    if (!input.length) return;
+
+    const createBundle = (inputOptions) =>
+      rolldown({
+        cwd,
+        input,
+        platform: "browser",
+        logLevel: "silent",
+        ...inputOptions,
+      });
+    // Whole package: chunks shared between entries are counted once
+    const bundleSize = async (bundle) => {
+      try {
+        const { output } = await bundle.generate({ minify: true });
+        return measure(
+          output
+            .filter(({ type }) => type === "chunk")
+            .map(({ code }) => code)
+            .join("\n"),
+        );
+      } finally {
+        await bundle.close();
+      }
+    };
+
+    const importedPackages = new Set();
+    let moduleIds = [];
+
+    const packageBundle = await createBundle({
+      external: (id) => {
+        if (isBuiltin(id)) return true;
+        if (!isBareSpecifier(id)) return false;
+        importedPackages.add(getPackageName(id));
+        return true;
+      },
+      plugins: [
+        {
+          name: "snowdev-analyse",
+          buildEnd() {
+            moduleIds = [...this.getModuleIds()];
+          },
+        },
+      ],
+    });
+    // Rolldown builds the module graph lazily on generate
+    const sizesRows = [
+      { dependencies: "external", ...(await bundleSize(packageBundle)) },
+    ];
+
+    const toSource = await getSourceMapper(cwd, options);
+    const reached = new Set(
+      moduleIds.map((id) => stripExtension(toSource(id))),
+    );
+
+    const unusedDependencies = Object.keys({
+      ...pkg.dependencies,
+      ...pkg.peerDependencies,
+    }).filter((name) => !importedPackages.has(name));
+    const unreachedFiles = files.filter(
+      (file) => !CONFIG_FILE.test(file) && !reached.has(stripExtension(file)),
+    );
+    const runtimeFiles = await Promise.all(unreachedFiles.map(hasRuntimeCode));
+    const unusedFiles = unreachedFiles
+      .filter((_, index) => runtimeFiles[index])
+      .map((file) => relative(cwd, file));
+
+    const issues = [
+      unusedDependencies.length &&
+        `Unused dependencies:${formatFileList(unusedDependencies)}`,
+      unusedFiles.length && `Unused files:${formatFileList(unusedFiles)}`,
+    ].filter(Boolean);
+
+    if (issues.length) {
+      results = issues.join("\n");
+      console.warn(`${analyse.description}\n${results}`);
+    }
+
+    if (!sizes) return results;
+
+    try {
+      sizesRows.push({
+        dependencies: "bundled",
+        ...(await bundleSize(
+          await createBundle({ external: (id) => isBuiltin(id) }),
+        )),
+      });
+    } catch (error) {
+      // Dependencies can be unbundlable (native addons, Node.js only code)
+      const [summary, firstError] = stripVTControlCharacters(error.message)
+        .split("\n")
+        .filter((line) => line.trim());
+      console.warn(
+        `${analyse.description} — sizes with bundled dependencies skipped\n${summary}\n${firstError}`,
+      );
+    }
+    const sizesTable = valueFormatTableAsText(sizesRows, {
+      columns: [{}, { align: "right" }, { align: "right" }, { align: "right" }],
+    });
+    console.info(`${analyse.description} — sizes\n${sizesTable}`);
+  } catch (error) {
+    console.error(error);
+  }
+
+  return results;
+});
+analyse.description = `build — analyse package`;
 
 const format = timed(async (cwd, files, options) => {
   const prettier = await import("prettier");
@@ -391,9 +586,10 @@ const build = async (options) => {
       options.docs ? docs(cwd, files, options) : 0,
     ].filter(Boolean),
   );
+  if (options.analyse) await analyse(cwd, files, options);
   if (options.lint) await lint(cwd, files, options);
 };
 
-export { types, lint, checkDocs };
+export { types, docs, lint, analyse, format, checkDocs };
 
 export default build;

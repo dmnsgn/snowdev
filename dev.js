@@ -5,7 +5,16 @@ import pDebounce from "p-debounce";
 import install from "./install.js";
 import createServer from "./server.js";
 import createWatcher from "./watcher.js";
-import { types, lint, checkDocs } from "./build.js";
+import bindShortcuts from "./shortcuts.js";
+import test from "./test.js";
+import build, {
+  types,
+  docs,
+  lint,
+  analyse,
+  format,
+  checkDocs,
+} from "./build.js";
 import { console, getFileExtension, readJson, resolveFiles } from "./utils.js";
 
 const lintAndLog = async (files, options, log) => {
@@ -17,6 +26,73 @@ const checkDocsAndLog = async (files, options, log) => {
   const results = await checkDocs(options.cwd, files, options);
   if (results) log(`JSDoc Error:\n${results}`);
 };
+
+const analyseAndLog = async (options, log, analyseOptions) => {
+  const files = await resolveFiles(options.cwd, options);
+  const results = await analyse(options.cwd, files, options, analyseOptions);
+  if (results) log(`Analyse Warning:\n${results}`);
+};
+
+const inGroup = (group, shortcuts) =>
+  shortcuts.map((shortcut) => ({ ...shortcut, group }));
+
+const getShortcuts = (options, { server, served, log, quit }) => [
+  ...(server
+    ? inGroup("server", [
+        { key: "u", description: "show server urls", action: server.printUrls },
+        { key: "o", description: "open in browser", action: server.open },
+        {
+          key: "r",
+          description: "reload browsers",
+          action: () => server.send("reload"),
+        },
+        {
+          key: "i",
+          description: "reinstall dependencies",
+          action: served.reinstall,
+        },
+      ])
+    : []),
+  ...inGroup("commands", [
+    {
+      key: "t",
+      description: options.ts ? "update docs" : "generate types and docs",
+      action: async () => {
+        const files = await resolveFiles(options.cwd, options);
+        await Promise.all([
+          options.types && !options.ts && types(options.cwd, files, options),
+          options.docs && docs(options.cwd, files, options),
+        ]);
+      },
+    },
+    {
+      key: "a",
+      description: "analyse package",
+      action: () => analyseAndLog(options, log),
+    },
+    {
+      key: "l",
+      description: "lint all",
+      action: () => lintAndLog(options.files, options, log),
+    },
+    {
+      key: "f",
+      description: "format all",
+      action: async () =>
+        format(options.cwd, await resolveFiles(options.cwd, options), options),
+    },
+    { key: "b", description: "build", action: () => build(options) },
+    { key: "T", description: "run tests", action: () => test(options) },
+  ]),
+  ...inGroup("general", [
+    {
+      key: "c",
+      description: "clear console",
+      action: () => globalThis.console.clear(),
+    },
+    { key: "q", description: "quit", action: quit },
+  ]),
+];
 
 const watchSources = (watcher, options, checkJsdoc, log) =>
   watcher.add(
@@ -62,10 +138,18 @@ const serve = async (options, { server, watcher, log }) => {
       : null;
   };
 
-  const onDependencyChange = pDebounce(async () => {
-    watchLinkedFiles(await install(options));
+  const installDependencies = async (installOptions = options) => {
+    try {
+      watchLinkedFiles(await install(installOptions));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const updateDependencies = async (installOptions) => {
+    await installDependencies(installOptions);
     if (options.server.hmr) await reload();
-  }, 500);
+  };
+  const onDependencyChange = pDebounce(() => updateDependencies(), 500);
 
   // Install on manifest change
   watcher.add(["package.json", "package-lock.json"], async (event, file) => {
@@ -125,11 +209,10 @@ const serve = async (options, { server, watcher, log }) => {
     });
   }
 
-  try {
-    watchLinkedFiles(await install(options));
-  } catch (error) {
-    console.error(error);
-  }
+  return {
+    install: () => installDependencies(),
+    reinstall: () => updateDependencies({ ...options, force: true }),
+  };
 };
 
 const dev = async (options = {}) => {
@@ -151,7 +234,22 @@ const dev = async (options = {}) => {
     watchSources(watcher, options, checkJsdoc, log);
   }
 
-  if (server) await serve(options, { server, watcher, log });
+  const served = server && (await serve(options, { server, watcher, log }));
+
+  const unbindShortcuts = bindShortcuts(
+    getShortcuts(options, {
+      server,
+      served,
+      log,
+      quit: async () => {
+        unbindShortcuts();
+        await Promise.all([server?.close(), watcher.close()]);
+        process.exit();
+      },
+    }),
+  );
+
+  await served?.install();
 
   const linting = options.lint && lintAndLog(options.files, options, log);
   if (checkJsdoc) {
@@ -165,6 +263,7 @@ const dev = async (options = {}) => {
       if (results) log(`TypeScript Error:\n${results}`);
     });
   }
+  if (options.analyse) await analyseAndLog(options, log, { sizes: false });
 
   await linting;
 };

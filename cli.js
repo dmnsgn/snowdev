@@ -121,6 +121,12 @@ parser
       describe: `Lint on build command.`,
       defaultDescription: `true`,
     },
+    analyse: {
+      group: "Commands options:",
+      type: "boolean",
+      describe: `Analyse package as published (unused dependencies and files, bundle sizes) on build command. Dev command startup skips bundle sizes.`,
+      defaultDescription: `true`,
+    },
     format: {
       group: "Commands options:",
       type: "boolean",

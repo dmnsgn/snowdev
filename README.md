@@ -34,6 +34,7 @@ npm install -g snowdev
 - Generate TypeScript types automatically (via `JSDoc` for JS only packages or using `src/**.ts` files)
 - Generate API documentation automatically (via `JSDoc` for JS only packages and inserted in README or via `typedoc` in a `docs` folder for TypeScript packages)
 - Prettier formatter and ESLint linter on build
+- Package analysis on dev and build: unused dependencies and files, minified/gzip/brotli bundle sizes on build
 - Keep package.json keys sorted for consistency
 
 ### Write examples
@@ -42,6 +43,7 @@ npm install -g snowdev
 - Write examples using standard [ES Modules](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules) directly with [import-map](https://github.com/WICG/import-maps). See [template/index.html](template/index.html).
 - Build examples dependencies using [browserlist](https://github.com/browserslist/browserslist) with targets `defaults and supports es6-module` to publish as GitHub pages with decent browser support.
 - Choose which dependencies to convert to ESM (devDependencies, dependencies or hardcoded list)
+- Terminal shortcuts on dev (`h + enter` for help): show server URLs, open browser, reload, reinstall dependencies, generate types and docs, analyse, lint all, format all, build, run tests (`test` script or `node --test`)
 
 ### Release
 
@@ -76,6 +78,7 @@ git add -A && git commit -m "feat: add feature"
 
 # Build package:
 # - lint and format sources
+# - analyse unused dependencies and files, report bundle sizes
 # - generate documentation and insert it directly in README
 # - generate TypeScript types from JSDoc
 npx snowdev build
@@ -160,6 +163,11 @@ Commands options:
   --serve                        Start the dev server on dev command.
                                                        [boolean] [default: true]
   --lint                         Lint on build command.[boolean] [default: true]
+  --analyse                      Analyse package as published (unused
+                                 dependencies and files, bundle sizes) on build
+                                 command. Dev command startup skips bundle
+                                 sizes.
+                                                       [boolean] [default: true]
   --format                       Format on build command.
                                                        [boolean] [default: true]
   --types                        Run TypeScript (generate types or compile) on
