@@ -1,9 +1,8 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>packageName by authorName (https://github.com/gitHubUsername)</title>
     <style>
       :root {
@@ -24,16 +23,18 @@
         padding: 0 20px;
       }
     </style>
+    <meta content="ie=edge" http-equiv="X-UA-Compatible" />
   </head>
   <body>
     <main>
       <h1>packageName</h1>
     </main>
-    <script async src="web_modules/es-module-shims.js" type="module"></script>
-    <script src="web_modules/import-map.json" type="importmap-shim"></script>
+    <script type="module" async src="web_modules/es-module-shims.js"></script>
+    <script type="importmap-shim" src="web_modules/import-map.json"></script>
 
     <script type="module-shim">
       import packageNameCC from "./index.js";
+
       console.log(packageNameCC);
     </script>
   </body>
