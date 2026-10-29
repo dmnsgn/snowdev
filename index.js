@@ -289,7 +289,7 @@ export const run = async (fn, options) => {
       const packageJsonPath = join(options.cwd, "package.json");
       let packageJson = await readJson(packageJsonPath);
       if (options.updateVersions) {
-        const { engines } = await readJson(
+        const { engines = {}, packageManager } = await readJson(
           join(__dirname, "template", "package.json"),
         );
         const { prerelease, major, minor } = semver.minVersion(VERSION);
@@ -297,6 +297,18 @@ export const run = async (fn, options) => {
           ? `>=${VERSION}`
           : `>=${major}.${minor}.x`;
         packageJson = deepmerge(packageJson, { engines });
+
+        const [name, version] = packageManager?.split("@", 2) ?? [];
+        const [currentName, currentVersion] =
+          packageJson.packageManager?.split("@") ?? [];
+        if (
+          !currentName ||
+          (currentName === name &&
+            (!semver.valid(currentVersion) ||
+              semver.gt(version, currentVersion)))
+        ) {
+          packageJson.packageManager = packageManager;
+        }
         await writeJson(packageJsonPath, packageJson);
       }
     }
