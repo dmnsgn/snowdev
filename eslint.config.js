@@ -1,36 +1,40 @@
-import eslintJs from "@eslint/js";
 import { defineConfig } from "eslint/config";
 import globals from "globals";
 import babelParser from "@babel/eslint-parser";
+
+import eslintJs from "@eslint/js";
 import tseslint from "typescript-eslint";
-import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
+import eslintPluginJsdoc from "eslint-plugin-jsdoc";
 import eslintPluginUnicorn from "eslint-plugin-unicorn";
 import eslintPluginSonarjs from "eslint-plugin-sonarjs";
-import eslintPluginJsdoc from "eslint-plugin-jsdoc";
 import eslintPluginImportX, {
   createNodeResolver,
   flatConfigs as importXConfigs,
 } from "eslint-plugin-import-x";
-import eslintPackageJson from "eslint-package-json";
-import eslintPluginHtml from "eslint-plugin-html";
-import eslintPluginMarkdown from "@eslint/markdown";
+import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
+
 import eslintNodeTest from "eslint-node-test";
-import css from "@eslint/css";
-import cssPropertyOrder, {
+import eslintPackageJson from "eslint-package-json";
+
+import eslintPluginHtml from "@html-eslint/eslint-plugin";
+import eslintPluginJsInHtml from "eslint-plugin-html";
+import eslintCssPropertyOrder, {
   createHtmlProcessor,
 } from "eslint-plugin-css-property-order";
+import eslintPluginMarkdown from "@eslint/markdown";
+
+import eslintCss from "@eslint/css";
 
 import { FILES_GLOB, getFileExtension } from "./utils.js";
 
-const IMPORT_EXTENSIONS = [
-  ...FILES_GLOB.javascript,
-  ...FILES_GLOB.typescriptAll,
-].map(getFileExtension);
+const SCRIPTS = [...FILES_GLOB.javascript, ...FILES_GLOB.typescriptAll];
+const SCRIPTS_AND_HTML = [...SCRIPTS, ...FILES_GLOB.html];
+const IMPORT_EXTENSIONS = SCRIPTS.map(getFileExtension);
 
-// eslint-disable-next-line unicorn/no-top-level-side-effects
 export default defineConfig([
+  // Scripts
   {
-    files: FILES_GLOB.javascript,
+    files: [...FILES_GLOB.javascript, ...FILES_GLOB.html],
     plugins: { js: eslintJs },
     extends: [eslintJs.configs.recommended],
   },
@@ -56,33 +60,7 @@ export default defineConfig([
     },
   },
   {
-    files: FILES_GLOB.javascript,
-    extends: [eslintPluginJsdoc.configs["flat/recommended-typescript-flavor"]],
-  },
-  {
-    files: FILES_GLOB.typescript,
-    extends: [eslintPluginJsdoc.configs["flat/recommended-typescript"]],
-    rules: {
-      "jsdoc/require-returns": 0,
-      "jsdoc/require-param": 0,
-      "jsdoc/require-yields": 0,
-    },
-  },
-  {
-    files: [...FILES_GLOB.javascript, ...FILES_GLOB.typescript],
-    plugins: { jsdoc: eslintPluginJsdoc },
-    rules: {
-      "jsdoc/require-jsdoc": 0,
-      "jsdoc/require-param-description": 0,
-      "jsdoc/require-property-description": 0,
-      "jsdoc/require-returns-description": 0,
-      "jsdoc/tag-lines": 0,
-      "jsdoc/no-defaults": 0,
-    },
-    settings: { jsdoc: { ignorePrivate: true } },
-  },
-  {
-    files: [...FILES_GLOB.javascript, ...FILES_GLOB.typescript],
+    files: SCRIPTS_AND_HTML,
     plugins: { unicorn: eslintPluginUnicorn },
     extends: [eslintPluginUnicorn.configs.unopinionated],
     rules: {
@@ -92,46 +70,18 @@ export default defineConfig([
       "unicorn/no-array-reverse": 0,
       "unicorn/no-array-sort": 0,
       "unicorn/no-for-each": 0,
-      "unicorn/number-literal-case": [
-        "error",
-        { hexadecimalValue: "lowercase" },
-      ],
     },
   },
   {
-    files: [...FILES_GLOB.javascript, ...FILES_GLOB.typescript],
-    ...eslintPluginSonarjs.configs.recommended,
+    files: SCRIPTS_AND_HTML,
+    extends: [eslintPluginSonarjs.configs.recommended],
     rules: {
       "sonarjs/cognitive-complexity": "warn",
+      "sonarjs/todo-tag": "warn",
     },
   },
   {
-    files: ["test/**/*.js"],
-    plugins: { "node-test": eslintNodeTest },
-    extends: [eslintNodeTest.configs.recommended],
-    languageOptions: {
-      // parser: "esprima",
-      globals: {
-        ...globals.browser,
-        ...globals.node,
-        ...globals.jest,
-        ...globals.jasmine,
-      },
-    },
-  },
-  {
-    files: ["**/package.json"],
-    plugins: { packageJson: eslintPackageJson },
-    extends: [eslintPackageJson.configs.recommended],
-    rules: {
-      "package-json/prefer-shorthand": 0,
-      "package-json/prefer-files-field": 0,
-      "package-json/sort-properties": 0,
-      "package-json/prefer-exports": 0,
-    },
-  },
-  {
-    files: [...FILES_GLOB.javascript, ...FILES_GLOB.typescriptAll],
+    files: SCRIPTS_AND_HTML,
     plugins: { "import-x": eslintPluginImportX },
     settings: {
       "import-x/extensions": IMPORT_EXTENSIONS,
@@ -184,18 +134,17 @@ export default defineConfig([
 
       // Style guide
       "import-x/consistent-type-specifier-style": "error",
-      "import-x/exports-last": "warn",
+      // "import-x/exports-last": "warn",
       "import-x/extensions": ["warn", "ignorePackages"],
       "import-x/first": "error",
-      "import-x/group-exports": "warn",
+      // "import-x/group-exports": "warn",
       "import-x/newline-after-import": ["error", { considerComments: true }],
       "import-x/order": [
         "error",
         {
           groups: [
             "builtin",
-            "external",
-            "internal",
+            ["external", "internal"],
             ["parent", "sibling", "index"],
             "unknown",
             "object",
@@ -203,6 +152,8 @@ export default defineConfig([
           ],
           // Allow sub-grouping local imports
           "newlines-between": "always-and-inside-groups",
+          sortTypesGroup: true,
+          "newlines-between-types": "ignore", // "never" TODO: https://github.com/un-ts/eslint-plugin-import-x/issues/542
           // named: true,
           // alphabetize: { order: "asc" },
           // warnOnUnassignedImports: "top",
@@ -222,33 +173,137 @@ export default defineConfig([
     },
   },
   eslintPluginPrettierRecommended,
+
+  // Documentation
+  {
+    files: [...FILES_GLOB.javascript, ...FILES_GLOB.html],
+    extends: [eslintPluginJsdoc.configs["flat/recommended-typescript-flavor"]],
+  },
+  {
+    files: FILES_GLOB.typescriptAll,
+    extends: [eslintPluginJsdoc.configs["flat/recommended-typescript"]],
+    rules: {
+      "jsdoc/require-returns": 0,
+      "jsdoc/require-param": 0,
+      "jsdoc/require-yields": 0,
+    },
+  },
+  {
+    files: SCRIPTS_AND_HTML,
+    plugins: { jsdoc: eslintPluginJsdoc },
+    rules: {
+      "jsdoc/require-jsdoc": 0,
+      "jsdoc/require-param-description": 0,
+      "jsdoc/require-property-description": 0,
+      "jsdoc/require-returns-description": 0,
+      "jsdoc/tag-lines": 0,
+      "jsdoc/no-defaults": 0,
+    },
+    settings: { jsdoc: { ignorePrivate: true } },
+  },
+
+  // Test
+  {
+    files: ["test/**/*.js"],
+    plugins: { "node-test": eslintNodeTest },
+    extends: [eslintNodeTest.configs.recommended],
+    languageOptions: {
+      // parser: "esprima",
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        ...globals.jest,
+        ...globals.jasmine,
+      },
+    },
+  },
+
+  // JSON
+  {
+    files: ["**/package.json"],
+    plugins: { packageJson: eslintPackageJson },
+    extends: [eslintPackageJson.configs.recommended],
+    rules: {
+      "package-json/prefer-shorthand": 0,
+      "package-json/prefer-files-field": 0,
+      "package-json/sort-properties": 0,
+      "package-json/prefer-exports": 0,
+    },
+  },
+
+  // Markup/Markdown
   {
     files: FILES_GLOB.html,
-    plugins: { html: eslintPluginHtml },
+    plugins: {
+      jsInHtml: eslintPluginJsInHtml,
+      "css-property-order": eslintCssPropertyOrder,
+    },
+    extends: [eslintPluginHtml.configs["flat/all"]],
     languageOptions: {
       sourceType: "module",
+      globals: globals.browser,
     },
     processor: createHtmlProcessor({ emitSource: true }),
+    settings: {
+      // eslint-plugin-html defaults + es-module-shims
+      "html/javascript-mime-types": [
+        String.raw`/^(application|text)\/(x-)?(javascript|babel|ecmascript-6)$/i`,
+        "/^module(-shim)?$/i",
+      ],
+    },
+    rules: {
+      // Prettier compatibility
+      "@html-eslint/attrs-newline": 0,
+      "@html-eslint/element-newline": 0,
+      "@html-eslint/indent": 0,
+      "@html-eslint/no-extra-spacing-text": 0,
+      "@html-eslint/no-extra-spacing-tags": [
+        "error",
+        { enforceBeforeSelfClose: true },
+      ],
+      "@html-eslint/require-closing-tags": ["error", { selfClosing: "always" }],
+      // es-module-shims types
+      "@html-eslint/no-invalid-attr-value": [
+        "error",
+        {
+          allow: [
+            {
+              tag: "script",
+              attr: "type",
+              valuePattern: "^(module|importmap)-shim$",
+            },
+          ],
+        },
+      ],
+      // No extra meta
+      "@html-eslint/require-meta-description": 0,
+      "@html-eslint/require-open-graph-protocol": 0,
+    },
   },
   {
     files: FILES_GLOB.markdown,
     plugins: { markdown: eslintPluginMarkdown },
     extends: [eslintPluginMarkdown.configs.recommended],
     rules: {
-      "markdown/no-irregular-whitespace": 0, // https://github.com/eslint/markdown/issues/299
+      // "markdown/no-irregular-whitespace": 0, // https://github.com/eslint/markdown/issues/299
       "markdown/no-missing-label-refs": 0,
     },
   },
+
+  // Styles
   {
-    files: [...FILES_GLOB.javascript, ...FILES_GLOB.typescript],
-    plugins: { "css-property-order": cssPropertyOrder },
+    files: SCRIPTS,
+    plugins: { "css-property-order": eslintCssPropertyOrder },
     processor: "css-property-order/tagged-template",
   },
   {
     files: FILES_GLOB.css,
-    plugins: { css },
+    plugins: { css: eslintCss },
     language: "css/css",
-    extends: [css.configs.recommended, cssPropertyOrder.configs.recommended],
+    extends: [
+      eslintCss.configs.recommended,
+      eslintCssPropertyOrder.configs.recommended,
+    ],
     rules: {
       "css/use-baseline": 0,
       "css/no-invalid-properties": 0,
