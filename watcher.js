@@ -48,6 +48,7 @@ const createWatcher = (
   const isIgnored = picomatch(ignore, { dot: true });
   const subscriptions = new Set();
   const externals = new Map();
+  let closed = false;
 
   const toFile = (path) =>
     isOutside(cwd, path) ? path : slash(relative(cwd, path));
@@ -93,6 +94,8 @@ const createWatcher = (
   };
 
   const add = (patterns, callback, { ignore = [] } = {}) => {
+    if (closed) return () => {};
+
     const globs = [];
     const negated = [];
     const files = new Set();
@@ -124,6 +127,7 @@ const createWatcher = (
   };
 
   const close = () => {
+    closed = true;
     subscriptions.clear();
     externals.clear();
     return watcher.close();
