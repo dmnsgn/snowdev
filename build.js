@@ -1,6 +1,6 @@
 import { promises as fs } from "node:fs";
-import { isBuiltin } from "node:module";
-import { join, extname, relative } from "node:path";
+import { findPackageJSON, isBuiltin } from "node:module";
+import { dirname, join, extname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { stripVTControlCharacters } from "node:util";
 import {
@@ -18,6 +18,7 @@ import {
   escapeRegExp,
   formatFileList,
   isInside,
+  pathExists,
   readJson,
   resolveExports,
   resolveFiles,
@@ -113,6 +114,18 @@ const getPackageName = (specifier) =>
     .split("/")
     .slice(0, specifier.startsWith("@") ? 2 : 1)
     .join("/");
+// Declared to satisfy an imported package's peer requirement
+const getPeerDependencies = async (name, cwd) => {
+  try {
+    const { peerDependencies } = await readJson(
+      findPackageJSON(name, join(cwd, "package.json")),
+    );
+    return Object.keys(peerDependencies ?? {});
+  } catch {
+    // Not installed: reported by the package manager instead
+    return [];
+  }
+};
 const stripExtension = (file) =>
   file.slice(0, -extname(file).length || undefined);
 
@@ -136,6 +149,22 @@ const hasRuntimeCode = async (file) => {
         !node.specifiers.length
       ),
   );
+};
+
+// Scripts referenced by URL ship with the package (workers, injected clients)
+const NEW_URL =
+  /new\s+URL\(\s*(["'`])([^"'`$]+)\1\s*,\s*import\.meta\.url\s*\)/g;
+const SCRIPT_FILE = /\.[cm]?[jt]sx?$/;
+const importMetaUrlPlugin = {
+  name: "snowdev-import-meta-url",
+  async transform(code, id) {
+    for (const match of code.matchAll(NEW_URL)) {
+      const file = resolve(dirname(id), match[2]);
+      if (SCRIPT_FILE.test(file) && (await pathExists(file))) {
+        this.emitFile({ type: "chunk", id: file });
+      }
+    }
+  },
 };
 
 const formatSize = (bytes) => `${(bytes / 1000).toFixed(2)} kB`;
@@ -172,6 +201,8 @@ const analyse = timed(async (cwd, files, options, { sizes = true } = {}) => {
   let results;
   try {
     const { rolldown } = await import("rolldown");
+    const { dynamicImportVarsPlugin, importGlobPlugin } =
+      await import("rolldown/experimental");
     const pkg = await readJson(join(cwd, "package.json"));
 
     // Analysed as published: consumers only reach exports and binaries
@@ -185,12 +216,19 @@ const analyse = timed(async (cwd, files, options, { sizes = true } = {}) => {
       .map((entry) => join(cwd, entry));
     if (!input.length) return;
 
-    const createBundle = (inputOptions) =>
+    const createBundle = ({ plugins = [], ...inputOptions }) =>
       rolldown({
         cwd,
         input,
         platform: "browser",
         logLevel: "silent",
+        // Template literal imports expand to glob imports of matching files
+        plugins: [
+          dynamicImportVarsPlugin(),
+          importGlobPlugin(),
+          importMetaUrlPlugin,
+          ...plugins,
+        ],
         ...inputOptions,
       });
     // Whole package: chunks shared between entries are counted once
@@ -237,10 +275,19 @@ const analyse = timed(async (cwd, files, options, { sizes = true } = {}) => {
       moduleIds.map((id) => stripExtension(toSource(id))),
     );
 
+    const usedPackages = new Set(importedPackages);
+    await Promise.all(
+      [...importedPackages].map(async (name) => {
+        for (const peer of await getPeerDependencies(name, cwd)) {
+          usedPackages.add(peer);
+        }
+      }),
+    );
+
     const unusedDependencies = Object.keys({
       ...pkg.dependencies,
       ...pkg.peerDependencies,
-    }).filter((name) => !importedPackages.has(name));
+    }).filter((name) => !usedPackages.has(name));
     const unreachedFiles = files.filter(
       (file) => !CONFIG_FILE.test(file) && !reached.has(stripExtension(file)),
     );
