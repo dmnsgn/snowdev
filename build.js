@@ -21,10 +21,41 @@ import {
   readJson,
   resolveExports,
   resolveFiles,
+  secondsFormatter,
   timed,
 } from "./utils.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
+
+// Core rules have no plugin prefix
+const getRulePlugin = (ruleId) =>
+  ruleId.includes("/") ? ruleId.slice(0, ruleId.lastIndexOf("/")) : "eslint";
+
+const formatLintStats = (lintResults) => {
+  const times = {};
+  const add = (key, total = 0) => (times[key] = (times[key] ?? 0) + total);
+
+  for (const { stats } of lintResults) {
+    for (const { parse, rules, fix } of stats?.times.passes ?? []) {
+      add("parse", parse?.total);
+      for (const [ruleId, { total }] of Object.entries(rules ?? {})) {
+        add(getRulePlugin(ruleId), total);
+      }
+      add("fix", fix?.total);
+    }
+  }
+
+  return valueFormatTableAsText(
+    Object.entries(times)
+      .filter(([, total]) => total)
+      .sort(([, a], [, b]) => b - a)
+      .map(([name, total]) => ({
+        name,
+        time: secondsFormatter.format(total / 1000),
+      })),
+    { columns: [{}, { align: "right" }] },
+  );
+};
 
 const lint = timed(async (cwd, files, options) => {
   try {
@@ -46,6 +77,7 @@ const lint = timed(async (cwd, files, options) => {
     }
 
     const fix = options.eslint?.fix;
+    const stats = console.level === "debug";
 
     const eslint = new ESLint({
       cwd,
@@ -53,9 +85,15 @@ const lint = timed(async (cwd, files, options) => {
       baseConfig,
       overrideConfigFile: true,
       fix,
+      stats,
       // concurrency: "auto",
     });
     const lintResults = await eslint.lintFiles(files);
+    if (stats) {
+      console.debug(
+        `${lint.description} — times\n${formatLintStats(lintResults)}`,
+      );
+    }
     if (fix) await ESLint.outputFixes(lintResults);
     const results = (await eslint.loadFormatter("stylish")).format(lintResults);
 
