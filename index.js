@@ -57,7 +57,7 @@ export const DEFAULTS_OPTIONS = {
   cache: true,
 
   /** @type {import("console-ansi").ConsoleAnsi} */
-  console: undefined,
+  console: { level: "log" },
 
   // Server
   /** @type {import("./server.js").ServerOptions} */
@@ -271,9 +271,8 @@ export const run = async (fn, options) => {
     );
 
     if (options.caller === "cli") {
-      console.debug(`v${VERSION}`);
-      console.debug(
-        `Using npm@${options.npmVersion} (${options.npmPath || "global"})`,
+      console.log(
+        `v${VERSION} — npm@${options.npmVersion} ("${options.npmPath || "global"}")`,
       );
     }
     console.info(`${fn.name} in "${options.cwd}"`);

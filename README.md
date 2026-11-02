@@ -190,7 +190,7 @@ Commands options:
                                  files or bundling options). Set to false to
                                  always install.       [boolean] [default: true]
   --console.level                Minimum console level to output.
-    [string] [choices: "debug", "log", "info", "warn", "error"] [default: debug]
+      [string] [choices: "debug", "log", "info", "warn", "error"] [default: log]
   --server.crossOriginIsolation  Add Cross-Origin-Opener-Policy (COOP) and
                                  Cross-Origin-Embedder-Policy (COEP) headers to
                                  the dev server. Required for the use of

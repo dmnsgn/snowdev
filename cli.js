@@ -176,7 +176,7 @@ parser
       type: "string",
       choices: ["debug", "log", "info", "warn", "error"],
       describe: `Minimum console level to output.`,
-      defaultDescription: `debug`,
+      defaultDescription: `log`,
     },
     "server.crossOriginIsolation": {
       group: "Commands options:",
