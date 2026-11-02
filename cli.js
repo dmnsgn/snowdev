@@ -7,6 +7,7 @@ import { cosmiconfig } from "cosmiconfig";
 import { DEFAULTS_OPTIONS, TARGETS, commands, run } from "./index.js";
 import { console, NAME, VERSION } from "./utils.js";
 
+// eslint-disable-next-line unicorn/no-exports-in-scripts
 export const getConfig = async () => {
   try {
     const { config = {}, filepath } =

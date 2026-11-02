@@ -195,9 +195,10 @@ const resolveHtml = async (pathname, req, options) => {
 
 const injectClient = (html) => {
   const script = `<script type="module" src="${CLIENT_PATH}"></script>`;
-  if (HEAD_TAG.test(html)) return html.replace(HEAD_TAG, (tag) => tag + script);
   // Head is optional in HTML: keep the doctype first to avoid quirks mode
-  return html.replace(LEADING_DOCTYPE, (doctype) => doctype + script);
+  return HEAD_TAG.test(html)
+    ? html.replace(HEAD_TAG, (tag) => tag + script)
+    : html.replace(LEADING_DOCTYPE, (doctype) => doctype + script);
 };
 
 const transformHtml = async (file, options) => {
@@ -261,6 +262,7 @@ const createServer = async (options) => {
       }
 
       const pathname = decodeURIComponent(
+        // eslint-disable-next-line sonarjs/no-clear-text-protocols -- Parsing base only, no request
         new URL(req.url, "http://_").pathname,
       );
 

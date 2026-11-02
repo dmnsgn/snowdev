@@ -1,6 +1,6 @@
 import { isAbsolute, relative, resolve } from "node:path";
 
-import chokidar from "chokidar";
+import { watch } from "chokidar";
 import picomatch from "picomatch";
 import slash from "slash";
 
@@ -69,12 +69,11 @@ const createWatcher = (
     }
   };
 
-  const watcher = chokidar
-    .watch(cwd, {
-      ignoreInitial: true,
-      ignored: (path) =>
-        !isOutside(cwd, path) && isIgnored(slash(relative(cwd, path))),
-    })
+  const watcher = watch(cwd, {
+    ignoreInitial: true,
+    ignored: (path) =>
+      !isOutside(cwd, path) && isIgnored(slash(relative(cwd, path))),
+  })
     .on("add", (path) => notify("change", path))
     .on("change", (path) => notify("change", path))
     .on("unlink", (path) => notify("unlink", path))

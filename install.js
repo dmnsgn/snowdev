@@ -212,23 +212,20 @@ const install = timed(async (options) => {
   const importMapFile = join(outputDir, "import-map.json");
 
   // Get current dependencies
+  const customDependencies =
+    type === DEPENDENCY_TYPES.CUSTOM ? options.dependencies : [];
   const dependencies =
-    type === DEPENDENCY_TYPES.CUSTOM && !options.dependencies.length
+    type === DEPENDENCY_TYPES.CUSTOM && !customDependencies.length
       ? []
-      : await getDependencies(
-          options,
-          type,
-          type === DEPENDENCY_TYPES.CUSTOM ? options.dependencies : [],
-        );
+      : await getDependencies(options, type, customDependencies);
 
   await checking;
 
   const dependenciesNames = dependencies.map(({ name }) => name);
 
-  const dependenciesHardcoded =
-    type === DEPENDENCY_TYPES.CUSTOM
-      ? options.dependencies.filter((name) => !dependenciesNames.includes(name))
-      : [];
+  const dependenciesHardcoded = customDependencies.filter(
+    (name) => !dependenciesNames.includes(name),
+  );
 
   let cache;
   try {
@@ -444,16 +441,17 @@ const install = timed(async (options) => {
             continue;
           }
 
-          if (!(await pathExists(resolvedExport))) {
-            console.error(`install — Unknown export: "${resolvedExport}"`);
-            continue;
-          }
-
+          // Current package exports may not be built yet: trust package.json
           if (isCurrentPackage) {
             const relativeExport = slash(relative(outputDir, resolvedExport));
             importMap.imports[id] = relativeExport.startsWith(".")
               ? relativeExport
               : `./${relativeExport}`;
+            continue;
+          }
+
+          if (!(await pathExists(resolvedExport))) {
+            console.error(`install — Unknown export: "${resolvedExport}"`);
             continue;
           }
 
@@ -464,12 +462,11 @@ const install = timed(async (options) => {
           } else {
             input[id] = resolvedExport;
           }
+          const needsJsExtension =
+            !isCopiedExport &&
+            (packageTargets.includes(id) || extname(id) !== ".js");
           importMap.imports[id] = bareToDotRelativePath(
-            isCopiedExport
-              ? id
-              : packageTargets.includes(id) || extname(id) !== ".js"
-                ? `${id}.js`
-                : id,
+            needsJsExtension ? `${id}.js` : id,
           );
         } catch (error) {
           console.error(error);

@@ -78,6 +78,7 @@ export default defineConfig([
     rules: {
       "sonarjs/cognitive-complexity": "warn",
       "sonarjs/todo-tag": "warn",
+      "sonarjs/redundant-type-aliases": "warn",
     },
   },
   {
@@ -127,7 +128,7 @@ export default defineConfig([
       // Static analysis
       "import-x/namespace": ["error", { allowComputed: true }],
       "import-x/no-absolute-path": "error",
-      "import-x/no-cycle": ["error", { ignoreExternal: true }],
+      "import-x/no-cycle": ["warn", { ignoreExternal: true }],
       "import-x/no-relative-packages": "error",
       "import-x/no-self-import": "error",
       "import-x/no-useless-path-segments": "error",

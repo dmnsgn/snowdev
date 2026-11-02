@@ -4,6 +4,7 @@ import { promises as fs } from "node:fs";
 import { dirname, extname, isAbsolute, join, parse, relative } from "node:path";
 import { promisify } from "node:util";
 import { exec as execCb } from "node:child_process";
+
 import deepmerge from "deepmerge";
 
 import { getConsole } from "console-ansi";
@@ -125,7 +126,8 @@ const timed = (fn, label) => {
         ? label(...args)
         : (label ?? getTaskLabel(wrapped.description, ...args));
     let key = name;
-    for (let i = 2; timers.has(key); i++) key = `${name} (${i})`;
+    let count = 1;
+    while (timers.has(key)) key = `${name} (${++count})`;
     timers.add(key);
     console.time(key);
     try {
@@ -395,7 +397,7 @@ const pick = (obj, keys) =>
 
 // RegExp and functions would otherwise serialize to {} / be dropped
 const hashObject = (obj) =>
-  createHash("sha1")
+  createHash("sha256")
     .update(
       JSON.stringify(obj, (key, value) =>
         value instanceof RegExp || typeof value === "function"

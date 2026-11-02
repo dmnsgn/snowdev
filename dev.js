@@ -244,6 +244,7 @@ const dev = async (options = {}) => {
       quit: async () => {
         unbindShortcuts();
         await Promise.all([server?.close(), watcher.close()]);
+        // eslint-disable-next-line unicorn/no-process-exit
         process.exit();
       },
     }),
