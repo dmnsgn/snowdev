@@ -43,6 +43,12 @@ export default defineConfig([
     files: FILES_GLOB.typescriptAll,
   })),
   {
+    files: FILES_GLOB.typescriptAll.map((glob) => `src/${glob}`),
+    ignores: ["**/*.spec.ts"],
+    extends: [tseslint.configs.recommendedTypeCheckedOnly],
+    languageOptions: { parserOptions: { projectService: true } },
+  },
+  {
     files: FILES_GLOB.javascript,
     languageOptions: {
       parser: babelParser,
