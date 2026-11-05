@@ -271,7 +271,7 @@ export const run = async (fn, options) => {
     );
 
     if (options.caller === "cli") {
-      console.log(
+      console.info(
         `v${VERSION} — npm@${options.npmVersion} ("${options.npmPath || "global"}")`,
       );
     }
