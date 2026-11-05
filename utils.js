@@ -1,6 +1,7 @@
 /* eslint-disable unicorn/prefer-await */
 import { createHash } from "node:crypto";
 import { promises as fs } from "node:fs";
+import { findPackageJSON } from "node:module";
 import { dirname, extname, isAbsolute, join, parse, relative } from "node:path";
 import { promisify } from "node:util";
 import { exec as execCb } from "node:child_process";
@@ -61,6 +62,8 @@ const secondsFormatter = new Intl.NumberFormat("en", {
   style: "unit",
   unitDisplay: "narrow",
 });
+
+const formatSize = (bytes) => `${(bytes / 1000).toFixed(2)} kB`;
 
 const sortPaths = (
   paths,
@@ -153,13 +156,18 @@ function escapeRegExp(string) {
   return string.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`); // $& means the whole matched string
 }
 
-async function isTypeScriptProject(cwd) {
+const readTsConfig = async (cwd, fallback) => {
   const { default: ts } = await import("typescript");
   const configPath = ts.findConfigFile(cwd, ts.sys.fileExists, "tsconfig.json");
-  return configPath
-    ? ts.readConfigFile(configPath, ts.sys.readFile).config?.compilerOptions
-        ?.outDir
-    : false;
+  const config = configPath
+    ? ts.readConfigFile(configPath, ts.sys.readFile).config
+    : fallback;
+  return { ts, configPath, config };
+};
+
+async function isTypeScriptProject(cwd) {
+  const { configPath, config } = await readTsConfig(cwd);
+  return configPath ? config?.compilerOptions?.outDir : false;
 }
 
 const pathExists = (path) =>
@@ -193,6 +201,9 @@ const statFiles = async (files) =>
 const compareStats = (a, b) => a?.mtimeMs === b?.mtimeMs && a?.size === b?.size;
 
 const getFileExtension = (file) => parse(file).ext;
+
+const stripExtension = (file) =>
+  file.slice(0, -extname(file).length || undefined);
 
 const htmlHotInject = async (html) => {
   const cheerio = await import("cheerio");
@@ -418,6 +429,28 @@ const dotRelativeToBarePath = (p) =>
 
 const bareToDotRelativePath = (p) => `./${p}`;
 
+// Bare specifiers name packages: not relative, absolute, subpath import, virtual or URL
+const isBareSpecifier = (id) => !/^([./#\0]|[a-z]+:)/i.test(id);
+
+const getPackageName = (specifier) =>
+  specifier
+    .split("/")
+    .slice(0, specifier.startsWith("@") ? 2 : 1)
+    .join("/");
+
+// Declared to satisfy an imported package's peer requirement
+const getPeerDependencies = async (name, cwd) => {
+  try {
+    const { peerDependencies } = await readJson(
+      findPackageJSON(name, join(cwd, "package.json")),
+    );
+    return Object.keys(peerDependencies ?? {});
+  } catch {
+    // Not installed: reported by the package manager instead
+    return [];
+  }
+};
+
 export {
   console,
   FILES_GLOB,
@@ -428,6 +461,7 @@ export {
   listFormatter,
   formatFileList,
   secondsFormatter,
+  formatSize,
   readJson,
   writeJson,
   sortPaths,
@@ -438,6 +472,7 @@ export {
   timed,
   allKeyed,
   escapeRegExp,
+  readTsConfig,
   isTypeScriptProject,
   pathExists,
   realpathSafe,
@@ -445,6 +480,7 @@ export {
   statFiles,
   compareStats,
   getFileExtension,
+  stripExtension,
   htmlHotInject,
   resolveExports,
   resolveBrowserIgnores,
@@ -453,4 +489,7 @@ export {
   arrayDifference,
   dotRelativeToBarePath,
   bareToDotRelativePath,
+  isBareSpecifier,
+  getPackageName,
+  getPeerDependencies,
 };

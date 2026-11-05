@@ -31,6 +31,7 @@ import {
   arrayDifference,
   dotRelativeToBarePath,
   bareToDotRelativePath,
+  getPackageName,
   pick,
   hashObject,
   readJson,
@@ -378,10 +379,7 @@ const install = timed(async (options) => {
         )?.realpath;
 
         if (!dependencyPath) {
-          const parent = target
-            .split("/")
-            .slice(0, target.startsWith("@") ? 2 : 1)
-            .join("/");
+          const parent = getPackageName(target);
           const parentRealPath = dependencies.find(
             ({ name }) => name === parent,
           )?.realpath;

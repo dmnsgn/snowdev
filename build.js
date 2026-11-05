@@ -1,5 +1,5 @@
 import { promises as fs } from "node:fs";
-import { findPackageJSON, isBuiltin } from "node:module";
+import { isBuiltin } from "node:module";
 import { dirname, join, extname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { stripVTControlCharacters } from "node:util";
@@ -17,12 +17,18 @@ import {
   RF_OPTIONS,
   escapeRegExp,
   formatFileList,
+  formatSize,
+  getPackageName,
+  getPeerDependencies,
+  isBareSpecifier,
   isInside,
   pathExists,
   readJson,
+  readTsConfig,
   resolveExports,
   resolveFiles,
   secondsFormatter,
+  stripExtension,
   timed,
 } from "./utils.js";
 
@@ -107,28 +113,6 @@ const lint = timed(async (cwd, files, options) => {
 });
 lint.description = `build — lint sources`;
 
-// Bare specifiers name packages: not relative, absolute, subpath import, virtual or URL
-const isBareSpecifier = (id) => !/^([./#\0]|[a-z]+:)/i.test(id);
-const getPackageName = (specifier) =>
-  specifier
-    .split("/")
-    .slice(0, specifier.startsWith("@") ? 2 : 1)
-    .join("/");
-// Declared to satisfy an imported package's peer requirement
-const getPeerDependencies = async (name, cwd) => {
-  try {
-    const { peerDependencies } = await readJson(
-      findPackageJSON(name, join(cwd, "package.json")),
-    );
-    return Object.keys(peerDependencies ?? {});
-  } catch {
-    // Not installed: reported by the package manager instead
-    return [];
-  }
-};
-const stripExtension = (file) =>
-  file.slice(0, -extname(file).length || undefined);
-
 // Loaded by their tool, not imported
 const CONFIG_FILE = /\.config\.[cm]?[jt]s$/;
 
@@ -167,7 +151,6 @@ const importMetaUrlPlugin = {
   },
 };
 
-const formatSize = (bytes) => `${(bytes / 1000).toFixed(2)} kB`;
 const measure = (code) => ({
   minified: formatSize(Buffer.byteLength(code)),
   gzip: formatSize(gzipSync(code, { level: 9 }).length),
@@ -182,11 +165,7 @@ const measure = (code) => ({
 const getSourceMapper = async (cwd, options) => {
   if (!options.ts) return (id) => id;
 
-  const { default: ts } = await import("typescript");
-  const configPath = ts.findConfigFile(cwd, ts.sys.fileExists, "tsconfig.json");
-  const config = configPath
-    ? ts.readConfigFile(configPath, ts.sys.readFile).config
-    : options.tsconfig;
+  const { ts, config } = await readTsConfig(cwd, options.tsconfig);
   const { outDir, rootDir = cwd } = ts.parseJsonConfigFileContent(
     config,
     ts.sys,
@@ -414,7 +393,6 @@ const docs = timed(async (cwd, files, options) => {
 
   if (options.ts) {
     try {
-      const { default: ts } = await import("typescript");
       const TypeDoc = await import("typedoc");
       const { default: concatMd } = await import("concat-md");
 
@@ -444,11 +422,7 @@ const docs = timed(async (cwd, files, options) => {
         ],
       );
       app.logger.info = console.info;
-      const configPath = ts.findConfigFile(
-        cwd,
-        ts.sys.fileExists,
-        "tsconfig.json",
-      );
+      const { configPath } = await readTsConfig(cwd);
       if (!configPath) {
         app.options.setCompilerOptions(
           files.flat(),
@@ -547,12 +521,9 @@ docs.description = `build — update docs`;
 
 const types = timed(async (cwd, files, options, watch) => {
   try {
-    const { default: ts } = await import("typescript");
-
-    const configPath = ts.findConfigFile(
+    const { ts, configPath, config } = await readTsConfig(
       cwd,
-      ts.sys.fileExists,
-      "tsconfig.json",
+      options.tsconfig,
     );
 
     // Ordered by severity: the most severe category present picks the console method
@@ -616,10 +587,6 @@ const types = timed(async (cwd, files, options, watch) => {
         ),
       );
     } else {
-      const config = configPath
-        ? ts.readConfigFile(configPath, ts.sys.readFile).config
-        : options.tsconfig;
-
       if (!configPath) config.include = files;
 
       if (config.compilerOptions.declarationDir) {
