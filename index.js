@@ -60,7 +60,7 @@ export const DEFAULTS_OPTIONS = {
   console: { level: "log" },
 
   // Server
-  /** @type {import("./server.js").ServerOptions} */
+  /** @type {import("./server/index.js").ServerOptions} */
   server: {
     host: undefined,
     port: 3000,

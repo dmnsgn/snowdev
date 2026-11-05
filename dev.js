@@ -1,12 +1,12 @@
+import { spawn } from "node:child_process";
 import { basename, join, relative } from "node:path";
+import { createInterface } from "node:readline/promises";
 
 import pDebounce from "p-debounce";
 
 import install from "./install.js";
-import createServer from "./server.js";
-import createWatcher from "./watcher.js";
-import bindShortcuts from "./shortcuts.js";
-import test from "./test.js";
+import createServer from "./server/index.js";
+import createWatcher from "./server/watcher.js";
 import build, {
   types,
   docs,
@@ -15,7 +15,13 @@ import build, {
   format,
   checkDocs,
 } from "./build.js";
-import { console, getFileExtension, readJson, resolveFiles } from "./utils.js";
+import {
+  console,
+  getFileExtension,
+  readJson,
+  resolveFiles,
+  timed,
+} from "./utils.js";
 
 const lintAndLog = async (files, options, log) => {
   const results = await lint(options.cwd, files, options);
@@ -31,6 +37,84 @@ const analyseAndLog = async (options, log, analyseOptions) => {
   const files = await resolveFiles(options.cwd, options);
   const results = await analyse(options.cwd, files, options, analyseOptions);
   if (results) log(`Analyse Warning:\n${results}`);
+};
+
+const getTestCommand = async (cwd) => {
+  try {
+    if ((await readJson(join(cwd, "package.json"))).scripts?.test) {
+      return "npm test";
+    }
+  } catch {
+    // No readable package.json: fall back to the built-in runner
+  }
+  return `"${process.execPath}" --test`;
+};
+
+const test = timed(async (options) => {
+  const command = await getTestCommand(options.cwd);
+
+  // No stdin: the dev shortcuts own it
+  const child = spawn(command, {
+    cwd: options.cwd,
+    shell: true,
+    stdio: ["ignore", "inherit", "inherit"],
+  });
+  const code = await new Promise((resolve, reject) =>
+    child.once("error", reject).once("close", resolve),
+  );
+  if (code) console.error(`test — failed with exit code ${code}`);
+
+  return code;
+}, "test — run tests");
+
+const bindShortcuts = (shortcuts) => {
+  if (!process.stdin.isTTY) return () => {};
+
+  const allShortcuts = [
+    ...shortcuts,
+    {
+      key: "h",
+      group: "general",
+      description: "show help",
+      action: () => {
+        const groups = Object.groupBy(allShortcuts, ({ group }) => group);
+        const lines = Object.entries(groups).flatMap(([group, items]) => [
+          `  ${group}`,
+          ...items.map(
+            ({ key, description }) => `    ${key} + enter  ${description}`,
+          ),
+        ]);
+        console.info(`dev — shortcuts:\n${lines.join("\n")}`);
+      },
+    },
+  ];
+
+  const running = new Set();
+
+  // No "output": keeps the terminal in cooked mode so Ctrl+C still sends SIGINT
+  const readline = createInterface({ input: process.stdin });
+  readline.on("line", async (line) => {
+    const key = line.trim();
+    const shortcut = allShortcuts.find((shortcut) => shortcut.key === key);
+    if (!shortcut) return;
+
+    if (running.has(shortcut)) {
+      console.warn(`dev — "${shortcut.description}" already running.`);
+      return;
+    }
+    running.add(shortcut);
+    try {
+      await shortcut.action();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      running.delete(shortcut);
+    }
+  });
+
+  console.info("dev — press h + enter to show help");
+
+  return () => readline.close();
 };
 
 const inGroup = (group, shortcuts) =>
@@ -236,19 +320,21 @@ const dev = async (options = {}) => {
 
   const served = server && (await serve(options, { server, watcher, log }));
 
-  const unbindShortcuts = bindShortcuts(
-    getShortcuts(options, {
-      server,
-      served,
-      log,
-      quit: async () => {
-        unbindShortcuts();
-        await Promise.all([server?.close(), watcher.close()]);
-        // eslint-disable-next-line unicorn/no-process-exit
-        process.exit();
-      },
-    }),
-  );
+  if (options.caller === "cli") {
+    const unbindShortcuts = bindShortcuts(
+      getShortcuts(options, {
+        server,
+        served,
+        log,
+        quit: async () => {
+          unbindShortcuts();
+          await Promise.all([server?.close(), watcher.close()]);
+          // eslint-disable-next-line unicorn/no-process-exit
+          process.exit();
+        },
+      }),
+    );
+  }
 
   await served?.install();
 

@@ -13,7 +13,7 @@ import selfsigned from "selfsigned";
 import open from "open";
 import getPort from "get-port";
 
-import { console, htmlHotInject } from "./utils.js";
+import { console, htmlHotInject } from "../utils.js";
 
 const execFile = promisify(execFileCb);
 

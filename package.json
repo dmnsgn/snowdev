@@ -70,7 +70,7 @@
   "files": [
     "*.js",
     "jsdoc.json",
-    "utils/**/*",
+    "server/**/*",
     "types/**/*",
     "template/**/*",
     "!.DS_Store"
@@ -173,6 +173,7 @@
   },
   "snowdev": {
     "serve": false,
-    "dependencies": []
+    "dependencies": [],
+    "files": "{*.js,server/**/*.js}"
   }
 }
