@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [3.0.0-alpha.4](https://github.com/dmnsgn/snowdev/compare/v3.0.0-alpha.3...v3.0.0-alpha.4) (2026-11-05)
+
+### Bug Fixes
+
+* **dev:** mirror initial lint and docs results to the browser console ([58f084a](https://github.com/dmnsgn/snowdev/commit/58f084a9dcdb0b30c271d7443d9e100f788ae041))
+* ensure importMap file exist ([73c0e5b](https://github.com/dmnsgn/snowdev/commit/73c0e5ba6d059e6e6f2e8fcdba49b5701a8b3aa4))
+* ensure no error on chokidar when closing ([b72d9ea](https://github.com/dmnsgn/snowdev/commit/b72d9eac96bdce090c24841faddec17fa6375773))
+* guard TypeScript diagnostics without a file ([c0b890e](https://github.com/dmnsgn/snowdev/commit/c0b890e445017209cb3898162872c1b68cabe760))
+* patch response to avoid UnsupportedWarning: Status message is not supported by HTTP/2 (RFC7540 8.1.2.4) ([55cd133](https://github.com/dmnsgn/snowdev/commit/55cd13311ca47bcaaf5b38b4a1d4092df98ef432))
+
+### Features
+
+* add @html-eslint/eslint-plugin and fix missing linting for scripts + reorder + enable all sonar recommended ([18e31a1](https://github.com/dmnsgn/snowdev/commit/18e31a19d2bf35e1b96b19ccf8da7b8dac22f425))
+* add eslint-plugin-import-x ([6443584](https://github.com/dmnsgn/snowdev/commit/6443584b570051edf7af928a5b48dabc9dc760ba))
+* add server ([7f531fd](https://github.com/dmnsgn/snowdev/commit/7f531fd5601642511d1e93482fd9bdf42e64cfa9))
+* add shortcuts + analyse + test ([f296f3d](https://github.com/dmnsgn/snowdev/commit/f296f3d2a57b4b0b5ecedf0455c0871bf5e00707))
+* add ts linting projectService ([c72298a](https://github.com/dmnsgn/snowdev/commit/c72298aa6804c40706f3ab189b704a92c38d82b0))
+* **build:** add eslint stats under debug level ([0cef874](https://github.com/dmnsgn/snowdev/commit/0cef874c8a5dd87d288738c12b644a8b4ce7a112))
+* **build:** follow dynamic, URL and peer dependencies in analyse ([64234f9](https://github.com/dmnsgn/snowdev/commit/64234f91af104dc7adefb3792a238b69ce59294c))
+* **dev:** hold html until install completes and send install errors to the browser ([d3fffe3](https://github.com/dmnsgn/snowdev/commit/d3fffe3950ceb4c9080024195746c9e0baaa64a1))
+* format file list and single file timed label ([96043f3](https://github.com/dmnsgn/snowdev/commit/96043f34243f97ec406a99b94e72d85ee7deadd1))
+* prevent overlapping console time/timeEnd ([ac90a01](https://github.com/dmnsgn/snowdev/commit/ac90a01c5cff071978dcaa24f5c1cdbcff5da1e3))
+* raise console level to log ([26954ea](https://github.com/dmnsgn/snowdev/commit/26954ea14fe8e99a4bd7a9b0f95a7e5dc19cf354))
+* **template:** lint html ([5d36e03](https://github.com/dmnsgn/snowdev/commit/5d36e03ad348a661a0fe9dee719f1a4012288997))
+* update node and packageManager versions + handle packageManager sync ([f6123b1](https://github.com/dmnsgn/snowdev/commit/f6123b15b07be6b64a1c877acc4e4ba8d9fe53b9))
+
+### Performance Improvements
+
+* **dev:** run diagnostics after install ([1567972](https://github.com/dmnsgn/snowdev/commit/156797231e196d4d0988e6b2b54a3b7b6354b502))
+* **dev:** start server before linting ([43d38e8](https://github.com/dmnsgn/snowdev/commit/43d38e83302e552bc1efc444ebd2ec39c84ae5d4))
+* dynamicly import commands ([f4c1a59](https://github.com/dmnsgn/snowdev/commit/f4c1a596ec3218bb05b0a74aeb8dd8a27354c4f0))
+* lazy load linter, formatter, TypeScript and docs dependencies ([63cb707](https://github.com/dmnsgn/snowdev/commit/63cb7070fc23b8c2045f2071f399d0e0baf45c4d))
+* run npm queries concurrently ([9c21e86](https://github.com/dmnsgn/snowdev/commit/9c21e86c3d3dd388271d837d887c98c986469ded))
+
+### BREAKING CHANGES
+
+* DEFAULTS_OPTIONS.eslint and DEFAULTS_OPTIONS.prettier are now empty; the defaults from eslint.config.js and prettier.config.js are merged on lint and format. isTypeScriptProject and htmlHotInject are now async.
+
 # [3.0.0-alpha.3](https://github.com/dmnsgn/snowdev/compare/v3.0.0-alpha.2...v3.0.0-alpha.3) (2026-09-22)
 
 ### Bug Fixes
