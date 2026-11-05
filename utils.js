@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { promises as fs } from "node:fs";
 import { findPackageJSON } from "node:module";
 import { dirname, extname, isAbsolute, join, parse, relative } from "node:path";
-import { promisify } from "node:util";
+import { promisify, styleText } from "node:util";
 import { exec as execCb } from "node:child_process";
 
 import deepmerge from "deepmerge";
@@ -56,6 +56,7 @@ const CORE_JS_SEMVER = semver.minVersion(dependencies["core-js"]);
 
 const listFormatter = new Intl.ListFormat("en");
 const formatFileList = (files) => files.map((file) => `\n- ${file}`).join("");
+const formatBold = (text) => styleText("bold", text);
 
 const secondsFormatter = new Intl.NumberFormat("en", {
   unit: "second",
@@ -460,6 +461,7 @@ export {
   RF_OPTIONS,
   listFormatter,
   formatFileList,
+  formatBold,
   secondsFormatter,
   formatSize,
   readJson,

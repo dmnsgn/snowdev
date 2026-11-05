@@ -17,6 +17,7 @@ import build, {
 } from "./build.js";
 import {
   console,
+  formatBold,
   getFileExtension,
   readJson,
   resolveFiles,
@@ -67,6 +68,8 @@ const test = timed(async (options) => {
   return code;
 }, "test — run tests");
 
+const formatKey = (key) => formatBold(`${key} + enter`);
+
 const bindShortcuts = (shortcuts) => {
   if (!process.stdin.isTTY) return () => {};
 
@@ -81,7 +84,7 @@ const bindShortcuts = (shortcuts) => {
         const lines = Object.entries(groups).flatMap(([group, items]) => [
           `  ${group}`,
           ...items.map(
-            ({ key, description }) => `    ${key} + enter  ${description}`,
+            ({ key, description }) => `    ${formatKey(key)}  ${description}`,
           ),
         ]);
         console.info(`dev — shortcuts:\n${lines.join("\n")}`);
@@ -112,7 +115,7 @@ const bindShortcuts = (shortcuts) => {
     }
   });
 
-  console.info("dev — press h + enter to show help");
+  console.info(`dev — press ${formatKey("h")} to show help`);
 
   return () => readline.close();
 };
