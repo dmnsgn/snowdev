@@ -36,6 +36,7 @@ on("hmr", (file) => {
   globalThis.importShim.hotReload(new URL(file, document.baseURI).href);
 });
 on("console:log", (message) => console.log(message));
+on("console:error", (message) => console.error(message));
 
 let attempts = 0;
 

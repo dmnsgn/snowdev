@@ -225,11 +225,19 @@ const serve = async (options, { server, watcher, log }) => {
       : null;
   };
 
+  const sendInstallError = ({ message }) =>
+    server.send("console:error", `[snowdev] Install Error:\n${message}`, {
+      queue: true,
+    });
+
   const installDependencies = async (installOptions = options) => {
     try {
-      watchLinkedFiles(await install(installOptions));
+      const result = await install(installOptions);
+      watchLinkedFiles(result);
+      if (result.error) sendInstallError(result.error);
     } catch (error) {
       console.error(error);
+      sendInstallError(error);
     }
   };
   const updateDependencies = async (installOptions) => {
@@ -313,7 +321,10 @@ const dev = async (options = {}) => {
           : error,
       ),
   });
-  const server = options.serve ? await createServer(options) : null;
+  const ready = Promise.withResolvers();
+  const server = options.serve
+    ? await createServer(options, ready.promise)
+    : null;
 
   const log = (message) => server?.send("console:log", `[snowdev] ${message}`);
 
@@ -340,6 +351,7 @@ const dev = async (options = {}) => {
   }
 
   await served?.install();
+  ready.resolve();
 
   const linting = options.lint && lintAndLog(options.files, options, log);
   if (checkJsdoc) {

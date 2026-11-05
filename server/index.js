@@ -228,6 +228,9 @@ const openBrowser = async (url) => {
  * @callback ServerSend
  * @param {string} type
  * @param {unknown} [data]
+ * @param {object} [options]
+ * @param {boolean} [options.queue=false] Deliver to the next page if none is
+ *   connected.
  * @returns {void}
  */
 
@@ -244,9 +247,10 @@ const openBrowser = async (url) => {
  * Start a static server with a WebSocket channel to the injected client.
  *
  * @param {object} options
+ * @param {Promise<void>} [ready] HTML responses wait for it.
  * @returns {Promise<DevServer>}
  */
-const createServer = async (options) => {
+const createServer = async (options, ready) => {
   const { host } = options.server;
   const client = await readFile(new URL("client.js", import.meta.url));
   const serveStatic = sirv(options.cwd, { dev: true, etag: true });
@@ -276,6 +280,8 @@ const createServer = async (options) => {
       if (html?.redirect) {
         res.writeHead(301, { Location: html.redirect }).end();
       } else if (html?.file) {
+        // Keeps the page in its loading state: its modules may not exist yet
+        await ready;
         res.setHeader("Content-Type", "text/html; charset=utf-8");
         res.setHeader("Cache-Control", "no-cache");
         res.end(await transformHtml(html.file, options));
@@ -315,11 +321,18 @@ const createServer = async (options) => {
     );
   });
 
-  const send = (type, data) => {
+  const pending = [];
+  wss.on("connection", (socket) => {
+    for (const message of pending.splice(0)) socket.send(message);
+  });
+
+  const send = (type, data, { queue = false } = {}) => {
     const message = JSON.stringify({ type, data });
-    for (const socket of wss.clients) {
-      if (socket.readyState === WebSocket.OPEN) socket.send(message);
-    }
+    const sockets = [...wss.clients].filter(
+      ({ readyState }) => readyState === WebSocket.OPEN,
+    );
+    if (queue && !sockets.length) pending.push(message);
+    for (const socket of sockets) socket.send(message);
   };
 
   const port = await listenAvailable(server, options.server);
