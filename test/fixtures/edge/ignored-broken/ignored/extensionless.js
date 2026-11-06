@@ -1,0 +1,1 @@
+globalThis.extensionless = "extensionless";

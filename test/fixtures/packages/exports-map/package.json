@@ -1,0 +1,1 @@
+{ "name": "exports-map", "version": "1.0.0", "type": "module", "exports": { ".": { "import": "./import.js", "require": "./require.cjs" }, "./feature": "./feature.js" } }

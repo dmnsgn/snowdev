@@ -1,0 +1,1 @@
+{ "name": "condition-exports", "version": "1.0.0", "type": "module", "exports": { ".": { "development": "./development.js", "production": "./production.js", "default": "./default.js" } } }

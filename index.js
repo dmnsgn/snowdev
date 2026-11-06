@@ -16,6 +16,7 @@ import {
   CORE_JS_SEMVER,
   isTypeScriptProject,
   allKeyed,
+  overwriteArrays,
   readJson,
   writeJson,
 } from "./utils.js";
@@ -151,10 +152,11 @@ export const DEFAULTS_OPTIONS = {
       ...FILES_GLOB.react,
       ...FILES_GLOB.assets,
     ],
-    exclude: ["**.d.ts"],
+    exclude: FILES_GLOB.declarations,
     copy: FILES_GLOB.assets,
     conditions: ["module", "import", "default"],
     mainFields: ["module", "jsnext:main", "jsnext", "main"],
+    requireMainFields: ["main"],
     browserField: true,
     overrides: {},
   },
@@ -247,7 +249,7 @@ export const run = async (fn, options) => {
 
   options = deepmerge.all(
     [DEFAULTS_OPTIONS, globalOptions || {}, commandOptions || {}],
-    { clone: false },
+    { clone: false, arrayMerge: overwriteArrays },
   );
 
   Object.assign(console, options.console);
@@ -277,7 +279,7 @@ export const run = async (fn, options) => {
     }
     console.info(`${fn.name} in "${options.cwd}"`);
 
-    options.ignore.push(`**/${options.rollup.output.dir}/**`);
+    options.ignore = [...options.ignore, `**/${options.rollup.output.dir}/**`];
 
     // Set default docs
     options.docs = options.docs ?? (options.ts ? "docs" : "README.md");

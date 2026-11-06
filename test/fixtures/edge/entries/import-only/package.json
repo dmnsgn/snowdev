@@ -1,0 +1,1 @@
+{ "name": "import-only", "version": "1.0.0", "type": "module", "exports": { ".": { "import": "./index.js" }, "./sub": { "import": { "browser": "./sub.js" } } } }

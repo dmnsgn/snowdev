@@ -1,0 +1,1 @@
+{ "name": "esm-consumer", "version": "1.0.0", "type": "module", "main": "index.js", "dependencies": { "jsnext": "file:../jsnext" } }

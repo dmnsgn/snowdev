@@ -2,18 +2,15 @@
 import { createHash } from "node:crypto";
 import { promises as fs } from "node:fs";
 import { findPackageJSON } from "node:module";
-import { dirname, extname, isAbsolute, join, parse, relative } from "node:path";
+import { extname, isAbsolute, join, parse, relative } from "node:path";
 import { promisify, styleText } from "node:util";
 import { exec as execCb } from "node:child_process";
 
 import deepmerge from "deepmerge";
 
+import { createFilter } from "@rollup/pluginutils";
 import { getConsole } from "console-ansi";
 import semver from "semver";
-import { exports, legacy as legacyExport } from "resolve.exports";
-import { sync as resolveSync } from "resolve";
-import slash from "slash";
-import picomatch from "picomatch";
 import * as acorn from "acorn";
 import * as acornWalk from "acorn-walk";
 import * as aString from "astring";
@@ -23,14 +20,19 @@ import packageJson from "./package.json" with { type: "json" };
 const FILES_GLOB = {
   javascript: ["**/*.js", "**/*.mjs"],
   typescript: ["**/*.ts", "**/*.mts"],
+  declarations: ["**/*.d.ts", "**/*.d.mts", "**/*.d.cts"],
   react: ["**/*.jsx", "**/*.tsx"],
   commonjs: ["**/*.cjs", "**/*.cts"],
   html: ["**/*.html"],
   css: ["**/*.css"],
   markdown: ["**/*.md"],
+  config: ["**/*.config.{js,mjs,cjs,ts,mts,cts}"],
 };
 FILES_GLOB.typescriptAll = [...FILES_GLOB.typescript, "**/*.tsx", "**/*.cts"];
 FILES_GLOB.assets = [...FILES_GLOB.css, "**/*.json", "**/*.wasm"];
+
+// Options replace defaults: concatenating can't reorder or remove values
+const overwriteArrays = (_, source) => source;
 
 const RF_OPTIONS = { recursive: true, force: true };
 const exec = promisify(execCb);
@@ -179,6 +181,9 @@ const pathExists = (path) =>
 
 const realpathSafe = (path) => fs.realpath(path).catch(() => path);
 
+// Bundlers suffix ids with a query for virtual variants of a module
+const stripQuery = (id) => id.split("?", 1)[0];
+
 const isInside = (directory, file) => {
   const path = relative(directory, file);
   return path && !path.startsWith("..") && !isAbsolute(path);
@@ -268,141 +273,10 @@ const htmlHotInject = async (html) => {
   return $.html();
 };
 
-const picomatchOptions = { capture: true, noglobstar: false };
-
-const getWildcardEntries = async (cwd, key, value) => {
-  const directoryName = dirname(value.split("*", 1)[0]);
-  const directoryFullPath = join(cwd, directoryName);
-
-  if (!(await pathExists(directoryFullPath))) {
-    throw new Error(`Directory "${directoryFullPath}" not found`);
-  }
-
-  const valueGlobStar = value.replace("*", "**");
-  const files = (
-    await Array.fromAsync(fs.glob(valueGlobStar, { cwd, withFileTypes: true }))
-  )
-    .filter((dirent) => !dirent.isDirectory())
-    .map(({ name }) => join(cwd, name));
-
-  const regex = picomatch.makeRe(valueGlobStar, picomatchOptions);
-
-  return Object.fromEntries(
-    files
-      .map((name) => {
-        const match = regex.exec(name);
-
-        if (!match?.[1]) return;
-
-        const [matchingPath, matchGroup] = match;
-        const normalizedKey = key.replace("*", matchGroup);
-        const normalizedFilePath = `./${matchingPath}`;
-        return [normalizedKey, normalizedFilePath];
-      })
-      .filter(Boolean),
-  );
-};
-
-const resolveEntryPoint = async (cwd, key, value, out = {}) => {
-  if (value.includes("*")) {
-    try {
-      Object.assign(out, await getWildcardEntries(cwd, key, value));
-    } catch (error) {
-      console.error(
-        `Error resolving "${cwd}" export: { "${key}": "${value}" }\n`,
-        error,
-      );
-    }
-  } else {
-    out[key] = value;
-  }
-  return out;
-};
-
-const resolveExports = async (options, src) => {
-  try {
-    const pkg = await readJson(join(src, "package.json"));
-
-    // Resolves "module" then "main", defaulting to Node.js behaviour
-    if (!pkg.exports) {
-      let entry = legacyExport(pkg, { fields: options.resolve.mainFields });
-      entry ??= (await pathExists(join(src, "index.js"))) && "./index.js";
-      if (entry && ![".js", ".mjs", ".cjs", ".node"].includes(extname(entry))) {
-        try {
-          entry = bareToDotRelativePath(
-            slash(relative(src, resolveSync(entry, { basedir: src }))),
-          );
-        } catch (error) {
-          console.error(error);
-        }
-      }
-      return { ".": entry };
-    }
-
-    // Resolve string exports
-    if (typeof pkg.exports === "string") return { ".": pkg.exports };
-
-    const resolvedExports = {};
-
-    // Resolve array exports (no conditions here)
-    if (Array.isArray(pkg.exports)) {
-      for (const entryValue of exports(pkg, ".")) {
-        await resolveEntryPoint(src, entryValue, entryValue, resolvedExports);
-      }
-      return resolvedExports;
-    }
-
-    const exportOptions = {
-      browser: options.resolve.browserField,
-      conditions: options.resolve.conditions,
-    };
-
-    // Resolve object of conditions
-    if (!Object.keys(pkg.exports)?.[0]?.startsWith(".")) {
-      const entryValue = exports(pkg, ".", exportOptions)?.[0];
-      return await resolveEntryPoint(src, ".", entryValue);
-    }
-
-    // Resolve object of exports
-    for (const key of Object.keys(pkg.exports)) {
-      if (!key.startsWith(".")) continue;
-
-      try {
-        const entryValue = exports(pkg, key, exportOptions)?.[0];
-        await resolveEntryPoint(src, key, entryValue, resolvedExports);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    return resolvedExports;
-  } catch (error) {
-    console.error(error);
-    return { ".": null };
-  }
-};
-
-const isObject = (value) =>
-  Object.prototype.toString.call(value) === "[object Object]";
-
-// https://github.com/defunctzombie/package-browser-field-spec#ignore-a-module
-const resolveBrowserIgnores = async (options, src) => {
-  try {
-    const pkg = await readJson(join(src, "package.json"));
-
-    if (pkg.browser && isObject(pkg.browser)) {
-      return Object.fromEntries(
-        Object.entries(legacyExport(pkg, { browser: true })).filter(
-          // TODO: handle ignoring absolute reference
-          ([key, value]) => key.startsWith(".") && value === false,
-        ),
-      );
-    }
-  } catch (error) {
-    console.error(error);
-  }
-  return {};
-};
+const getExportFilters = ({ cwd, resolve: { include, exclude, copy } }) => ({
+  filter: createFilter(include, exclude, { resolve: cwd }),
+  copyFilter: createFilter(copy, exclude, { resolve: cwd }),
+});
 
 const pick = (obj, keys) =>
   Object.fromEntries(keys.map((key) => [key, obj[key]]));
@@ -479,13 +353,14 @@ export {
   pathExists,
   realpathSafe,
   isInside,
+  stripQuery,
+  overwriteArrays,
+  getExportFilters,
   statFiles,
   compareStats,
   getFileExtension,
   stripExtension,
   htmlHotInject,
-  resolveExports,
-  resolveBrowserIgnores,
   pick,
   hashObject,
   arrayDifference,

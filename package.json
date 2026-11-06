@@ -149,8 +149,9 @@
     "rollup": "^4.67.5",
     "rollup-plugin-commonjs-named-exports": "^2.0.0",
     "rollup-plugin-esbuild": "^6.2.1",
-    "rollup-plugin-no-op": "^1.0.2",
+    "rollup-plugin-no-op": "^1.1.0",
     "rollup-plugin-polyfill-node": "^0.13.0",
+    "rollup-plugin-strip-shebang": "^2.0.0",
     "selfsigned": "^5.5.0",
     "semver": "^7.8.6",
     "sirv": "^3.0.2",
@@ -170,9 +171,12 @@
     "@types/node": "^26.6.6"
   },
   "packageManager": "npm@11.12.1",
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
   "engines": {
     "node": ">=26.0.0",
-    "snowdev": ">=3.0.0-alpha.3"
+    "snowdev": ">=3.0.0-alpha.4"
   },
   "snowdev": {
     "serve": false,

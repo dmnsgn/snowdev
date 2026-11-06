@@ -1,0 +1,1 @@
+{ "name": "evil-require", "version": "1.0.0", "main": "../../../secret.cjs", "module": "module.mjs" }

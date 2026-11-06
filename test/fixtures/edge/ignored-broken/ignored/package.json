@@ -1,0 +1,1 @@
+{ "name": "ignored", "version": "1.0.0", "type": "module", "exports": { "./*": "./*.js" }, "browser": { "./ignored.js": false, "./extensionless": false } }

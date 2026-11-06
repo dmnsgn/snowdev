@@ -206,6 +206,24 @@ Options:
   --help     Show help                                                 [boolean]
 ```
 
+## Package resolution
+
+`snowdev install` makes every package export available as an ES module through an import map:
+
+- `exports` map, using `resolve.conditions`, `browser` or `node` depending on `resolve.browserField`, and `development` or `production` depending on `NODE_ENV`. Patterns (`"./addons/*"`) are expanded to every file they match: use `resolve.exclude` to filter out the ones you don't need.
+- `resolve.mainFields` (default: `["module", "jsnext:main", "jsnext", "main"]`) otherwise. A `browser` string is tried before `main` when `resolve.browserField` is set, so an ES `module` entry is preferred: set `resolve.mainFields` to `["browser", "module", "main"]` if a `module` entry only works in Node.js.
+
+`snowdev install` lists the exports and the bundler resolves them like any other import, so a package gets the same file from your code and from its dependents. Exceptions are `resolve.overrides` and packages named after a Node.js builtin, which would otherwise resolve to their polyfill.
+
+`require()` of a package without an `exports` map uses `resolve.requireMainFields` instead (default: `["main"]`), like Node.js does, as a package `module` entry can have a different shape than its CommonJS one. `browser` strings and maps still apply. Opt out with `rollup: { pluginsOptions: { requireMain: { enabled: false } } }`.
+
+Modules failing to bundle don't fail the install. They are listed, emptied and the bundle runs again, up to 5 times. A failing export is removed from the import map, and missing exports are `undefined` with a warning. `install` returns them as `failedModules`.
+
+Assets are copied with their package layout, not their export name: use the import map to resolve them.
+
+> [!NOTE]
+> A package reached by both `import` and `require()` is bundled twice, once per entry, each caller getting the shape it expects. It only matters for packages relying on module state, which won't be shared between both instances.
+
 ## License
 
 MIT. See [license file](https://github.com/dmnsgn/snowdev/blob/main/LICENSE.md).

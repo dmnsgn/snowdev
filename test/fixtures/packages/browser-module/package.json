@@ -1,0 +1,1 @@
+{ "name": "browser-module", "version": "1.0.0", "main": "main.cjs", "module": "module.mjs", "browser": "browser.mjs" }

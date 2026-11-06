@@ -9,23 +9,26 @@ import {
   gzipSync,
 } from "node:zlib";
 
+import { createFilter } from "@rollup/pluginutils";
 import deepmerge from "deepmerge";
 import { valueFormatTableAsText } from "value-format-table";
 
+import { resolveExports } from "./resolve.js";
 import {
   console,
   RF_OPTIONS,
   escapeRegExp,
   formatFileList,
+  FILES_GLOB,
   formatSize,
   getPackageName,
   getPeerDependencies,
   isBareSpecifier,
   isInside,
+  overwriteArrays,
   pathExists,
   readJson,
   readTsConfig,
-  resolveExports,
   resolveFiles,
   secondsFormatter,
   stripExtension,
@@ -114,7 +117,17 @@ const lint = timed(async (cwd, files, options) => {
 lint.description = `build — lint sources`;
 
 // Loaded by their tool, not imported
-const CONFIG_FILE = /\.config\.[cm]?[jt]s$/;
+const isConfigFile = createFilter(FILES_GLOB.config, null, { resolve: false });
+const isCodeFile = createFilter(
+  [
+    ...FILES_GLOB.javascript,
+    ...FILES_GLOB.typescript,
+    ...FILES_GLOB.react,
+    ...FILES_GLOB.commonjs,
+  ],
+  FILES_GLOB.declarations,
+  { resolve: false },
+);
 
 // Type only modules (TypeScript types, JSDoc typedefs) are erased before bundling
 const hasRuntimeCode = async (file) => {
@@ -186,7 +199,9 @@ const analyse = timed(async (cwd, files, options, { sizes = true } = {}) => {
 
     // Analysed as published: consumers only reach exports and binaries
     const input = [
-      ...Object.values(await resolveExports(options, cwd)),
+      ...Object.values(await resolveExports(options, cwd)).filter(
+        (entry) => entry && isCodeFile(join(cwd, entry)),
+      ),
       ...[pkg.bin ?? []].flatMap((bin) =>
         typeof bin === "string" ? bin : Object.values(bin),
       ),
@@ -268,7 +283,7 @@ const analyse = timed(async (cwd, files, options, { sizes = true } = {}) => {
       ...pkg.peerDependencies,
     }).filter((name) => !usedPackages.has(name));
     const unreachedFiles = files.filter(
-      (file) => !CONFIG_FILE.test(file) && !reached.has(stripExtension(file)),
+      (file) => !isConfigFile(file) && !reached.has(stripExtension(file)),
     );
     const runtimeFiles = await Promise.all(unreachedFiles.map(hasRuntimeCode));
     const unusedFiles = unreachedFiles
@@ -322,6 +337,7 @@ const format = timed(async (cwd, files, options) => {
   const { default: prettierConfig } = await import("./prettier.config.js");
   const config = deepmerge(prettierConfig, options.prettier ?? {}, {
     clone: false,
+    arrayMerge: overwriteArrays,
   });
 
   for (const file of files) {

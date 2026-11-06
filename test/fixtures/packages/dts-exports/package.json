@@ -1,0 +1,1 @@
+{ "name": "dts-exports", "version": "1.0.0", "type": "module", "exports": { ".": "./index.js", "./types": "./index.d.ts", "./module-types": "./index.d.mts", "./commonjs-types": "./index.d.cts" } }

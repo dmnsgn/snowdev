@@ -1,0 +1,1 @@
+{ "name": "pattern-exports", "version": "1.0.0", "type": "module", "exports": { ".": "./index.js", "./lib/*": "./lib/*.js", "./lib/special": "./special.js", "./lib/private/*": null } }

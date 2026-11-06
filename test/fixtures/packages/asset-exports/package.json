@@ -1,0 +1,1 @@
+{ "name": "asset-exports", "version": "1.0.0", "type": "module", "exports": { ".": "./style.css", "./theme": "./theme.css", "./theme/dark": "./dark.js" } }

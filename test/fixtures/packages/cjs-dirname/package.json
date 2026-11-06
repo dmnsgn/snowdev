@@ -1,0 +1,1 @@
+{ "name": "cjs-dirname", "version": "1.0.0", "exports": "./index.cjs" }

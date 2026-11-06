@@ -1,5 +1,5 @@
 import { promises as fs } from "node:fs";
-import { createRequire } from "node:module";
+import { createRequire, findPackageJSON, isBuiltin } from "node:module";
 import {
   dirname,
   extname,
@@ -13,16 +13,16 @@ import { fileURLToPath } from "node:url";
 
 import deepmerge from "deepmerge";
 import slash from "slash";
-import { createFilter } from "@rollup/pluginutils";
 
+import { resolveExports } from "./resolve.js";
 import {
   console,
   RF_OPTIONS,
-  resolveExports,
-  resolveBrowserIgnores,
   pathExists,
   realpathSafe,
   isInside,
+  stripQuery,
+  getExportFilters,
   statFiles,
   compareStats,
   VERSION,
@@ -39,7 +39,7 @@ import {
   timed,
 } from "./utils.js";
 
-import npm from "./npm.js";
+import npm, { restoreRealpath } from "./npm.js";
 import bundle from "./bundle.js";
 
 const require = createRequire(import.meta.url);
@@ -71,11 +71,16 @@ const getDependencies = async (options, type, names = []) => {
           .map((selector) => `.${selector}`)
           .join(",")})`;
 
-  return JSON.parse(
+  const dependencies = JSON.parse(
     await npm.run(options.cwd, "query", [`':scope > ${depsSelector}'`]),
-  )
-    .map((dependency) => pick(dependency, DEPENDENCY_FIELDS))
-    .filter(({ name }) => !names.length || names.includes(name));
+  ).filter(({ name }) => !names.length || names.includes(name));
+
+  return await Promise.all(
+    dependencies.map(async (dependency) => ({
+      ...pick(dependency, DEPENDENCY_FIELDS),
+      realpath: await restoreRealpath(options.cwd, dependency),
+    })),
+  );
 };
 
 const compareDependencies = (a, b) =>
@@ -164,6 +169,18 @@ const getInstallReason = async (
     : null;
 };
 
+// Rollup reports one error per bundle
+const MAX_BUNDLE_RETRIES = 5;
+
+// `id` can be the importer of the failing module: `loc.file` is the module itself
+const getFailedModules = (error) => [
+  ...new Set(
+    (error.errors ?? [error])
+      .map(({ loc, id }) => stripQuery(loc?.file ?? id ?? ""))
+      .filter((id) => id && isAbsolute(id)),
+  ),
+];
+
 const checkDependencies = async (options) => {
   try {
     const selectors = ["missing", "invalid", "extraneous"];
@@ -194,6 +211,12 @@ const install = timed(async (options) => {
   } catch (error) {
     console.error(`install — error reading package.json\n`, error);
     return { error };
+  }
+
+  if (options.resolve.conditions.includes("require")) {
+    console.warn(
+      `install — "require" in "resolve.conditions" ignored: it would apply to imports too.`,
+    );
   }
 
   const checking = checkDependencies(options);
@@ -300,20 +323,32 @@ const install = timed(async (options) => {
 
   let result;
   let input = {};
+  let entryFiles = {};
   let importMap = { imports: {} };
   let copies = {};
   let linkedFiles = [];
+  const failedModules = new Set();
 
-  const filter = createFilter(
-    options.resolve.include,
-    options.resolve.exclude,
-    { resolve: options.cwd },
+  const { filter, copyFilter } = getExportFilters(options);
+
+  // Bare entries need snowdev resolution, and can't be external
+  const hasCustomResolution = [options.rollup, options.rolldown].some(
+    (bundlerOptions) =>
+      bundlerOptions?.input?.plugins || bundlerOptions?.input?.external,
   );
-  const copyFilter = createFilter(
-    options.resolve.copy,
-    options.resolve.exclude,
-    { resolve: options.cwd },
-  );
+
+  // The folder of an aliased package isn't named after it
+  const isResolvableByName = async (dependency, path) => {
+    try {
+      const packageJson = findPackageJSON(
+        dependency,
+        join(options.cwd, "package.json"),
+      );
+      return dirname(await realpathSafe(packageJson)) === path;
+    } catch {
+      return false;
+    }
+  };
 
   const packageTargets = dependenciesNames.filter(
     (target) => target !== "snowdev",
@@ -346,8 +381,10 @@ const install = timed(async (options) => {
             if (isCopiedExport) {
               copies[resolvedExport] = join(outputDir, id);
             } else {
-              // TODO: why not resolvedExport?
-              input[id] = dependency;
+              // Relative files are from the project, not resolvable as packages
+              input[id] =
+                isRelative || hasCustomResolution ? resolvedExport : dependency;
+              entryFiles[id] = resolvedExport;
             }
 
             importMap.imports[id] = isRelative
@@ -420,6 +457,11 @@ const install = timed(async (options) => {
         continue;
       }
 
+      const canResolveByName =
+        !hasCustomResolution &&
+        dependenciesNames.includes(dependency) &&
+        (await isResolvableByName(dependency, dependencyPath));
+
       for (let [specifier, entryPoint] of Object.entries(entryPoints)) {
         const isMain = specifier === ".";
         const id = isMain ? dependency : slash(join(dependency, specifier));
@@ -453,55 +495,31 @@ const install = timed(async (options) => {
             continue;
           }
 
-          const isCopiedExport = copyFilter(resolvedExport);
-
-          if (isCopiedExport) {
-            copies[resolvedExport] = join(outputDir, id);
-          } else {
-            input[id] = resolvedExport;
+          // Keep the package layout: ids can have no extension or be a folder of another id
+          if (copyFilter(resolvedExport)) {
+            const copyPath = slash(join(dependency, entryPoint));
+            copies[resolvedExport] = join(outputDir, copyPath);
+            importMap.imports[id] = bareToDotRelativePath(copyPath);
+            continue;
           }
+
+          // Bundlers resolve these like any import inside a package. Overrides
+          // and nested packages are explicit files, builtin names would be polyfilled.
+          const isResolvable =
+            canResolveByName &&
+            !options.resolve.overrides[dependency]?.[specifier] &&
+            !isBuiltin(id);
+
+          input[id] = isResolvable ? id : resolvedExport;
+          entryFiles[id] = resolvedExport;
+
           const needsJsExtension =
-            !isCopiedExport &&
-            (packageTargets.includes(id) || extname(id) !== ".js");
+            packageTargets.includes(id) || extname(id) !== ".js";
           importMap.imports[id] = bareToDotRelativePath(
             needsJsExtension ? `${id}.js` : id,
           );
         } catch (error) {
           console.error(error);
-        }
-      }
-    }
-
-    let noOpIds = [];
-    if (options.resolve.browserField) {
-      const resolvedBrowserIgnores = Object.fromEntries(
-        await Promise.all(
-          packageTargets.map(async (dependency) => [
-            dependency,
-            await resolveBrowserIgnores(options, dependenciesPath[dependency]),
-          ]),
-        ),
-      );
-
-      for (let [dependency, entryPoints] of Object.entries(
-        resolvedBrowserIgnores,
-      )) {
-        const dependencyPath = dependenciesPath[dependency];
-        for (let specifier of Object.keys(entryPoints)) {
-          try {
-            const resolvedIgnore = slash(join(dependencyPath, specifier));
-
-            if (!(await pathExists(resolvedIgnore))) {
-              console.warn(
-                `install — Unresolved browser ignore: "${resolvedIgnore}"`,
-              );
-              continue;
-            }
-
-            noOpIds.push(resolvedIgnore);
-          } catch (error) {
-            console.error(error);
-          }
         }
       }
     }
@@ -515,9 +533,10 @@ const install = timed(async (options) => {
     const bundleOptions = { ...options };
     bundleOptions.rollup = {
       ...options.rollup,
-      input: { ...options.rollup.input, input },
+      input: { shimMissingExports: true, ...options.rollup.input, input },
       output: {
         ...options.rollup.output,
+        dir: outputDir,
         entryFileNames: ({ name }) =>
           packageTargets.includes(name) || extname(name) !== ".js"
             ? `${name}.js`
@@ -525,13 +544,40 @@ const install = timed(async (options) => {
       },
     };
 
-    if (noOpIds.length) {
-      bundleOptions.rollup = deepmerge(bundleOptions.rollup, {
-        pluginsOptions: { noOp: { ids: noOpIds } },
-      });
+    for (let retry = 0; ; retry++) {
+      const { pluginsOptions } = options.rollup;
+      bundleOptions.rollup.pluginsOptions = {
+        ...pluginsOptions,
+        noOp: {
+          ...pluginsOptions?.noOp,
+          ids: [...(pluginsOptions?.noOp?.ids ?? []), ...failedModules],
+        },
+      };
+
+      result = await bundle(bundleOptions);
+
+      const failed = result.error
+        ? getFailedModules(result.error).filter((id) => !failedModules.has(id))
+        : [];
+      if (!failed.length || retry === MAX_BUNDLE_RETRIES) break;
+
+      console.warn(
+        `install — Emptying modules failing to bundle:${formatFileList(failed)}`,
+      );
+      for (const id of failed) failedModules.add(id);
+
+      for (const [id, file] of Object.entries(entryFiles)) {
+        if (failedModules.has(await realpathSafe(file))) {
+          delete input[id];
+          delete entryFiles[id];
+          delete importMap.imports[id];
+        }
+      }
+
+      // Bundling nothing would replace the error by a configuration one
+      if (!Object.keys(input).length) break;
     }
 
-    result = await bundle(bundleOptions);
     linkedFiles = await getLinkedFiles(options, result.watchFiles);
 
     await Promise.allSettled(
@@ -564,14 +610,26 @@ const install = timed(async (options) => {
         files: await statFiles(linkedFiles),
       });
 
-      console.log("install — complete.");
+      if (failedModules.size) {
+        console.warn(
+          `install — complete, with emptied modules:${formatFileList([...failedModules])}`,
+        );
+      } else {
+        console.log("install — complete.");
+      }
     }
   } catch (error) {
     console.error(error);
     result = { error };
   }
 
-  return { ...result, input, importMap, linkedFiles };
+  return {
+    ...result,
+    input,
+    importMap,
+    linkedFiles,
+    failedModules: [...failedModules],
+  };
 }, `install`);
 
 export default install;

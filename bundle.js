@@ -1,4 +1,5 @@
-import { join } from "node:path";
+import { findPackageJSON } from "node:module";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { nodeResolve } from "@rollup/plugin-node-resolve";
@@ -8,10 +9,30 @@ import json from "@rollup/plugin-json";
 import replace from "@rollup/plugin-replace";
 import commonjsNamedExports from "rollup-plugin-commonjs-named-exports";
 import noOp from "rollup-plugin-no-op";
+import { stripShebang } from "rollup-plugin-strip-shebang";
 import browserslistToEsbuild from "browserslist-to-esbuild";
 import deepmerge from "deepmerge";
 
-import { console, FILES_GLOB, secondsFormatter, timed } from "./utils.js";
+import {
+  getConditions,
+  getMainFields,
+  getRequireMainFields,
+  isInsidePackage,
+  resolveLegacyEntry,
+} from "./resolve.js";
+import {
+  console,
+  FILES_GLOB,
+  getPackageName,
+  isBareSpecifier,
+  overwriteArrays,
+  pathExists,
+  readJson,
+  realpathSafe,
+  secondsFormatter,
+  stripQuery,
+  timed,
+} from "./utils.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
@@ -22,6 +43,124 @@ let watch;
 let transpiler;
 let minifier;
 
+// As written by @rollup/plugin-inject
+const INJECTED_IMPORT = /^import \{ (\S+) as (\S+) \} from '(.+)';$/gm;
+
+/**
+ * Rewrite imports injected in CommonJS files to `require()` calls.
+ *
+ * @returns {import("rolldown").Plugin}
+ */
+const requireInjectedImports = () => ({
+  name: "require-injected-imports",
+  transform(code, id) {
+    // rolldown parses ".cjs" files as scripts: an import is a syntax error
+    return /\.c[jt]s$/.test(stripQuery(id))
+      ? {
+          code: code.replaceAll(
+            INJECTED_IMPORT,
+            "const { $1: $2 } = require('$3');",
+          ),
+          map: null,
+        }
+      : null;
+  },
+});
+
+/**
+ * Report modules bundlers can't name in their own errors.
+ *
+ * @returns {import("rolldown").Plugin}
+ */
+const reportModules = () => ({
+  name: "report-modules",
+  // Last, for plugins handling these types. rolldown's own errors for them have
+  // no module id to empty: raising them here sets it.
+  transform: {
+    order: "post",
+    handler(code, id, meta) {
+      if (meta?.moduleType === "css") {
+        this.error({ message: "Bundling CSS is not supported", id });
+      }
+      if (meta?.moduleType === "json") {
+        try {
+          JSON.parse(code);
+        } catch (error) {
+          this.error({ message: error.message, id });
+        }
+      }
+      return null;
+    },
+  },
+});
+
+const getRedirect = async (path, { mainFields, requireMainFields }) => {
+  const src = dirname(path);
+  const pkg = await readJson(path);
+  if (pkg.exports) return null;
+
+  const entry = await resolveLegacyEntry(pkg, src, mainFields);
+  const requireEntry = await resolveLegacyEntry(pkg, src, requireMainFields);
+  if (!entry || !requireEntry) return null;
+
+  const to = join(src, requireEntry);
+  const isValid =
+    (await pathExists(to)) && (await isInsidePackage(src, requireEntry));
+  return isValid ? { from: join(src, entry), to } : null;
+};
+
+/**
+ * Resolve `require()` of a package to its `requireMainFields` entry instead of
+ * its `mainFields` one.
+ *
+ * @param {{ mainFields: string[]; requireMainFields: string[] }} options
+ * @returns {import("rolldown").Plugin}
+ */
+const requireMain = (options) => {
+  const redirects = new Map();
+
+  const findRedirect = async (source, importer) => {
+    try {
+      const path = await realpathSafe(findPackageJSON(source, importer));
+      if (!redirects.has(path)) {
+        redirects.set(path, getRedirect(path, options));
+      }
+      return await redirects.get(path);
+    } catch {
+      // Not reachable by Node: bundler specific resolution or virtual module
+      return null;
+    }
+  };
+
+  return {
+    name: "require-main",
+    async resolveId(source, importer, resolveOptions) {
+      // rolldown sets kind, @rollup/plugin-commonjs sets custom
+      const isRequire =
+        resolveOptions.kind === "require-call" ||
+        resolveOptions.custom?.["node-resolve"]?.isRequire;
+      if (
+        !isRequire ||
+        !importer ||
+        !isBareSpecifier(source) ||
+        getPackageName(source) !== source
+      ) {
+        return null;
+      }
+
+      // Keep what other plugins resolved: polyfills, aliases and externals
+      const resolved = await this.resolve(source, importer, {
+        ...resolveOptions,
+        skipSelf: true,
+      });
+      if (!resolved || resolved.external) return null;
+
+      const redirect = await findRedirect(source, stripQuery(importer));
+      return redirect?.from === resolved.id ? redirect.to : null;
+    },
+  };
+};
+
 const parsePluginOptions = (plugins, options) =>
   Object.entries(plugins)
     .filter(([name]) => !options[name] || (options[name].enabled ?? true))
@@ -30,10 +169,10 @@ const parsePluginOptions = (plugins, options) =>
 const groupExtraPlugins = (plugins) =>
   plugins.reduce(
     (groupedPlugins, plugin) => {
-      if (plugin.enforce === "pre") groupedPlugins["pre"].push(plugin);
-      else if (plugin.enforce === "post") groupedPlugins["post"].push(plugin);
-      else groupedPlugins["normal"].push(plugin);
-      delete plugin.enforce;
+      const { enforce, ...rest } = plugin;
+      if (enforce === "pre") groupedPlugins["pre"].push(rest);
+      else if (enforce === "post") groupedPlugins["post"].push(rest);
+      else groupedPlugins["normal"].push(enforce ? rest : plugin);
       return groupedPlugins;
     },
     { pre: [], normal: [], post: [] },
@@ -54,10 +193,16 @@ const formatRollupLog = (
 
 const label = (options = {}) => `bundle (${options.bundler})`;
 
+// `browser` maps are applied by bundlers, including ignored files:
+// https://github.com/defunctzombie/package-browser-field-spec#ignore-a-module
+const BROWSER_ALIAS_FIELDS = [["browser"]];
+
 const bundle = timed(async (options = {}) => {
   if (options.bundler === "rolldown") {
     ({ rolldown: bundler, watch } = await import("rolldown"));
-    bundlerOptions = deepmerge(options.rollup, options.rolldown);
+    bundlerOptions = deepmerge(options.rollup, options.rolldown, {
+      arrayMerge: overwriteArrays,
+    });
   } else {
     ({ rollup: bundler, watch } = await import("rollup"));
     bundlerOptions = options.rollup;
@@ -70,17 +215,27 @@ const bundle = timed(async (options = {}) => {
     let minify = options.minify;
     minify ??= options.NODE_ENV === "production";
 
+    const polyfilledFiles = [...FILES_GLOB.javascript, ...FILES_GLOB.commonjs];
+
     const pluginsOptions = deepmerge(
       {
+        // Injected polyfill imports would precede a shebang, a syntax error.
+        // commonjs-named-exports copies them to modules with a query.
+        stripShebang: {
+          include: polyfilledFiles.map((glob) => `${glob}*`),
+          sourcemap: sourceMap,
+        },
         nodeResolve: {
+          rootDir: options.cwd,
           modulePaths: [join(__dirname, "node_modules")],
-          mainFields: options.resolve.mainFields,
+          mainFields: getMainFields(options),
           browser: options.resolve.browserField,
+          exportConditions: getConditions(options),
         },
         commonjs: { sourceMap, strictRequires: "auto" },
         /** @type {import("rollup-plugin-polyfill-node").NodePolyfillsOptions} */
         polyfillNode: {
-          include: [...FILES_GLOB.javascript, ...FILES_GLOB.commonjs],
+          include: polyfilledFiles,
           exclude: options.transpileExclude,
         },
         replace: {
@@ -90,10 +245,19 @@ const bundle = timed(async (options = {}) => {
           preventAssignment: true,
         },
         json: { compact: minify },
-        noOp: { ids: ["inspector"] },
+        requireMain: {
+          mainFields: getMainFields(options),
+          requireMainFields: getRequireMainFields(options),
+        },
       },
       bundlerOptions.pluginsOptions,
+      { arrayMerge: overwriteArrays },
     );
+    // Not a default: install sets ids to failed modules
+    pluginsOptions.noOp = {
+      ...pluginsOptions.noOp,
+      ids: ["inspector", ...(pluginsOptions.noOp?.ids ?? [])],
+    };
 
     if (options.bundler === "rolldown") {
       bundlerOptions.output.minify = minify;
@@ -148,12 +312,19 @@ const bundle = timed(async (options = {}) => {
       ...parsePluginOptions(
         options.bundler === "rolldown"
           ? {
+              reportModules,
+              stripShebang,
+              requireMain,
               commonjsNamedExports,
               polyfillNode,
+              requireInjectedImports,
               replace,
               noOp,
             }
           : {
+              reportModules,
+              stripShebang,
+              requireMain,
               nodeResolve,
               commonjs,
               commonjsNamedExports,
@@ -196,6 +367,19 @@ const bundle = timed(async (options = {}) => {
         formatRollupLog(log, level);
       },
       ...bundlerOptions.input,
+      ...(options.bundler === "rolldown" && {
+        cwd: bundlerOptions.input?.cwd ?? options.cwd,
+        // Only "neutral" has no conditions or alias fields of its own
+        platform:
+          bundlerOptions.input?.platform ??
+          (options.resolve.browserField ? "browser" : "neutral"),
+        resolve: {
+          mainFields: getMainFields(options),
+          conditionNames: getConditions(options),
+          aliasFields: options.resolve.browserField ? BROWSER_ALIAS_FIELDS : [],
+          ...bundlerOptions.input?.resolve,
+        },
+      }),
       plugins,
     };
 

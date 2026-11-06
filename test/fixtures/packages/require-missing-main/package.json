@@ -1,0 +1,1 @@
+{ "name": "require-missing-main", "version": "1.0.0", "main": "dist/missing.cjs", "module": "module.mjs" }

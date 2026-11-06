@@ -1,0 +1,1 @@
+{ "name": "require-consumer", "version": "1.0.0", "main": "index.js", "dependencies": { "require-browser": "*", "require-browser-map": "*", "require-missing-main": "*" } }

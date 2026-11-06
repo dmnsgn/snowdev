@@ -1,0 +1,1 @@
+{ "name": "browser-object", "version": "1.0.0", "main": "node.js", "browser": { "./node.js": "./browser.js" } }

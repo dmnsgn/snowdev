@@ -1,0 +1,1 @@
+{ "name": "excluded", "version": "1.0.0", "exports": { ".": "./index.mjs", "./cjs": "./index.cjs" } }
