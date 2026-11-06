@@ -98,7 +98,7 @@ console.log(
     requireBrowser: requireConsumer.browser,
     requireBrowserMap: requireConsumer.browserMap,
     requireMissingMain: requireConsumer.missingMain,
-    cjsDirname: [cjsDirname.dirname, cjsDirname.filename],
+    cjsDirname: [typeof cjsDirname.dirname, typeof cjsDirname.filename],
     absent: [
       "pattern-exports/lib/private/secret",
       "array-exports/first.js",

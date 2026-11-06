@@ -235,6 +235,7 @@ const bundle = timed(async (options = {}) => {
         commonjs: { sourceMap, strictRequires: "auto" },
         /** @type {import("rollup-plugin-polyfill-node").NodePolyfillsOptions} */
         polyfillNode: {
+          baseDir: await realpathSafe(options.cwd),
           include: polyfilledFiles,
           exclude: options.transpileExclude,
         },

@@ -1,2 +1,2 @@
-exports.dirname = typeof __dirname;
-exports.filename = typeof __filename;
+exports.dirname = __dirname;
+exports.filename = __filename;

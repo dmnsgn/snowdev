@@ -158,6 +158,17 @@ const loadExports = async (dir) => {
 const readImports = async (dir) =>
   JSON.parse(await readFile(join(dir, "import-map.json"), "utf8")).imports;
 
+const assertNoPathLeak = async (dir, root) => {
+  const path = await realpath(root);
+  for (const file of await readdir(dir, { recursive: true })) {
+    if (!file.endsWith(".js")) continue;
+    assert.ok(
+      !(await readFile(join(dir, file), "utf8")).includes(path),
+      `"${file}" contains "${path}"`,
+    );
+  }
+};
+
 describe("commands", () => {
   for (const name of Object.keys(commands)) {
     it(`loads ${name}`, () => import(`../${name}.js`));
@@ -186,6 +197,7 @@ describe("install", () => {
         await readFile(join(dir, "shebang-cjs.js"), "utf8"),
         /^#!/,
       );
+      await assertNoPathLeak(dir, root);
     });
   }
 
