@@ -1,5 +1,5 @@
 import { promises as fs } from "node:fs";
-import { createRequire, findPackageJSON, isBuiltin } from "node:module";
+import { findPackageJSON, isBuiltin } from "node:module";
 import {
   dirname,
   extname,
@@ -14,7 +14,7 @@ import { fileURLToPath } from "node:url";
 import deepmerge from "deepmerge";
 import slash from "slash";
 
-import { resolveExports } from "./resolve.js";
+import { isInsidePackage, resolveExports } from "./resolve.js";
 import {
   console,
   RF_OPTIONS,
@@ -42,7 +42,6 @@ import {
 import npm, { restoreRealpath } from "./npm.js";
 import bundle from "./bundle.js";
 
-const require = createRequire(import.meta.url);
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 const DEPENDENCY_TYPES = Object.freeze({
@@ -354,11 +353,15 @@ const install = timed(async (options) => {
     (target) => target !== "snowdev",
   );
 
+  // Ids can have no extension or be a folder of another id
+  const getEntryFileName = (id) =>
+    packageTargets.includes(id) || extname(id) !== ".js" ? `${id}.js` : id;
+
   // Harcoded dependency can be:
   // - a package listed in package.json
   // - a relative file path
   // - a package inside a package to be added as target
-  // - a file inside a package to be added as target
+  // - a file inside a package to be added as target, as is: package exports don't apply
   // - no relative folder support (use "local-dep-name": "file:./path-to-local-dep" in pacakge.json instead)
   // - no absolute path support (what would the import map be?)
   await Promise.allSettled(
@@ -367,29 +370,45 @@ const install = timed(async (options) => {
         if (parse(dependency).ext) {
           const isRelative = dependency.startsWith(".");
 
-          const resolvedExport = isRelative
-            ? resolve(options.cwd, dependency)
-            : require.resolve(dependency, { paths: [options.cwd] });
+          let resolvedExport;
+          if (isRelative) {
+            resolvedExport = resolve(options.cwd, dependency);
+          } else {
+            const name = getPackageName(dependency);
+            const src = dirname(
+              findPackageJSON(name, join(options.cwd, "package.json")),
+            );
+            const target = dependency.slice(name.length + 1);
+
+            if (!(await isInsidePackage(src, target))) {
+              console.warn(
+                `install — Hardcoded file outside of its package: "${dependency}"`,
+              );
+              return;
+            }
+            resolvedExport = join(src, target);
+          }
+
+          if (!(await pathExists(resolvedExport))) {
+            console.warn(`install — Hardcoded file not found: "${dependency}"`);
+            return;
+          }
 
           if (filter(resolvedExport)) {
             const id = isRelative
               ? dotRelativeToBarePath(dependency)
               : dependency;
 
-            const isCopiedExport = copyFilter(resolvedExport);
-
-            if (isCopiedExport) {
+            if (copyFilter(resolvedExport)) {
               copies[resolvedExport] = join(outputDir, id);
+              importMap.imports[id] = bareToDotRelativePath(id);
             } else {
-              // Relative files are from the project, not resolvable as packages
-              input[id] =
-                isRelative || hasCustomResolution ? resolvedExport : dependency;
+              input[id] = resolvedExport;
               entryFiles[id] = resolvedExport;
+              importMap.imports[id] = bareToDotRelativePath(
+                getEntryFileName(id),
+              );
             }
-
-            importMap.imports[id] = isRelative
-              ? dependency
-              : bareToDotRelativePath(dependency);
           } else {
             console.info(`install — Filtered out export: "${resolvedExport}"`);
           }
@@ -513,11 +532,7 @@ const install = timed(async (options) => {
           input[id] = isResolvable ? id : resolvedExport;
           entryFiles[id] = resolvedExport;
 
-          const needsJsExtension =
-            packageTargets.includes(id) || extname(id) !== ".js";
-          importMap.imports[id] = bareToDotRelativePath(
-            needsJsExtension ? `${id}.js` : id,
-          );
+          importMap.imports[id] = bareToDotRelativePath(getEntryFileName(id));
         } catch (error) {
           console.error(error);
         }
@@ -537,10 +552,7 @@ const install = timed(async (options) => {
       output: {
         ...options.rollup.output,
         dir: outputDir,
-        entryFileNames: ({ name }) =>
-          packageTargets.includes(name) || extname(name) !== ".js"
-            ? `${name}.js`
-            : name,
+        entryFileNames: ({ name }) => getEntryFileName(name),
       },
     };
 

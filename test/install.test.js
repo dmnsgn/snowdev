@@ -386,6 +386,57 @@ describe("install", () => {
       ]);
     });
 
+    const installHardcoded = async (dependencies, options) => {
+      const projectCwd = await createProject(
+        await mkdtemp(join(root, `hardcoded-files-${bundler}-`)),
+        join(FIXTURES, "edge", "hardcoded-files"),
+      );
+      const dir = join(projectCwd, "web_modules");
+      const result = await install(projectCwd, bundler, dir, {
+        dependencies,
+        rollup: { output: { dir }, ...options },
+      });
+      return { ...result, dir };
+    };
+
+    for (const [name, options] of [
+      ["", {}],
+      [" and custom plugins", { input: { plugins: [] } }],
+    ]) {
+      // Not listed in the package exports
+      it(`adds hardcoded package files as is${name} with ${bundler}`, async () => {
+        const { error, dir } = await installHardcoded(["cond/x.mjs"], options);
+
+        assert.ifError(error);
+        const imports = await readImports(dir);
+        assert.match(
+          await readFile(join(dir, imports["cond/x.mjs"]), "utf8"),
+          /"import"/,
+        );
+      });
+    }
+
+    it(`rejects hardcoded files missing or outside of their package with ${bundler}`, async () => {
+      const { error, dir } = await installHardcoded([
+        "cond/x.mjs",
+        "cond/x.js",
+        "cond/../../package.json",
+      ]);
+
+      assert.ifError(error);
+      assert.deepEqual(Object.keys(await readImports(dir)), ["cond/x.mjs"]);
+    });
+
+    it(`removes hardcoded package files failing to bundle with ${bundler}`, async () => {
+      const { error, dir } = await installHardcoded([
+        "cond/x.mjs",
+        "cond/bad.mjs",
+      ]);
+
+      assert.ifError(error);
+      assert.deepEqual(Object.keys(await readImports(dir)), ["cond/x.mjs"]);
+    });
+
     it(`rejects package targets outside of their package with ${bundler}`, async () => {
       const projectRoot = join(root, `traversal-${bundler}`);
       const projectCwd = await createProject(

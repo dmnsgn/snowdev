@@ -1,0 +1,1 @@
+{ "name": "cond", "version": "1.0.0", "exports": { "./x.js": { "browser": "./x.browser.js", "import": "./x.mjs", "require": "./x.cjs" }, "./bad.js": { "import": "./bad.mjs", "require": "./bad.cjs" } } }

@@ -113,7 +113,9 @@ const getRedirect = async (path, { mainFields, requireMainFields }) => {
  * Resolve `require()` of a package to its `requireMainFields` entry instead of
  * its `mainFields` one.
  *
- * @param {{ mainFields: string[]; requireMainFields: string[] }} options
+ * @param {object} options
+ * @param {string[]} options.mainFields
+ * @param {string[]} options.requireMainFields
  * @returns {import("rolldown").Plugin}
  */
 const requireMain = (options) => {
