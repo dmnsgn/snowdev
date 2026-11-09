@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [3.0.0-alpha.5](https://github.com/dmnsgn/snowdev/compare/v3.0.0-alpha.4...v3.0.0-alpha.5) (2026-11-09)
+
+### Bug Fixes
+
+* **bundle:** keep build paths out of polyfilled __dirname and __filename ([b2ee5dd](https://github.com/dmnsgn/snowdev/commit/b2ee5dd334b5a622a193f7c075b2547abcd7367f))
+* exclude html from jsdoc rules ([61ccd5b](https://github.com/dmnsgn/snowdev/commit/61ccd5bdc673df0c89e4ac82b21aabbd4ffcd7e5))
+* **install:** add hardcoded package files as is ([1dbafa5](https://github.com/dmnsgn/snowdev/commit/1dbafa5b30b630b80512d06ffa3c3870a423b597))
+
+### Features
+
+* rework package resolution ([29bf712](https://github.com/dmnsgn/snowdev/commit/29bf7120efccb5078f584ecbd3baac005566d423))
+
+### BREAKING CHANGES
+
+* array options now replace their default instead of being concatenated. Spread DEFAULTS_OPTIONS to extend them.
+* assets are copied with their package layout, not their export name. Resolve them through the import map.
+
 # [3.0.0-alpha.4](https://github.com/dmnsgn/snowdev/compare/v3.0.0-alpha.3...v3.0.0-alpha.4) (2026-11-05)
 
 ### Bug Fixes

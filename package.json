@@ -1,6 +1,6 @@
 {
   "name": "snowdev",
-  "version": "3.0.0-alpha.4",
+  "version": "3.0.0-alpha.5",
   "description": "Zero configuration, unbundled, opinionated, development and prototyping server for simple ES modules development: types generation, format and linting, dev server and TypeScript support.",
   "keywords": [
     "esm",
@@ -75,6 +75,9 @@
     "template/**/*",
     "!.DS_Store"
   ],
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
   "overrides": {
     "@rollup/plugin-babel": {
       "@babel/core": "$@babel/core"
@@ -171,9 +174,6 @@
     "@types/node": "^26.6.6"
   },
   "packageManager": "npm@11.12.1",
-  "scripts": {
-    "test": "node --test test/*.test.js"
-  },
   "engines": {
     "node": ">=26.0.0",
     "snowdev": ">=3.0.0-alpha.4"
