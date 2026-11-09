@@ -183,7 +183,8 @@ export default defineConfig([
 
   // Documentation
   {
-    files: [...FILES_GLOB.javascript, ...FILES_GLOB.html],
+    // HTML excluded: https://github.com/BenoitZugmeyer/eslint-plugin-html/issues/359
+    files: FILES_GLOB.javascript,
     extends: [eslintPluginJsdoc.configs["flat/recommended-typescript-flavor"]],
   },
   {
@@ -196,7 +197,8 @@ export default defineConfig([
     },
   },
   {
-    files: SCRIPTS_AND_HTML,
+    // HTML excluded: https://github.com/BenoitZugmeyer/eslint-plugin-html/issues/359
+    files: SCRIPTS,
     plugins: { jsdoc: eslintPluginJsdoc },
     rules: {
       "jsdoc/require-jsdoc": 0,
