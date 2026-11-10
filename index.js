@@ -5,7 +5,6 @@ import { fileURLToPath } from "node:url";
 
 import deepmerge from "deepmerge";
 import semver from "semver";
-import browserslistToEsbuild from "browserslist-to-esbuild";
 
 import npm from "./npm.js";
 import {
@@ -32,6 +31,7 @@ export const DEFAULTS_OPTIONS = {
   // Inputs/meta
   cwd: process.cwd(),
   NODE_ENV: process.env.NODE_ENV || "development",
+  targets: TARGETS,
   username: null,
   gitHubUsername: null,
   authorName: null,
@@ -108,7 +108,6 @@ export const DEFAULTS_OPTIONS = {
   /** @type {import("@rollup/plugin-babel").RollupBabelInputPluginOptions} */
   babel: {
     exclude: /node_modules\/(assert|core-js|@babel\/runtime)/,
-    targets: TARGETS,
     presets: [[require.resolve("@babel/preset-env"), { debug: false }]],
     plugins: [
       [require.resolve("@babel/plugin-transform-runtime")],
@@ -121,14 +120,12 @@ export const DEFAULTS_OPTIONS = {
   /** @type {import("esbuild").BuildOptions} */
   esbuild: {
     exclude: [""],
-    target: browserslistToEsbuild(TARGETS),
   },
   /** @type {import("@swc/core").Options} */
   swc: {
     /** @type {import("@rollup/pluginutils").FilterPattern} */
     exclude: /node_modules\/(assert|core-js|@babel\/runtime|es-module-shims)/,
     env: {
-      targets: TARGETS,
       mode: "entry",
       coreJs: coreJsVersion,
       shippedProposals: true,
@@ -179,9 +176,6 @@ export const DEFAULTS_OPTIONS = {
   rolldown: {
     /** @type {import("rolldown").InputOptions} */
     input: {
-      transform: {
-        target: browserslistToEsbuild(TARGETS),
-      },
       experimental: {
         attachDebugInfo: "none",
         resolveNewUrlToAsset: true,
