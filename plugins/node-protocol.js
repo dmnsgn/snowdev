@@ -3,7 +3,7 @@ import { isBuiltin } from "node:module";
 const PROTOCOL = "node:";
 
 /**
- * Resolve `node:` builtins as their unprefixed name, the only one polyfills match.
+ * Resolve `node:` builtins by their unprefixed name, the one polyfills match.
  *
  * @returns {import("rolldown").Plugin}
  */
@@ -14,9 +14,9 @@ const nodeProtocol = () => ({
 
     // Prefix-only builtins ("node:test") would resolve to an npm package
     const name = source.slice(PROTOCOL.length);
-    if (!isBuiltin(name)) return null;
-
-    return this.resolve(name, importer, { ...resolveOptions, skipSelf: true });
+    return isBuiltin(name)
+      ? this.resolve(name, importer, { ...resolveOptions, skipSelf: true })
+      : null;
   },
 });
 

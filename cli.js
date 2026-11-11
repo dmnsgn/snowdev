@@ -82,7 +82,7 @@ parser
     targets: {
       group: "Input/meta options:",
       type: "string",
-      describe: `Browserslist targets used by build command.`,
+      describe: `Browserslist targets for transpilation and polyfills.`,
       defaultDescription: TARGETS,
     },
     updateVersions: {

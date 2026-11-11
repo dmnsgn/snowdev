@@ -6,7 +6,7 @@ const NEW_URL =
   /new\s+URL\(\s*(["'`])([^"'`$]+)\1\s*,\s*import\.meta\.url\s*\)/g;
 
 /**
- * Emit scripts referenced by URL as chunks: they ship with the package (workers, injected clients).
+ * Emit scripts referenced by URL as chunks, e.g. workers and injected clients.
  *
  * @returns {import("rolldown").Plugin}
  */
