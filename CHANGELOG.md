@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+# [3.0.0-alpha.6](https://github.com/dmnsgn/snowdev/compare/v3.0.0-alpha.5...v3.0.0-alpha.6) (2026-11-11)
+
+### Features
+
+* add corejs and syntax lowering for rolldown + consolidate option targets ([91c9e0e](https://github.com/dmnsgn/snowdev/commit/91c9e0e54e908d42cfb6309454619dc8f3aae443))
+* **bundle:** polyfill TypeScript sources with core-js + fix injected require() calls ([85c53a3](https://github.com/dmnsgn/snowdev/commit/85c53a376097fb0a108153260314abcf2e4ad49d))
+* **bundle:** resolve node: builtins to polyfills + extract plugins ([055a92b](https://github.com/dmnsgn/snowdev/commit/055a92b777c52f2d5185266b085bcdf99e546a1c))
+
 # [3.0.0-alpha.5](https://github.com/dmnsgn/snowdev/compare/v3.0.0-alpha.4...v3.0.0-alpha.5) (2026-11-09)
 
 ### Bug Fixes
