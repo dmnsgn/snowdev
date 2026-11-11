@@ -120,6 +120,8 @@ export const DEFAULTS_OPTIONS = {
   /** @type {import("esbuild").BuildOptions} */
   esbuild: {
     exclude: [""],
+    // rollup-plugin-esbuild only has loaders for ".js", ".jsx", ".ts" and ".tsx"
+    loaders: { ".mjs": "js", ".cjs": "js", ".mts": "ts", ".cts": "ts" },
   },
   /** @type {import("@swc/core").Options} */
   swc: {

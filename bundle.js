@@ -171,6 +171,22 @@ const requireMain = (options) => {
 
 const CORE_JS_SOURCE = /^core-js(?:\/|$)/;
 const CORE_JS_MODULE = /^core-js\/modules\/(.+)\.js$/;
+const COMMONJS_KEYWORDS = /\b(?:require|module|exports)\b/;
+
+// Babel can't enable both: "jsx" breaks `<T>value` casts in ".ts" files
+const getParserPlugins = (filename) => {
+  if (/\.[cm]?ts$/.test(filename)) return ["typescript"];
+  if (/\.tsx$/.test(filename)) return ["typescript", "jsx"];
+  return ["jsx"];
+};
+
+// Scripts without CommonJS keywords are ES modules without imports or exports:
+// a require() would reach the output unconverted
+const isCommonJs = (filename, code, sourceType) =>
+  /\.c[jt]s$/.test(filename) ||
+  (sourceType === "script" &&
+    !/\.m[jt]s$/.test(filename) &&
+    COMMONJS_KEYWORDS.test(code));
 
 const getSource = (node) =>
   node.type === "ImportDeclaration"
@@ -243,7 +259,6 @@ const coreJs = ({
     configFile: false,
     // CommonJS modules get require() calls
     sourceType: "unambiguous",
-    parserOpts: { plugins: ["jsx"] },
   };
   const babelOptions = {
     ...parseOptions,
@@ -257,7 +272,11 @@ const coreJs = ({
 
   const scan = async (code, id) => {
     const filename = stripQuery(id);
-    const ast = await parseAsync(code, { ...parseOptions, filename });
+    const ast = await parseAsync(code, {
+      ...parseOptions,
+      parserOpts: { plugins: getParserPlugins(filename) },
+      filename,
+    });
     const { ast: transformed } = await transformFromAstAsync(ast, code, {
       ...babelOptions,
       filename,
@@ -272,7 +291,15 @@ const coreJs = ({
   // Babel parses ~1MB/s: large prebuilt files would cost the same scan on every build
   const cachedScan = async (code, id) => {
     const hash = createHash("sha256")
-      .update(JSON.stringify([version, method, targets, exclude]))
+      .update(
+        JSON.stringify([
+          version,
+          method,
+          targets,
+          exclude,
+          getParserPlugins(stripQuery(id)),
+        ]),
+      )
       .update(code)
       .digest("hex");
     const file = join(cacheFolder, `${hash}.json`);
@@ -299,7 +326,7 @@ const coreJs = ({
       // Virtual modules and core-js itself excluded
       filter: {
         id: {
-          include: /\.[cm]?jsx?(?:$|\?)/,
+          include: /\.[cm]?[jt]sx?(?:$|\?)/,
           exclude: [/^\0/, /[\\/]core-js[\\/]/],
         },
       },
@@ -310,7 +337,7 @@ const coreJs = ({
         modulePolyfills.set(id, polyfills);
         if (!polyfills.length && !replaced.length) return null;
 
-        const isModule = sourceType === "module";
+        const isModule = !isCommonJs(stripQuery(id), code, sourceType);
         const statements = polyfills
           .map(getSpecifier)
           .map((specifier) =>
@@ -520,11 +547,11 @@ const bundle = timed(async (options = {}) => {
               reportModules,
               stripShebang,
               requireMain,
+              coreJs,
               commonjsNamedExports,
               polyfillNode,
               requireInjectedImports,
               replace,
-              coreJs,
               noOp,
             }
           : {
@@ -532,14 +559,15 @@ const bundle = timed(async (options = {}) => {
               stripShebang,
               requireMain,
               nodeResolve,
+              // Before commonjs: it converts the injected require() calls
+              ...(["esbuild", "swc"].includes(options.transpiler) && {
+                coreJs,
+              }),
               commonjs,
               commonjsNamedExports,
               polyfillNode,
               replace,
               json,
-              ...(["esbuild", "swc"].includes(options.transpiler) && {
-                coreJs,
-              }),
               noOp,
             },
         pluginsOptions,
