@@ -1,6 +1,6 @@
 import { promises as fs } from "node:fs";
 import { isBuiltin } from "node:module";
-import { dirname, join, extname, relative, resolve } from "node:path";
+import { join, extname, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { stripVTControlCharacters } from "node:util";
 import {
@@ -13,6 +13,7 @@ import { createFilter } from "@rollup/pluginutils";
 import deepmerge from "deepmerge";
 import { valueFormatTableAsText } from "value-format-table";
 
+import importMetaUrl from "./plugins/import-meta-url.js";
 import { resolveExports } from "./resolve.js";
 import {
   console,
@@ -25,8 +26,8 @@ import {
   getPeerDependencies,
   isBareSpecifier,
   isInside,
+  isScriptFile,
   overwriteArrays,
-  pathExists,
   readJson,
   readTsConfig,
   resolveFiles,
@@ -118,16 +119,6 @@ lint.description = `build — lint sources`;
 
 // Loaded by their tool, not imported
 const isConfigFile = createFilter(FILES_GLOB.config, null, { resolve: false });
-const isCodeFile = createFilter(
-  [
-    ...FILES_GLOB.javascript,
-    ...FILES_GLOB.typescript,
-    ...FILES_GLOB.react,
-    ...FILES_GLOB.commonjs,
-  ],
-  FILES_GLOB.declarations,
-  { resolve: false },
-);
 
 // Type only modules (TypeScript types, JSDoc typedefs) are erased before bundling
 const hasRuntimeCode = async (file) => {
@@ -146,22 +137,6 @@ const hasRuntimeCode = async (file) => {
         !node.specifiers.length
       ),
   );
-};
-
-// Scripts referenced by URL ship with the package (workers, injected clients)
-const NEW_URL =
-  /new\s+URL\(\s*(["'`])([^"'`$]+)\1\s*,\s*import\.meta\.url\s*\)/g;
-const SCRIPT_FILE = /\.[cm]?[jt]sx?$/;
-const importMetaUrlPlugin = {
-  name: "snowdev-import-meta-url",
-  async transform(code, id) {
-    for (const match of code.matchAll(NEW_URL)) {
-      const file = resolve(dirname(id), match[2]);
-      if (SCRIPT_FILE.test(file) && (await pathExists(file))) {
-        this.emitFile({ type: "chunk", id: file });
-      }
-    }
-  },
 };
 
 const measure = (code) => ({
@@ -200,7 +175,7 @@ const analyse = timed(async (cwd, files, options, { sizes = true } = {}) => {
     // Analysed as published: consumers only reach exports and binaries
     const input = [
       ...Object.values(await resolveExports(options, cwd)).filter(
-        (entry) => entry && isCodeFile(join(cwd, entry)),
+        (entry) => entry && isScriptFile(join(cwd, entry)),
       ),
       ...[pkg.bin ?? []].flatMap((bin) =>
         typeof bin === "string" ? bin : Object.values(bin),
@@ -220,7 +195,7 @@ const analyse = timed(async (cwd, files, options, { sizes = true } = {}) => {
         plugins: [
           dynamicImportVarsPlugin(),
           importGlobPlugin(),
-          importMetaUrlPlugin,
+          importMetaUrl(),
           ...plugins,
         ],
         ...inputOptions,

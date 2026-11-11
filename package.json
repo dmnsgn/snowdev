@@ -70,6 +70,7 @@
   "files": [
     "*.js",
     "jsdoc.json",
+    "plugins/**/*",
     "server/**/*",
     "types/**/*",
     "template/**/*",
@@ -182,6 +183,6 @@
   "snowdev": {
     "serve": false,
     "dependencies": [],
-    "files": "{*.js,server/**/*.js}"
+    "files": "{*.js,plugins/**/*.js,server/**/*.js}"
   }
 }

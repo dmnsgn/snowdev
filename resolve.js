@@ -34,6 +34,11 @@ const getMainFields = ({ resolve: { browserField, mainFields } }) =>
       )
     : mainFields;
 
+// `browser` maps are applied by bundlers, including ignored files:
+// https://github.com/defunctzombie/package-browser-field-spec#ignore-a-module
+const getAliasFields = ({ resolve }) =>
+  resolve.browserField ? [["browser"]] : [];
+
 const getRequireMainFields = ({ resolve }) =>
   getMainFields({
     resolve: { ...resolve, mainFields: resolve.requireMainFields },
@@ -193,6 +198,7 @@ const resolveExports = async (options, src) => {
 export {
   getConditions,
   getMainFields,
+  getAliasFields,
   getRequireMainFields,
   isInsidePackage,
   resolveLegacyEntry,

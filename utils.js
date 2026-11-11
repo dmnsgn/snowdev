@@ -23,6 +23,7 @@ const FILES_GLOB = {
   declarations: ["**/*.d.ts", "**/*.d.mts", "**/*.d.cts"],
   react: ["**/*.jsx", "**/*.tsx"],
   commonjs: ["**/*.cjs", "**/*.cts"],
+  esm: ["**/*.mjs", "**/*.mts"],
   html: ["**/*.html"],
   css: ["**/*.css"],
   markdown: ["**/*.md"],
@@ -30,6 +31,19 @@ const FILES_GLOB = {
 };
 FILES_GLOB.typescriptAll = [...FILES_GLOB.typescript, "**/*.tsx", "**/*.cts"];
 FILES_GLOB.assets = [...FILES_GLOB.css, "**/*.json", "**/*.wasm"];
+FILES_GLOB.scripts = [
+  ...FILES_GLOB.javascript,
+  ...FILES_GLOB.typescript,
+  ...FILES_GLOB.react,
+  ...FILES_GLOB.commonjs,
+];
+
+const isScriptFile = createFilter(FILES_GLOB.scripts, FILES_GLOB.declarations, {
+  resolve: false,
+});
+const isCommonJsFile = createFilter(FILES_GLOB.commonjs, null, {
+  resolve: false,
+});
 
 // Options replace defaults: concatenating can't reorder or remove values
 const overwriteArrays = (_, source) => source;
@@ -329,6 +343,8 @@ const getPeerDependencies = async (name, cwd) => {
 export {
   console,
   FILES_GLOB,
+  isScriptFile,
+  isCommonJsFile,
   NAME,
   VERSION,
   CORE_JS_SEMVER,
